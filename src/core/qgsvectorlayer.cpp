@@ -384,6 +384,43 @@ void QgsVectorLayer::drawLabels( QgsRenderContext& rendererContext )
   }
 }
 
+bool QgsVectorLayer::checkMinimumSizeMM( const QgsRenderContext * ct, QgsGeometry* geom, double minSize ) const
+{
+  if ( minSize <= 0 )
+  {
+    return true;
+  }
+
+  if ( !geom )
+  {
+    return false;
+  }
+
+  QGis::GeometryType featureType = geom->type();
+  if ( featureType == QGis::Point ) //minimum size does not apply to point features
+  {
+    return true;
+  }
+
+  double mapUnitsPerMM = ct->mapToPixel().mapUnitsPerPixel() * ct->scaleFactor();
+  if ( featureType == QGis::Line )
+  {
+    double length = geom->length();
+    if ( length >= 0.0 )
+    {
+      return ( length >= ( minSize * mapUnitsPerMM ) );
+    }
+  }
+  else if ( featureType == QGis::Polygon )
+  {
+    double area = geom->area();
+    if ( area >= 0.0 )
+    {
+      return ( sqrt( area ) >= ( minSize * mapUnitsPerMM ) );
+    }
+  }
+  return true; //should never be reached. Return true in this case to label such geometries anyway.
+}
 
 
 void QgsVectorLayer::drawRendererV2( QgsFeatureIterator &fit, QgsRenderContext& rendererContext, bool labeling )
@@ -407,6 +444,15 @@ void QgsVectorLayer::drawRendererV2( QgsFeatureIterator &fit, QgsRenderContext& 
     {
       if ( !fet.geometry() )
         continue; // skip features without geometry
+
+
+      if ( !checkMinimumSizeMM( mCurrentRendererContext, fet.geometry(), 2 ) )
+      {
+
+        continue; // skip features too small     
+      }
+        
+        
 
 #ifndef Q_WS_MAC //MH: disable this on Mac for now to avoid problems with resizing
 #ifdef Q_WS_X11

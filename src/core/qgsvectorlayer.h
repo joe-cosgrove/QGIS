@@ -1462,6 +1462,8 @@ class CORE_EXPORT QgsVectorLayer : public QgsMapLayer
       @param attributes attributes needed for labeling and diagrams will be added to the list
       @param labeling out: true if there will be labeling (ng) for this layer*/
     void prepareLabelingAndDiagrams( QgsRenderContext& rendererContext, QgsAttributeList& attributes, bool& labeling );
+    
+    bool checkMinimumSizeMM( const QgsRenderContext * ct, QgsGeometry* geom, double minSize ) const;
 
   private:                       // Private attributes
 
