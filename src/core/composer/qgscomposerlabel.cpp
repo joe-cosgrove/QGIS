@@ -65,9 +65,9 @@ void QgsComposerLabel::paint( QPainter* painter, const QStyleOptionGraphicsItem*
 
   double penWidth = pen().widthF();
   QRectF painterRect( penWidth + mMargin, penWidth + mMargin, mTextBoxWidth - 2 * penWidth - 2 * mMargin, mTextBoxHeight - 2 * penWidth - 2 * mMargin );
-  painter->translate( rect().width() / 2.0, rect().height() / 2.0 );
-  painter->rotate( mRotation );
-  painter->translate( -mTextBoxWidth / 2.0, -mTextBoxHeight / 2.0 );
+  //painter->translate( rect().width() / 2.0, rect().height() / 2.0 );
+ // painter->rotate( mRotation );
+ // painter->translate( -mTextBoxWidth / 2.0, -mTextBoxHeight / 2.0 );
 
   if ( mHtmlState )
   {
@@ -230,7 +230,7 @@ void QgsComposerLabel::adjustSizeToText()
   double width = mTextBoxWidth;
   double height = mTextBoxHeight;
 
-  sizeChangedByRotation( width, height );
+  //sizeChangedByRotation( width, height );
 
   //keep alignment point constant
   double xShift = 0;
@@ -247,14 +247,14 @@ QFont QgsComposerLabel::font() const
 
 void QgsComposerLabel::setRotation( double r )
 {
-  double width = mTextBoxWidth;
-  double height = mTextBoxHeight;
+ /* double width = mTextBoxWidth;
+  double height = mTextBoxHeight;*/
   QgsComposerItem::setRotation( r );
-  sizeChangedByRotation( width, height );
+ /* sizeChangedByRotation( width, height );
 
   double x = transform().dx() + rect().width() / 2.0 - width / 2.0;
   double y = transform().dy() + rect().height() / 2.0 - height / 2.0;
-  QgsComposerItem::setSceneRect( QRectF( x, y, width, height ) );
+  QgsComposerItem::setSceneRect( QRectF( x, y, width, height ) );*/
 }
 
 void QgsComposerLabel::setSceneRect( const QRectF& rectangle )
@@ -263,7 +263,7 @@ void QgsComposerLabel::setSceneRect( const QRectF& rectangle )
   {
     double textBoxWidth = rectangle.width();
     double textBoxHeight = rectangle.height();
-    imageSizeConsideringRotation( textBoxWidth, textBoxHeight );
+    //imageSizeConsideringRotation( textBoxWidth, textBoxHeight );
     mTextBoxWidth = textBoxWidth;
     mTextBoxHeight = textBoxHeight;
   }

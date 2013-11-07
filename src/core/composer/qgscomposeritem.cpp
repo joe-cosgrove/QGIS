@@ -226,7 +226,7 @@ bool QgsComposerItem::_readXML( const QDomElement& itemElem, const QDomDocument&
   }
 
   //rotation
-  mRotation = itemElem.attribute( "rotation", "0" ).toDouble();
+  setRotation( itemElem.attribute( "rotation", "0" ).toDouble() );
 
   //uuid
   mUuid = itemElem.attribute( "uuid", QUuid::createUuid().toString() );
@@ -713,12 +713,20 @@ void QgsComposerItem::setRotation( double r )
   {
     mRotation = r;
   }
+  
+  //rotate item around its centre point
+  setTransformOriginPoint ( QPointF( rect().width() / 2.0, rect().height() / 2.0 ) );
+  QGraphicsItem::setRotation( mRotation );
+  setTransformOriginPoint ( 0, 0 );
+  
   emit rotationChanged( r );
   update();
 }
 
 bool QgsComposerItem::imageSizeConsideringRotation( double& width, double& height ) const
 {
+  return true;
+  
   if ( qAbs( mRotation ) <= 0.0 ) //width and height stays the same if there is no rotation
   {
     return true;

@@ -70,10 +70,6 @@ class CORE_EXPORT QgsComposerShape: public QgsComposerItem
     /**Returns the radius for rounded rectangle corners*/
     double cornerRadius() const { return mCornerRadius; };
 
-  public slots:
-    /**Sets item rotation and resizes item bounds such that the shape always has the same size*/
-    virtual void setRotation( double r );
-
   protected:
     /* reimplement drawFrame, since it's not a rect, but a custom shape */
     virtual void drawFrame( QPainter* p );
