@@ -67,7 +67,8 @@ class GUI_EXPORT QgsComposerView: public QGraphicsView
       AddTable, //add attribute table
       MoveItemContent, //move content of item (e.g. content of map)
       Pan,
-      Zoom
+      Zoom,
+      Transform
     };
 
     enum ClipboardMode

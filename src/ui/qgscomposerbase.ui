@@ -21,7 +21,16 @@
     <bool>true</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item row="0" column="0">
@@ -108,6 +117,7 @@
    <addaction name="mActionPan"/>
    <addaction name="mActionMouseZoom"/>
    <addaction name="mActionSelectMoveItem"/>
+   <addaction name="mActionTransform"/>
    <addaction name="mActionMoveItemContent"/>
    <addaction name="separator"/>
    <addaction name="mActionAddNewMap"/>
@@ -780,7 +790,7 @@
    <property name="text">
     <string>Pan Composer</string>
    </property>
-  </action> 
+  </action>
   <action name="mActionOptions">
    <property name="icon">
     <iconset resource="../../images/images.qrc">
@@ -792,7 +802,19 @@
    <property name="menuRole">
     <enum>QAction::PreferencesRole</enum>
    </property>
-  </action>      
+  </action>
+  <action name="mActionTransform">
+   <property name="icon">
+    <iconset resource="../../images/images.qrc">
+     <normaloff>:/images/themes/default/mActionMoveVertex.png</normaloff>:/images/themes/default/mActionMoveVertex.png</iconset>
+   </property>
+   <property name="text">
+    <string>Free Transform</string>
+   </property>
+   <property name="toolTip">
+    <string>Free transform</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../../images/images.qrc"/>

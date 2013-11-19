@@ -151,6 +151,7 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   toggleActionGroup->addAction( mActionAddNewScalebar );
   toggleActionGroup->addAction( mActionAddImage );
   toggleActionGroup->addAction( mActionSelectMoveItem );
+  toggleActionGroup->addAction( mActionTransform );
   toggleActionGroup->addAction( mActionAddRectangle );
   toggleActionGroup->addAction( mActionAddTriangle );
   toggleActionGroup->addAction( mActionAddEllipse );
@@ -163,6 +164,7 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   mActionAddNewLabel->setCheckable( true );
   mActionAddNewLegend->setCheckable( true );
   mActionSelectMoveItem->setCheckable( true );
+  mActionTransform->setCheckable( true );
   mActionAddNewScalebar->setCheckable( true );
   mActionAddImage->setCheckable( true );
   mActionMoveItemContent->setCheckable( true );
@@ -291,6 +293,7 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   layoutMenu->addAction( mActionAddTable );
   layoutMenu->addSeparator();
   layoutMenu->addAction( mActionSelectMoveItem );
+  layoutMenu->addAction( mActionTransform );
   layoutMenu->addAction( mActionMoveItemContent );
   layoutMenu->addSeparator();
   layoutMenu->addAction( mActionGroupItems );
@@ -496,6 +499,7 @@ void QgsComposer::setupTheme()
   mActionAddTable->setIcon( QgsApplication::getThemeIcon( "/mActionOpenTable.png" ) );
   mActionAddHtml->setIcon( QgsApplication::getThemeIcon( "/mActionAddHtml.png" ) );
   mActionSelectMoveItem->setIcon( QgsApplication::getThemeIcon( "/mActionSelect.svg" ) );
+  mActionTransform->setIcon( QgsApplication::getThemeIcon( "/mActionMoveVertex.png" ) );
   mActionMoveItemContent->setIcon( QgsApplication::getThemeIcon( "/mActionMoveItemContent.png" ) );
   mActionGroupItems->setIcon( QgsApplication::getThemeIcon( "/mActionGroupItems.png" ) );
   mActionUngroupItems->setIcon( QgsApplication::getThemeIcon( "/mActionUngroupItems.png" ) );
@@ -664,7 +668,7 @@ void QgsComposer::showItemOptions( QgsComposerItem* item )
 
 void QgsComposer::on_mActionOptions_triggered()
 {
-  mQgis->showOptionsDialog( this, QString("mOptionsPageComposer") );
+  mQgis->showOptionsDialog( this, QString( "mOptionsPageComposer" ) );
 }
 
 QgsMapCanvas *QgsComposer::mapCanvas( void )
@@ -1554,6 +1558,15 @@ void QgsComposer::on_mActionSelectMoveItem_triggered()
     mView->setCurrentTool( QgsComposerView::Select );
   }
 }
+
+void QgsComposer::on_mActionTransform_triggered()
+{
+  if ( mView )
+  {
+    mView->setCurrentTool( QgsComposerView::Transform );
+  }
+}
+
 
 void QgsComposer::on_mActionAddNewMap_triggered()
 {

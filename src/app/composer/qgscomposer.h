@@ -147,6 +147,9 @@ class QgsComposer: public QMainWindow, private Ui::QgsComposerBase
     //! Select item
     void on_mActionSelectMoveItem_triggered();
 
+    //! Transform item
+    void on_mActionTransform_triggered();
+
     //! Add arrow
     void on_mActionAddArrow_triggered();
 
