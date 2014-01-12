@@ -35,6 +35,7 @@ class QgsComposerScaleBar;
 class QgsComposerShape;
 class QgsComposerAttributeTable;
 class QgsComposerView;
+class QgsComposerNavigator;
 class QgsComposition;
 class QgsMapCanvas;
 class QgsAtlasComposition;
@@ -497,6 +498,8 @@ class QgsComposer: public QMainWindow, private Ui::QgsComposerBase
     QgsComposerRuler* mVerticalRuler;
     QWidget* mRulerLayoutFix;
 
+    QgsComposerNavigator *mViewNavigator;
+
     //! Current composition
     QgsComposition *mComposition;
 
@@ -535,6 +538,7 @@ class QgsComposer: public QMainWindow, private Ui::QgsComposerBase
     QDockWidget* mUndoDock;
     QDockWidget* mGeneralDock;
     QDockWidget* mAtlasDock;
+    QDockWidget* mNavigatorDock;
 
     QMenu* mPanelMenu;
     QMenu* mToolbarMenu;

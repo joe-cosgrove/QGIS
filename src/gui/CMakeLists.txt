@@ -72,6 +72,7 @@ qgscolorbutton.cpp
 qgscolordialog.cpp
 qgscomposerruler.cpp
 qgscomposerview.cpp
+qgscomposernavigator.cpp
 qgscredentialdialog.cpp
 qgscursors.cpp
 qgsdatadefinedbutton.cpp
@@ -215,6 +216,7 @@ qgscollapsiblegroupbox.h
 qgscolordialog.h
 qgscomposerruler.h
 qgscomposerview.h
+qgscomposernavigator.h
 qgscredentialdialog.h
 qgsdatadefinedbutton.h
 qgsdetaileditemdelegate.h

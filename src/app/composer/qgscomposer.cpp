@@ -23,6 +23,7 @@
 #include "qgsbusyindicatordialog.h"
 #include "qgscomposerruler.h"
 #include "qgscomposerview.h"
+#include "qgscomposernavigator.h"
 #include "qgscomposition.h"
 #include "qgscompositionwidget.h"
 #include "qgsatlascompositionwidget.h"
@@ -461,11 +462,14 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   mAtlasDock = new QDockWidget( tr( "Atlas generation" ), this );
   mAtlasDock->setObjectName( "AtlasDock" );
   mPanelMenu->addAction( mAtlasDock->toggleViewAction() );
+  mNavigatorDock = new QDockWidget( tr( "Navigator" ), this );
+  mNavigatorDock->setObjectName( "NavigatorDock" );
 
   mGeneralDock->setFeatures( QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable );
   mItemDock->setFeatures( QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable );
   mUndoDock->setFeatures( QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable );
   mAtlasDock->setFeatures( QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable );
+  mNavigatorDock->setFeatures( QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable );
 
   QgsCompositionWidget* compositionWidget = new QgsCompositionWidget( mGeneralDock, mComposition );
   connect( mComposition, SIGNAL( paperSizeChanged() ), compositionWidget, SLOT( displayCompositionWidthHeight() ) );
@@ -480,6 +484,13 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   addDockWidget( Qt::RightDockWidgetArea, mGeneralDock );
   addDockWidget( Qt::RightDockWidgetArea, mUndoDock );
   addDockWidget( Qt::RightDockWidgetArea, mAtlasDock );
+  addDockWidget( Qt::RightDockWidgetArea, mNavigatorDock );
+
+
+  mViewNavigator = new QgsComposerNavigator( this );
+  mViewNavigator->setComposition( mComposition );
+  mViewNavigator->setContentsMargins( 0, 0, 0, 0 );
+  mNavigatorDock->setWidget( mViewNavigator );
 
   QgsAtlasCompositionWidget* atlasWidget = new QgsAtlasCompositionWidget( mGeneralDock, mComposition );
   mAtlasDock->setWidget( atlasWidget );
@@ -488,11 +499,14 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   mGeneralDock->show();
   mUndoDock->show();
   mAtlasDock->show();
+  mNavigatorDock->show();
 
   tabifyDockWidget( mGeneralDock, mUndoDock );
   tabifyDockWidget( mItemDock, mUndoDock );
   tabifyDockWidget( mGeneralDock, mItemDock );
   tabifyDockWidget( mItemDock, mAtlasDock );
+  tabifyDockWidget( mGeneralDock, mNavigatorDock );
+
 
   mGeneralDock->raise();
 
