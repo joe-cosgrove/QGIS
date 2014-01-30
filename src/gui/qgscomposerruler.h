@@ -46,6 +46,7 @@ class GUI_EXPORT QgsComposerRuler: public QWidget
     QPointF mMarkerPos;
     QgsComposition* mComposition; //reference to composition for paper size, nPages
     QGraphicsLineItem* mLineSnapItem;
+    bool mCreatingNewSnapLine;
     //items snapped to the current snap line
     QList< QPair< QgsComposerItem*, QgsComposerItem::ItemPositionMode > > mSnappedItems;
 

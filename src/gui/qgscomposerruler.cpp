@@ -1,6 +1,7 @@
 #include "qgscomposerruler.h"
 #include "qgscomposition.h"
 #include "qgis.h"
+#include "qgslogger.h"
 #include <QDragEnterEvent>
 #include <QGraphicsLineItem>
 #include <QPainter>
@@ -16,6 +17,7 @@ QgsComposerRuler::QgsComposerRuler( QgsComposerRuler::Direction d ) : QWidget( 0
     mDirection( d ),
     mComposition( 0 ),
     mLineSnapItem( 0 ),
+    mCreatingNewSnapLine( false ),
     mScaleMinPixelsWidth( 0 )
 {
   setMouseTracking( true );
@@ -206,7 +208,10 @@ void QgsComposerRuler::paintEvent( QPaintEvent* event )
   }
 
   //draw current marker pos
-  drawMarkerPos( &p );
+  if ( !mCreatingNewSnapLine )
+  {
+    drawMarkerPos( &p );
+  }
 }
 
 void QgsComposerRuler::drawMarkerPos( QPainter *painter )
@@ -367,11 +372,16 @@ void QgsComposerRuler::mouseMoveEvent( QMouseEvent* event )
 {
   //qWarning( "QgsComposerRuler::mouseMoveEvent" );
   updateMarker( event->posF() );
-  setSnapLinePosition( event->posF() );
+
+  if ( event->posF().x() > 0 && event->posF().y() > 0 )
+  {
+    setSnapLinePosition( event->posF() );
+  }
 
   //update cursor position in status bar
   QPointF displayPos = mTransform.inverted().map( event->posF() );
-  if ( mDirection == Horizontal )
+  if (( mDirection == Horizontal && !mCreatingNewSnapLine ) ||
+      ( mDirection == Vertical && mCreatingNewSnapLine ) )
   {
     //mouse is over a horizontal ruler, so don't show a y coordinate
     displayPos.setY( 0 );
@@ -387,11 +397,13 @@ void QgsComposerRuler::mouseMoveEvent( QMouseEvent* event )
 void QgsComposerRuler::mouseReleaseEvent( QMouseEvent* event )
 {
   Q_UNUSED( event );
+  setCursor( Qt::ArrowCursor );
 
   //remove snap line if coordinate under 0
   QPointF pos = mTransform.inverted().map( event->pos() );
   bool removeItem = false;
-  if ( mDirection == Horizontal )
+  if (( mDirection == Vertical && mCreatingNewSnapLine ) ||
+      ( mDirection == Horizontal && !mCreatingNewSnapLine ) )
   {
     removeItem = pos.x() < 0 ? true : false;
   }
@@ -406,6 +418,7 @@ void QgsComposerRuler::mouseReleaseEvent( QMouseEvent* event )
     mSnappedItems.clear();
   }
   mLineSnapItem = 0;
+  mCreatingNewSnapLine = false;
 }
 
 void QgsComposerRuler::mousePressEvent( QMouseEvent* event )
@@ -421,16 +434,21 @@ void QgsComposerRuler::mousePressEvent( QMouseEvent* event )
     y = mTransform.inverted().map( event->pos() ).y();
   }
 
-  //horizontal ruler means vertical snap line
+  //check if mouse is pressed over an existing snap line
+  //(pressing on horizontal ruler means moving an existing vertical snap line)
   QGraphicsLineItem* line = mComposition->nearestSnapLine( mDirection != Horizontal, x, y, 10.0, mSnappedItems );
   if ( !line )
   {
     //create new snap line
     mLineSnapItem = mComposition->addSnapLine();
+    mCreatingNewSnapLine = true;
+    setCursor( mDirection == Horizontal ? Qt::SplitVCursor : Qt::SplitHCursor );
   }
   else
   {
     mLineSnapItem = line;
+    mCreatingNewSnapLine = false;
+    setCursor( mDirection == Horizontal ? Qt::SplitHCursor : Qt::SplitVCursor );
   }
 }
 
@@ -441,21 +459,54 @@ void QgsComposerRuler::setSnapLinePosition( const QPointF& pos )
     return;
   }
 
-  QPointF transformedPt = mTransform.inverted().map( pos );
-  if ( mDirection == Horizontal )
+  QgsDebugMsg( QString( "\nx %1 y %2" ).arg( pos.x() ).arg( pos.y() ) );
+
+  QPointF transformedPt;
+  if ( mCreatingNewSnapLine )
   {
-    int numPages = mComposition->numPages();
-    double lineHeight = numPages * mComposition->paperHeight();
-    if ( numPages > 1 )
+    QPointF newPos = QPointF( pos.x() - width() < 0 ? 0 : pos.x() - width(), pos.y() - height() < 0 ? 0 : pos.y() - height() );
+    QgsDebugMsg( QString( "\nnew x %1 y %2" ).arg( newPos.x() ).arg( newPos.y() ) );
+    transformedPt = mTransform.inverted().map( newPos );
+
+    QgsDebugMsg( QString( "\ntrans x %1 y %2" ).arg( transformedPt.x() ).arg( transformedPt.y() ) );
+
+    //creating a new line
+    if ( mDirection == Vertical )
     {
-      lineHeight += ( numPages - 1 ) * mComposition->spaceBetweenPages();
+      int numPages = mComposition->numPages();
+      double lineHeight = numPages * mComposition->paperHeight();
+      if ( numPages > 1 )
+      {
+        lineHeight += ( numPages - 1 ) * mComposition->spaceBetweenPages();
+      }
+      mLineSnapItem->setLine( QLineF( transformedPt.x(), 0, transformedPt.x(), lineHeight ) );
     }
-    mLineSnapItem->setLine( QLineF( transformedPt.x(), 0, transformedPt.x(), lineHeight ) );
+    else //vertical
+    {
+      mLineSnapItem->setLine( QLineF( 0, transformedPt.y(), mComposition->paperWidth(), transformedPt.y() ) );
+    }
   }
-  else //vertical
+  else
   {
-    mLineSnapItem->setLine( QLineF( 0, transformedPt.y(), mComposition->paperWidth(), transformedPt.y() ) );
+    QPointF newPos = QPointF( pos.x() < 0 ? 0 : pos.x(), pos.y() < 0 ? 0 : pos.y() );
+    transformedPt = mTransform.inverted().map( newPos );
+    //moving an existing line
+    if ( mDirection == Horizontal )
+    {
+      int numPages = mComposition->numPages();
+      double lineHeight = numPages * mComposition->paperHeight();
+      if ( numPages > 1 )
+      {
+        lineHeight += ( numPages - 1 ) * mComposition->spaceBetweenPages();
+      }
+      mLineSnapItem->setLine( QLineF( transformedPt.x(), 0, transformedPt.x(), lineHeight ) );
+    }
+    else //vertical
+    {
+      mLineSnapItem->setLine( QLineF( 0, transformedPt.y(), mComposition->paperWidth(), transformedPt.y() ) );
+    }
   }
+
 
   //move snapped items together with the snap line
   QList< QPair< QgsComposerItem*, QgsComposerItem::ItemPositionMode > >::iterator itemIt = mSnappedItems.begin();
