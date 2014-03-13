@@ -162,13 +162,11 @@ class CORE_EXPORT QgsMapRenderer : public QObject
       BlendHardLight,
       BlendDifference,
       BlendSubtract,
-      BlendPunch,
       BlendDrawUnder,
       BlendMasked,
       BlendClipMask,
       BlendDrawOutside,
-      BlendErase,
-      BlendClear
+      BlendErase
     };
 
     //! constructor

@@ -63,14 +63,12 @@ QStringList QgsBlendModeComboBox::blendModesList() const
   if ( mShowAdvancedModes )
   {
     modes << "-"
-    <<  tr( "Punch" ) //source
     << tr( "Draw under" ) //destination over
     << tr( "Masked" ) //source in
     << tr( "Clip Mask" ) //destination in
     << "-"
     << tr( "Draw only outside" ) //source out
     << tr( "Erase" ) //destination out
-    << tr( "Clear" ); //clear
   }
   return modes;
 }
