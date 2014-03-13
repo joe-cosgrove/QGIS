@@ -36,6 +36,14 @@ class GUI_EXPORT QgsBlendModeComboBox : public QComboBox
     QPainter::CompositionMode blendMode();
     //! Function to set the selected blend mode from QPainter::CompositionMode
     void setBlendMode( QPainter::CompositionMode blendMode );
+
+    /** Controls whether advanced blend modes are shown. If set to true, blending modes
+     * which only make sense in certain contexts (like clipping and punch) are shown.
+     * These advanced modes are hidden by default.
+     * @param showAdvancedModes set to true to show advanced blending modes
+     * @added in 2.3 */
+    void setShowAdvancedModes( bool showAdvancedModes );
+
   private:
     //! Returns a list of grouped blend modes (with seperators)
     QStringList blendModesList() const;
@@ -44,6 +52,8 @@ class GUI_EXPORT QgsBlendModeComboBox : public QComboBox
     //  index within the combo box
     std::vector<int> mBlendModeToListIndex;
     std::vector<int> mListIndexToBlendMode;
+
+    bool mShowAdvancedModes;
 
   public slots:
     void updateModes();

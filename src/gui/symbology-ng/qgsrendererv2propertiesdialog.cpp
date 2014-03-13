@@ -81,6 +81,12 @@ QgsRendererV2PropertiesDialog::QgsRendererV2PropertiesDialog( QgsVectorLayer* la
     layout()->setContentsMargins( 0, 0, 0, 0 );
   }
 
+  //show advanced blend modes for layer blend mode combo
+  //we don't give the option for advanced blend modes for feature blend, since
+  //options like clipping make no sense in that context and produce
+  //unexpected and unpredictable results
+  mBlendModeComboBox->setShowAdvancedModes( true );
+
   connect( buttonBox, SIGNAL( accepted() ), this, SLOT( onOK() ) );
 
   // initialize registry's widget functions

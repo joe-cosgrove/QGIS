@@ -127,6 +127,8 @@ QgsRasterLayerProperties::QgsRasterLayerProperties( QgsMapLayer* lyr, QgsMapCanv
   cbMinimumScale->setScale( 1.0 / lyr->minimumScale() );
   cbMaximumScale->setScale( 1.0 / lyr->maximumScale() );
 
+  //show advanced blend modes, such as clipping modes
+  mBlendModeComboBox->setShowAdvancedModes( true );
 
   leNoDataValue->setValidator( new QDoubleValidator( -std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), 1000, this ) );
 

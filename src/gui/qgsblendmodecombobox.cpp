@@ -24,7 +24,8 @@
 #include <QSettings>
 #include <QLineEdit>
 
-QgsBlendModeComboBox::QgsBlendModeComboBox( QWidget* parent ) : QComboBox( parent )
+QgsBlendModeComboBox::QgsBlendModeComboBox( QWidget* parent ) : QComboBox( parent ),
+    mShowAdvancedModes( false )
 {
   updateModes();
 }
@@ -40,23 +41,38 @@ QgsBlendModeComboBox::~QgsBlendModeComboBox()
 */
 QStringList QgsBlendModeComboBox::blendModesList() const
 {
-  return QStringList() << tr( "Normal" )
-         << "-"
-         << tr( "Lighten" )
-         << tr( "Screen" )
-         << tr( "Dodge" )
-         << tr( "Addition" )
-         << "-"
-         << tr( "Darken" )
-         << tr( "Multiply" )
-         << tr( "Burn" )
-         << "-"
-         << tr( "Overlay" )
-         << tr( "Soft light" )
-         << tr( "Hard light" )
-         << "-"
-         << tr( "Difference" )
-         << tr( "Subtract" );
+  QStringList modes;
+  modes << tr( "Normal" )
+  << "-"
+  << tr( "Lighten" )
+  << tr( "Screen" )
+  << tr( "Dodge" )
+  << tr( "Addition" )
+  << "-"
+  << tr( "Darken" )
+  << tr( "Multiply" )
+  << tr( "Burn" )
+  << "-"
+  << tr( "Overlay" )
+  << tr( "Soft light" )
+  << tr( "Hard light" )
+  << "-"
+  << tr( "Difference" )
+  << tr( "Subtract" );
+
+  if ( mShowAdvancedModes )
+  {
+    modes << "-"
+    <<  tr( "Punch" ) //source
+    << tr( "Draw under" ) //destination over
+    << tr( "Masked" ) //source in
+    << tr( "Clip Mask" ) //destination in
+    << "-"
+    << tr( "Draw only outside" ) //source out
+    << tr( "Erase" ) //destination out
+    << tr( "Clear" ); //clear
+  }
+  return modes;
 }
 
 /* Populates the blend mode combo box, and sets up mapping for
@@ -67,16 +83,16 @@ void QgsBlendModeComboBox::updateModes()
   blockSignals( true );
   clear();
 
-  QStringList myBlendModesList = blendModesList();
-  QStringList::const_iterator blendModeIt = myBlendModesList.constBegin();
+  QStringList blendModes = blendModesList();
+  QStringList::const_iterator blendModeIt = blendModes.constBegin();
 
-  mBlendModeToListIndex.resize( myBlendModesList.count() );
-  mListIndexToBlendMode.resize( myBlendModesList.count() );
+  mBlendModeToListIndex.resize( blendModes.count() );
+  mListIndexToBlendMode.resize( blendModes.count() );
 
   // Loop through blend modes
   int index = 0;
   int blendModeIndex = 0;
-  for ( ; blendModeIt != myBlendModesList.constEnd(); ++blendModeIt )
+  for ( ; blendModeIt != blendModes.constEnd(); ++blendModeIt )
   {
     if ( *blendModeIt == "-" )
     {
@@ -108,5 +124,11 @@ QPainter::CompositionMode QgsBlendModeComboBox::blendMode()
 void QgsBlendModeComboBox::setBlendMode( QPainter::CompositionMode blendMode )
 {
   setCurrentIndex( mBlendModeToListIndex[( int ) QgsMapRenderer::getBlendModeEnum( blendMode )] );
+}
+
+void QgsBlendModeComboBox::setShowAdvancedModes( bool showAdvancedModes )
+{
+  mShowAdvancedModes = showAdvancedModes;
+  updateModes();
 }
 

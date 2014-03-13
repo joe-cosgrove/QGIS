@@ -1136,6 +1136,20 @@ QPainter::CompositionMode QgsMapRenderer::getCompositionMode( const QgsMapRender
       return QPainter::CompositionMode_Difference;
     case QgsMapRenderer::BlendSubtract:
       return QPainter::CompositionMode_Exclusion;
+    case QgsMapRenderer::BlendPunch:
+      return QPainter::CompositionMode_Source;
+    case QgsMapRenderer::BlendDrawUnder:
+      return QPainter::CompositionMode_DestinationOver;
+    case QgsMapRenderer::BlendMasked:
+      return QPainter::CompositionMode_SourceIn;
+    case QgsMapRenderer::BlendClipMask:
+      return QPainter::CompositionMode_DestinationIn;
+    case QgsMapRenderer::BlendDrawOutside:
+      return QPainter::CompositionMode_SourceOut;
+    case QgsMapRenderer::BlendErase:
+      return QPainter::CompositionMode_DestinationOut;
+    case QgsMapRenderer::BlendClear:
+      return QPainter::CompositionMode_Clear;
     default:
       return QPainter::CompositionMode_SourceOver;
   }
@@ -1172,6 +1186,20 @@ QgsMapRenderer::BlendMode QgsMapRenderer::getBlendModeEnum( const QPainter::Comp
       return QgsMapRenderer::BlendDifference;
     case QPainter::CompositionMode_Exclusion:
       return QgsMapRenderer::BlendSubtract;
+    case QPainter::CompositionMode_Source:
+      return QgsMapRenderer::BlendPunch;
+    case QPainter::CompositionMode_DestinationOver:
+      return QgsMapRenderer::BlendDrawUnder;
+    case QPainter::CompositionMode_SourceIn:
+      return QgsMapRenderer::BlendMasked;
+    case QPainter::CompositionMode_DestinationIn:
+      return QgsMapRenderer::BlendClipMask;
+    case QPainter::CompositionMode_SourceOut:
+      return QgsMapRenderer::BlendDrawOutside;
+    case QPainter::CompositionMode_DestinationOut:
+      return QgsMapRenderer::BlendErase;
+    case QPainter::CompositionMode_Clear:
+      return QgsMapRenderer::BlendClear;
     default:
       return QgsMapRenderer::BlendNormal;
   }
