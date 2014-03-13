@@ -68,7 +68,7 @@ QStringList QgsBlendModeComboBox::blendModesList() const
     << tr( "Clip Mask" ) //destination in
     << "-"
     << tr( "Draw only outside" ) //source out
-    << tr( "Erase" ) //destination out
+    << tr( "Erase" ); //destination out
   }
   return modes;
 }
