@@ -269,6 +269,11 @@ void QgsComposerMap::cache( void )
 
   QPainter p( &mCacheImage );
 
+  if ( mGridEnabled )
+  {
+    drawGrid( &p );
+  }
+
   draw( &p, requestExtent, QSizeF( w, h ), mCacheImage.logicalDpiX() );
   p.end();
   mCacheUpdated = true;
@@ -306,6 +311,11 @@ void QgsComposerMap::paint( QPainter* painter, const QStyleOptionGraphicsItem* i
     //client functions
 
     //Background color is already included in cached image, so no need to draw
+
+    if ( mGridEnabled )
+    {
+      drawGrid( painter );
+    }
 
     QgsRectangle requestRectangle;
     requestedExtent( requestRectangle );
@@ -357,6 +367,12 @@ void QgsComposerMap::paint( QPainter* painter, const QStyleOptionGraphicsItem* i
     // Fill with background color
     drawBackground( painter );
 
+    if ( mGridEnabled )
+    {
+      drawGrid( painter );
+    }
+
+
     QgsRectangle requestRectangle;
     requestedExtent( requestRectangle );
 
@@ -395,10 +411,7 @@ void QgsComposerMap::paint( QPainter* painter, const QStyleOptionGraphicsItem* i
 
   painter->setClipRect( thisPaintRect , Qt::NoClip );
 
-  if ( mGridEnabled )
-  {
-    drawGrid( painter );
-  }
+
   if ( mOverviewFrameMapId != -1 )
   {
     drawOverviewMapExtent( painter );
