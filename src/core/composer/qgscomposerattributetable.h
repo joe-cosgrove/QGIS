@@ -22,6 +22,8 @@
 
 class QgsComposerMap;
 class QgsVectorLayer;
+class QgsVectorLayerCache;
+class QgsCacheIndexFeatureId;
 
 /**Helper class for sorting, takes into account sorting column and ascending / descending*/
 class CORE_EXPORT QgsComposerAttributeTableCompare
@@ -251,6 +253,9 @@ class CORE_EXPORT QgsComposerAttributeTable: public QgsComposerTable
     /**Contains information about sort attribute index / ascending (true/false). First entry has the highest priority*/
     QList< QPair<int, bool> > mSortInformation;
 
+    QgsVectorLayerCache* mVectorLayerCache;
+    QgsCacheIndexFeatureId*        mFeatureIdIndex;
+
     /**Inserts aliases from vector layer as starting configuration to the alias map*/
     void initializeAliasMap();
 
@@ -263,6 +268,7 @@ class CORE_EXPORT QgsComposerAttributeTable: public QgsComposerTable
      */
     QString attributeDisplayName( int attributeIndex, const QString& name ) const;
 
+    void initCache();
   private slots:
     /**Checks if this vector layer will be removed (and sets mVectorLayer to 0 if yes) */
     void removeLayer( QString layerId );

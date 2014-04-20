@@ -19,9 +19,12 @@
 #include "qgscomposermap.h"
 #include "qgsmaplayerregistry.h"
 #include "qgsvectorlayer.h"
+#include "qgsvectorlayercache.h"
+#include <qgscacheindexfeatureid.h>
 
-QgsComposerAttributeTableCompare::QgsComposerAttributeTableCompare()
-    : mCurrentSortColumn( 0 ), mAscending( true )
+QgsComposerAttributeTableCompare::QgsComposerAttributeTableCompare() :
+    mCurrentSortColumn( 0 ),
+    mAscending( true )
 {
 }
 
@@ -52,6 +55,8 @@ QgsComposerAttributeTable::QgsComposerAttributeTable( QgsComposition* compositio
     , mShowOnlyVisibleFeatures( true )
     , mFilterFeatures( false )
     , mFeatureFilter( "" )
+    , mVectorLayerCache( 0 )
+    , mFeatureIdIndex( 0 )
 {
   //set first vector layer from layer registry as default one
   QMap<QString, QgsMapLayer*> layerMap =  QgsMapLayerRegistry::instance()->mapLayers();
@@ -65,11 +70,39 @@ QgsComposerAttributeTable::QgsComposerAttributeTable( QgsComposition* compositio
       break;
     }
   }
+
+  initCache();
+
   connect( QgsMapLayerRegistry::instance(), SIGNAL( layerWillBeRemoved( QString ) ), this, SLOT( removeLayer( const QString& ) ) );
 }
 
 QgsComposerAttributeTable::~QgsComposerAttributeTable()
 {
+  delete mVectorLayerCache;
+  delete mFeatureIdIndex;
+}
+
+void QgsComposerAttributeTable::initCache()
+{
+  if ( mVectorLayerCache )
+  {
+    mVectorLayerCache->deleteLater();
+    mVectorLayerCache = 0;
+  }
+
+  if ( mFeatureIdIndex )
+  {
+    delete mFeatureIdIndex;
+    mFeatureIdIndex = 0;
+  }
+
+  if ( mVectorLayer )
+  {
+    mVectorLayerCache = new QgsVectorLayerCache( mVectorLayer, mMaximumNumberOfFeatures );
+    mFeatureIdIndex = new QgsCacheIndexFeatureId( mVectorLayerCache );
+    mVectorLayerCache->addCacheIndex( mFeatureIdIndex );
+  }
+
 }
 
 void QgsComposerAttributeTable::paint( QPainter* painter, const QStyleOptionGraphicsItem* itemStyle, QWidget* pWidget )
@@ -115,6 +148,7 @@ void QgsComposerAttributeTable::setVectorLayer( QgsVectorLayer* layer )
 
   mVectorLayer = layer;
   initializeAliasMap();
+  initCache();
   refreshAttributes();
 
   //listen for modifications to layer and refresh table when they occur
@@ -189,6 +223,7 @@ void QgsComposerAttributeTable::setFeatureFilter( const QString& expression )
 void QgsComposerAttributeTable::setDisplayAttributes( const QSet<int>& attr, bool refresh )
 {
   mDisplayAttributes = attr;
+  initCache();
 
   if ( refresh )
   {
@@ -251,14 +286,14 @@ bool QgsComposerAttributeTable::getFeatureAttributes( QList<QgsAttributeMap> &at
   if ( !selectionRect.isEmpty() )
     req.setFilterRect( selectionRect );
 
-  req.setFlags( mShowOnlyVisibleFeatures ? QgsFeatureRequest::ExactIntersect : QgsFeatureRequest::NoGeometry );
+  req.setFlags( mShowOnlyVisibleFeatures ? QgsFeatureRequest::ExactIntersect :  QgsFeatureRequest::NoGeometry );
 
   if ( !mDisplayAttributes.isEmpty() )
     req.setSubsetOfAttributes( mDisplayAttributes.toList() );
 
   QgsFeature f;
   int counter = 0;
-  QgsFeatureIterator fit = mVectorLayer->getFeatures( req );
+  QgsFeatureIterator fit = mVectorLayerCache->getFeatures( req );
 
   while ( fit.nextFeature( f ) && counter < mMaximumNumberOfFeatures )
   {
@@ -327,6 +362,7 @@ void QgsComposerAttributeTable::removeLayer( QString layerId )
     if ( layerId == mVectorLayer->id() )
     {
       mVectorLayer = 0;
+      initCache();
     }
   }
 }
@@ -473,6 +509,7 @@ bool QgsComposerAttributeTable::readXML( const QDomElement& itemElem, const QDom
       }
     }
   }
+  initCache();
 
   //restore display attribute map
   mDisplayAttributes.clear();
