@@ -1151,7 +1151,15 @@ void QgsComposition::addItemsFromXML( const QDomElement& elem, const QDomDocumen
     QDomElement groupElem = groupList.at( i ).toElement();
     QgsComposerItemGroup *newGroup = new QgsComposerItemGroup( this );
     newGroup->readXML( groupElem, doc );
+
+    if ( pos )
+    {
+      newGroup->setSelected( true );
+      lastPastedItem = newGroup;
+    }
+
     addItem( newGroup );
+    newGroup->setZValue( newGroup->zValue() + zOrderOffset );
   }
 
   //Since this function adds items grouped by type, and each item is added to end of

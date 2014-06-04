@@ -1095,17 +1095,21 @@ void QgsComposerView::copyItems( ClipboardMode mode )
   }
   doc.appendChild( documentElement );
 
-  //if it's a copy, we have to remove the UUIDs since we don't want any duplicate UUID
+  //if it's a copy, we have to move the UUIDs since we don't want any duplicate UUID
   if ( mode == ClipboardModeCopy )
   {
-    // remove all uuid attributes
+    // move all uuid attributes
     QDomNodeList composerItemsNodes = doc.elementsByTagName( "ComposerItem" );
     for ( int i = 0; i < composerItemsNodes.count(); ++i )
     {
       QDomNode composerItemNode = composerItemsNodes.at( i );
-      if ( composerItemNode.isElement() )
+      if ( composerItemNode.isElement() && composerItemNode.toElement().hasAttribute( "uuid ") )
       {
+        //we actually move the uuid to the "templateUuid" attribute, so that
+        //groups can still be recreated after pasting the items
+        QString uuid = composerItemNode.toElement().attribute( "uuid" );
         composerItemNode.toElement().removeAttribute( "uuid" );
+        composerItemNode.toElement().setAttribute( "templateUuid", uuid );
       }
     }
   }
