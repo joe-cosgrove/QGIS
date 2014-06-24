@@ -387,6 +387,14 @@ class CORE_EXPORT QgsGeometry
     /** Returns the smallest convex polygon that contains all the points in the geometry. */
     QgsGeometry* convexHull();
 
+    /** Returns a rotated copy of the geometry.
+     * @param anchorPoint point around which to rotate the geometry
+     * @param rotation amount of rotation in degrees
+     * @returns copy of geometry rotated around anchorPoint
+     * @note added in 2.4
+     */
+    QgsGeometry* rotated( const QgsPoint* anchorPoint, double rotation );
+
     /* Return interpolated point on line at distance
      * @note added in 1.9
      */

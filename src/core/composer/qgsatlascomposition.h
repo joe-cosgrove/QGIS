@@ -309,6 +309,7 @@ class CORE_EXPORT QgsAtlasComposition : public QObject
 
     // bounding box of the current feature transformed into map crs
     QgsRectangle mTransformedFeatureBounds;
+    QgsGeometry* mTransformedFeature;
 
     QString mFilenameParserError;
     QString mFilterParserError;

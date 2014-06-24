@@ -35,6 +35,7 @@ QgsAtlasComposition::QgsAtlasComposition( QgsComposition* composition ) :
     mCoverageLayer( 0 ), mSingleFile( false ),
     mSortFeatures( false ), mSortAscending( true ), mCurrentFeatureNo( 0 ),
     mFilterFeatures( false ), mFeatureFilter( "" ),
+    mTransformedFeature( 0 ),
     mFilenameParserError( QString() ),
     mFilterParserError( QString() )
 {
@@ -387,6 +388,12 @@ bool QgsAtlasComposition::prepareForFeature( int featureI )
 
   //clear the transformed bounds of the previous feature
   mTransformedFeatureBounds = QgsRectangle();
+  if ( mTransformedFeature )
+  {
+      delete mTransformedFeature;
+      mTransformedFeature = 0;
+  }
+  mTransformedFeatureBounds = QgsRectangle();
 
   if ( atlasMaps.isEmpty() )
   {
@@ -418,12 +425,20 @@ void QgsAtlasComposition::computeExtent( QgsComposerMap* map )
   mTransform.setSourceCrs( coverage_crs );
   mTransform.setDestCRS( destination_crs );
 
-  // QgsGeometry::boundingBox is expressed in the geometry"s native CRS
-  // We have to transform the grometry to the destination CRS and ask for the bounding box
+  // QgsGeometry::boundingBox is expressed in the geometry's native CRS
+  // We have to transform the geometry to the destination CRS and ask for the bounding box
   // Note: we cannot directly take the transformation of the bounding box, since transformations are not linear
-  QgsGeometry tgeom( *mCurrentFeature.geometry() );
-  tgeom.transform( mTransform );
-  mTransformedFeatureBounds = tgeom.boundingBox();
+  if ( mTransformedFeature )
+  {
+      delete mTransformedFeature;
+  }
+  mTransformedFeature = new QgsGeometry(   *mCurrentFeature.geometry() );
+  mTransformedFeature->transform( mTransform );
+
+ // QgsRectangle bbox = tgeom.boundingBox();
+ // QgsPoint bboxCenter = bbox.center();
+
+  mTransformedFeatureBounds = mTransformedFeature->boundingBox();
 }
 
 void QgsAtlasComposition::prepareMap( QgsComposerMap* map )
@@ -433,18 +448,28 @@ void QgsAtlasComposition::prepareMap( QgsComposerMap* map )
     return;
   }
 
-  if ( mTransformedFeatureBounds.isEmpty() )
+  if ( mTransformedFeatureBounds.isEmpty() || !mTransformedFeature )
   {
     //transformed extent of current feature hasn't been calculated yet. This can happen if
     //a map has been set to be atlas controlled after prepare feature was called
     computeExtent( map );
   }
 
-  double xa1 = mTransformedFeatureBounds.xMinimum();
-  double xa2 = mTransformedFeatureBounds.xMaximum();
-  double ya1 = mTransformedFeatureBounds.yMinimum();
-  double ya2 = mTransformedFeatureBounds.yMaximum();
-  QgsRectangle newExtent = mTransformedFeatureBounds;
+  //rotate geometry to match map's rotation
+  QgsRectangle bbox = mTransformedFeature->boundingBox();
+  QgsPoint bboxCenter = bbox.center();
+
+  QgsGeometry* rotatedFeature = mTransformedFeature->rotated( &bboxCenter, 45 );
+  QgsRectangle rotatedBounds = rotatedFeature->boundingBox();
+  delete rotatedFeature;
+  rotatedFeature = 0;
+
+
+  double xa1 = rotatedBounds.xMinimum();
+  double xa2 = rotatedBounds.xMaximum();
+  double ya1 = rotatedBounds.yMinimum();
+  double ya2 = rotatedBounds.yMaximum();
+  QgsRectangle newExtent = rotatedBounds;
   QgsRectangle mOrigExtent = map->extent();
 
   //sanity check - only allow fixed scale mode for point layers

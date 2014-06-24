@@ -39,6 +39,7 @@ email                : morb at ozemail dot com dot au
 #endif
 
 #define DEFAULT_QUADRANT_SEGMENTS 8
+#define PI 3.14159265
 
 #define CATCH_GEOS(r) \
   catch (GEOSException &e) \
@@ -5692,6 +5693,32 @@ QgsGeometry* QgsGeometry::convexHull()
     return fromGeosGeom( GEOSConvexHull( mGeos ) );
   }
   CATCH_GEOS( 0 )
+}
+
+QgsGeometry *QgsGeometry::rotated(const QgsPoint *anchorPoint, double rotation )
+{
+    //calculations for affine transformation
+    double angle = -1 * rotation * ( PI / 180 );
+    double a = cos( angle );
+    double b = -1 * sin( angle );
+    double c = anchorPoint->x() - cos( angle ) * anchorPoint->x() + sin( angle ) * anchorPoint->y();
+    double d = sin( angle );
+    double ee = cos( angle );
+    double f = anchorPoint->y() - sin( angle ) * anchorPoint->x() - cos( angle ) * anchorPoint->y();
+
+    QgsGeometry* rotatedGeom = new QgsGeometry( *this );
+    int i = 0;
+    QgsPoint vertex = rotatedGeom->vertexAt( i );
+  while ( vertex != QgsPoint( 0, 0 ) )
+  {
+    double newX = a * vertex.x() + b * vertex.y() + c;
+    double newY = d * vertex.x() + ee * vertex.y() + f;
+
+    rotatedGeom->moveVertex( newX, newY, i );
+    i = i + 1;
+    vertex = rotatedGeom->vertexAt( i );
+  }
+  return rotatedGeom;
 }
 
 QgsGeometry* QgsGeometry::interpolate( double distance )
