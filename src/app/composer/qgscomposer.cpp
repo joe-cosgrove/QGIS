@@ -101,6 +101,7 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
     , mQgis( qgis )
     , mUndoView( 0 )
     , mAtlasFeatureAction( 0 )
+    , mShowingFullScreen( false )
 {
   setupUi( this );
   setWindowTitle( mTitle );
@@ -327,6 +328,7 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   mToolbarMenu = new QMenu( tr( "Toolbars" ), this );
   mToolbarMenu->setObjectName( "mToolbarMenu" );
   viewMenu->addSeparator();
+  viewMenu->addAction( mActionToggleFullScreen );
   viewMenu->addMenu( mPanelMenu );
   viewMenu->addMenu( mToolbarMenu );
   // toolBar already exists, add other widgets as they are created
@@ -1164,6 +1166,20 @@ void QgsComposer::on_mActionAtlasSettings_triggered()
   }
 
   mAtlasDock->raise();
+}
+
+void QgsComposer::on_mActionToggleFullScreen_triggered()
+{
+    if (mShowingFullScreen )
+    {
+        showNormal();
+        mShowingFullScreen= false;
+    }
+    else
+    {
+   showFullScreen();
+   mShowingFullScreen= true;
+    }
 }
 
 void QgsComposer::disablePreviewMode()
