@@ -21,6 +21,7 @@
 #include <QAbstractItemModel>
 #include <QStringList>
 #include <QSet>
+#include <QItemSelection>
 
 class QgsComposition;
 class QgsComposerItem;
@@ -231,6 +232,12 @@ class CORE_EXPORT QgsComposerModel: public QAbstractItemModel
      * @note added in QGIS 2.5
      */
     void setSelected( const QModelIndex &index );
+
+    /**Sets a QItemSelection as the current selection for the composition
+     * @param selection QItemSelection for selected items
+     * @note added in QGIS 2.5
+     */
+    void setSelection( const QItemSelection &selection );
 
   private:
 

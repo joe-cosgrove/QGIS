@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QIcon>
+#include <QItemSelection>
 
 QgsComposerModel::QgsComposerModel( QgsComposition* composition , QObject *parent )
     : QAbstractItemModel( parent )
@@ -770,4 +771,25 @@ void QgsComposerModel::setSelected( const QModelIndex &index )
   }
 
   mComposition->setSelectedItem( item );
+}
+
+void QgsComposerModel::setSelection( const QItemSelection &selection )
+{
+  QModelIndexList selectedIndexes = selection.indexes();
+  QModelIndexList::iterator it = selectedIndexes.begin();
+  for ( ; it != selectedIndexes.end(); ++it )
+  {
+    if ((( *it ).column() != 0 ) )
+    {
+      //avoid multiple calls to set selected for a given item
+      continue;
+    }
+    QgsComposerItem *item = itemFromIndex( *it );
+    if ( !item )
+    {
+      continue;
+    }
+
+    item->setSelected( true );
+  }
 }

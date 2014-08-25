@@ -552,8 +552,9 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   mItemsTreeView->header()->setResizeMode( 1, QHeaderView::Fixed );
   mItemsTreeView->header()->setMovable( false );
   mItemsTreeView->setIndentation( 0 );
+  mItemsTreeView->setSelectionMode( QAbstractItemView::ExtendedSelection );
   mItemsDock->setWidget( mItemsTreeView );
-  connect( mItemsTreeView->selectionModel(), SIGNAL( currentChanged( QModelIndex, QModelIndex ) ), mComposition->itemsModel(), SLOT( setSelected( QModelIndex ) ) );
+  connect( mItemsTreeView->selectionModel(), SIGNAL( selectionChanged( const QItemSelection &, const QItemSelection & ) ), mComposition->itemsModel(), SLOT( setSelection( const QItemSelection & ) ) );
 
   addDockWidget( Qt::RightDockWidgetArea, mItemDock );
   addDockWidget( Qt::RightDockWidgetArea, mGeneralDock );
@@ -3076,7 +3077,7 @@ void QgsComposer::readXML( const QDomElement& composerElem, const QDomDocument& 
   mItemsTreeView->setModel( mComposition->itemsModel() );
   mItemsTreeView->setColumnWidth( 0, 30 );
   mItemsTreeView->setColumnWidth( 1, 30 );
-  connect( mItemsTreeView->selectionModel(), SIGNAL( currentChanged( QModelIndex, QModelIndex ) ), mComposition->itemsModel(), SLOT( setSelected( QModelIndex ) ) );
+  connect( mItemsTreeView->selectionModel(), SIGNAL( selectionChanged( const QItemSelection &, const QItemSelection & ) ), mComposition->itemsModel(), SLOT( setSelection( const QItemSelection & ) ) );
 
   setSelectionTool();
 }
