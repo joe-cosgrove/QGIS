@@ -119,7 +119,7 @@ int QgsComposerModel::rowCount( const QModelIndex &parent ) const
 int QgsComposerModel::columnCount( const QModelIndex &parent ) const
 {
   Q_UNUSED( parent );
-  return 3;
+  return 4;
 }
 
 QVariant QgsComposerModel::data( const QModelIndex &index, int role ) const
@@ -171,6 +171,9 @@ QVariant QgsComposerModel::data( const QModelIndex &index, int role ) const
         case LockStatus:
           //column 1 is locked state of item
           return item->positionLock() ? Qt::Checked : Qt::Unchecked;
+        case SelectStatus:
+          //column 3 is selection status of item
+          return item->isSelected() ? Qt::Checked : Qt::Unchecked;
         default:
           return QVariant();
       }
@@ -210,19 +213,21 @@ bool QgsComposerModel::setData( const QModelIndex & index, const QVariant & valu
   switch ( index.column() )
   {
     case Visibility:
-      //first column is item visibility
       item->setVisibility( value.toBool() );
       emit dataChanged( index, index );
       return true;
 
     case LockStatus:
-      //second column is item lock state
       item->setPositionLock( value.toBool() );
       emit dataChanged( index, index );
       return true;
 
+    case SelectStatus:
+      item->setSelected( value.toBool() );
+      emit dataChanged( index, index );
+      return true;
+
     case ItemId:
-      //last column is item id
       item->setId( value.toString() );
       emit dataChanged( index, index );
       return true;
@@ -680,15 +685,22 @@ void QgsComposerModel::updateItemSelectStatus( QgsComposerItem *item )
     return;
   }
 
-  //need to get QModelIndex of item
-  QModelIndex itemIndex = indexForItem( item, ItemId );
-  if ( !itemIndex.isValid() )
+  //get QModelIndex of item for item id column (to redraw name
+  //in bold for selected items)
+  QModelIndex itemIdIndex = indexForItem( item, ItemId );
+  if ( itemIdIndex.isValid() )
   {
-    return;
+    //emit signal for item id change
+    emit dataChanged( itemIdIndex, itemIdIndex );
   }
 
-  //emit signal for item visibility change
-  emit dataChanged( itemIndex, itemIndex );
+  //get QModelIndex of item for selection status column
+  QModelIndex itemSelectIndex = indexForItem( item, SelectStatus );
+  if ( itemSelectIndex.isValid() )
+  {
+    //emit signal for item select status change
+    emit dataChanged( itemSelectIndex, itemSelectIndex );
+  }
 }
 
 bool QgsComposerModel::reorderItemUp( QgsComposerItem *item )
@@ -902,6 +914,7 @@ Qt::ItemFlags QgsComposerModel::flags( const QModelIndex & index ) const
   {
     case Visibility:
     case LockStatus:
+    case SelectStatus:
       return flags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled;
     case ItemId:
       return flags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled;

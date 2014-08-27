@@ -243,7 +243,8 @@ class CORE_EXPORT QgsComposerModel: public QAbstractItemModel
     {
       Visibility = 0,
       LockStatus,
-      ItemId
+      ItemId,
+      SelectStatus
     };
 
     /**Parent composition*/

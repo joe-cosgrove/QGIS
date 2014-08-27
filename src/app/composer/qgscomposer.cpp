@@ -546,11 +546,17 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   //for testing:
   //new ModelTest( mComposition->itemsModel(), this );
 
+  mItemsTreeView->setUniformRowHeights( true );
   mItemsTreeView->setColumnWidth( 0, 30 );
   mItemsTreeView->setColumnWidth( 1, 30 );
+  mItemsTreeView->setColumnWidth( 3, 30 );
+  mItemsTreeView->header()->setStretchLastSection( false );
   mItemsTreeView->header()->setResizeMode( 0, QHeaderView::Fixed );
   mItemsTreeView->header()->setResizeMode( 1, QHeaderView::Fixed );
+  mItemsTreeView->header()->setResizeMode( 2, QHeaderView::Stretch );
+  mItemsTreeView->header()->setResizeMode( 3, QHeaderView::Fixed );
   mItemsTreeView->header()->setMovable( false );
+  mItemsTreeView->setSelectionMode( QAbstractItemView::ExtendedSelection );
 
   mItemsTreeView->setDragEnabled( true );
   mItemsTreeView->setAcceptDrops( true );
@@ -559,7 +565,6 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
 
   mItemsTreeView->setIndentation( 0 );
   mItemsDock->setWidget( mItemsTreeView );
-  connect( mItemsTreeView->selectionModel(), SIGNAL( currentChanged( QModelIndex, QModelIndex ) ), mComposition->itemsModel(), SLOT( setSelected( QModelIndex ) ) );
 
   addDockWidget( Qt::RightDockWidgetArea, mItemDock );
   addDockWidget( Qt::RightDockWidgetArea, mGeneralDock );
@@ -3082,7 +3087,7 @@ void QgsComposer::readXML( const QDomElement& composerElem, const QDomDocument& 
   mItemsTreeView->setModel( mComposition->itemsModel() );
   mItemsTreeView->setColumnWidth( 0, 30 );
   mItemsTreeView->setColumnWidth( 1, 30 );
-  connect( mItemsTreeView->selectionModel(), SIGNAL( currentChanged( QModelIndex, QModelIndex ) ), mComposition->itemsModel(), SLOT( setSelected( QModelIndex ) ) );
+  mItemsTreeView->setColumnWidth( 3, 30 );
 
   setSelectionTool();
 }
