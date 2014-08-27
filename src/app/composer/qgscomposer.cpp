@@ -98,6 +98,67 @@ static bool cmpByText_( QAction* a, QAction* b )
   return QString::localeAwareCompare( a->text(), b->text() ) < 0;
 }
 
+#include <QStyledItemDelegate>
+class ItemDelegate : public QStyledItemDelegate
+{
+public:
+    ItemDelegate(QObject *parent = 0)
+        : QStyledItemDelegate(parent)
+    {
+    }
+
+    void paint ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+    {
+        QStyleOptionViewItemV4 viewItemOption(option);
+
+        if (index.column() == 0) {
+            const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+            QRect newRect = QStyle::alignedRect(option.direction, Qt::AlignCenter,
+                                                QSize(option.decorationSize.width() + 5,option.decorationSize.height()),
+                                                QRect(option.rect.x() + textMargin, option.rect.y(),
+                                                      option.rect.width() - (2 * textMargin), option.rect.height()));
+            viewItemOption.rect = newRect;
+        }
+        QStyledItemDelegate::paint(painter, viewItemOption, index);
+    }
+
+    virtual bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option,
+                             const QModelIndex &index)
+    {
+        Q_ASSERT(event);
+        Q_ASSERT(model);
+
+        // make sure that the item is checkable
+        Qt::ItemFlags flags = model->flags(index);
+        if (!(flags & Qt::ItemIsUserCheckable) || !(flags & Qt::ItemIsEnabled))
+            return false;
+        // make sure that we have a check state
+        QVariant value = index.data(Qt::CheckStateRole);
+        if (!value.isValid())
+            return false;
+        // make sure that we have the right event type
+        if (event->type() == QEvent::MouseButtonRelease) {
+            const int textMargin = QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+            QRect checkRect = QStyle::alignedRect(option.direction, Qt::AlignCenter,
+                                                  option.decorationSize,
+                                                  QRect(option.rect.x() + (2 * textMargin), option.rect.y(),
+                                                        option.rect.width() - (2 * textMargin),
+                                                        option.rect.height()));
+            if (!checkRect.contains(static_cast<QMouseEvent*>(event)->pos()))
+                return false;
+        } else if (event->type() == QEvent::KeyPress) {
+            if (static_cast<QKeyEvent*>(event)->key() != Qt::Key_Space&& static_cast<QKeyEvent*>(event)->key() != Qt::Key_Select)
+                return false;
+        } else {
+            return false;
+        }
+        Qt::CheckState state = (static_cast<Qt::CheckState>(value.toInt()) == Qt::Checked
+                                ? Qt::Unchecked : Qt::Checked);
+        return model->setData(index, state, Qt::CheckStateRole);
+    }
+};
+
+
 QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
     : QMainWindow()
     , mTitle( title )
@@ -545,6 +606,9 @@ QgsComposer::QgsComposer( QgisApp *qgis, const QString& title )
   mItemsTreeView->setModel( mComposition->itemsModel() );
   //for testing:
   //new ModelTest( mComposition->itemsModel(), this );
+
+
+  mItemsTreeView->setItemDelegateForColumn( 0, new ItemDelegate(this) );
 
   mItemsTreeView->setUniformRowHeights( true );
   mItemsTreeView->setColumnWidth( 0, 30 );
