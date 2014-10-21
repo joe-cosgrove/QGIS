@@ -17,6 +17,7 @@
 
 #include "qgscomposeritemcommand.h"
 #include "qgscomposeritem.h"
+#include "qgscomposeritemgroup.h"
 #include "qgscomposerframe.h"
 #include "qgscomposermultiframe.h"
 #include "qgsproject.h"
@@ -153,3 +154,28 @@ bool QgsComposerMergeCommand::mergeWith( const QUndoCommand * command )
   return true;
 }
 
+
+//
+// QgsComposerGroupCommand
+//
+
+QgsComposerGroupCommand::QgsComposerGroupCommand( QgsComposerItemGroup *group, const QString &text, QUndoCommand *parent )
+    : QgsComposerItemCommand( group, text, parent )
+{
+
+}
+
+QgsComposerGroupCommand::~QgsComposerGroupCommand()
+{
+
+}
+
+void QgsComposerGroupCommand::undo()
+{
+
+}
+
+void QgsComposerGroupCommand::redo()
+{
+
+}
