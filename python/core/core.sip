@@ -182,6 +182,8 @@
 %Include layertree/qgslayertreeregistrybridge.sip
 %Include layertree/qgslayertreeutils.sip
 
+%Include layout/qgslayoutmeasurement.sip
+
 %Include raster/qgsraster.sip
 %Include raster/qgscliptominmaxenhancement.sip
 %Include raster/qgscolorrampshader.sip

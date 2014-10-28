@@ -9,6 +9,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/core
   ${CMAKE_SOURCE_DIR}/src/core/composer
+  ${CMAKE_SOURCE_DIR}/src/core/layout
   ${CMAKE_SOURCE_DIR}/src/core/layertree
   ${CMAKE_SOURCE_DIR}/src/core/raster
   ${CMAKE_SOURCE_DIR}/src/core/symbology-ng
@@ -105,6 +106,7 @@ ADD_QGIS_TEST(rulebasedrenderertest testqgsrulebasedrenderer.cpp)
 ADD_QGIS_TEST(ziplayertest testziplayer.cpp)
 ADD_QGIS_TEST(dataitemtest testqgsdataitem.cpp)
 ADD_QGIS_TEST(datadefined testqgsdatadefined.cpp)
+ADD_QGIS_TEST(layoutmeasurement testqgslayoutmeasurement.cpp )
 ADD_QGIS_TEST(composerobject testqgscomposerobject.cpp)
 ADD_QGIS_TEST(composerutils testqgscomposerutils.cpp)
 ADD_QGIS_TEST(compositiontest testqgscomposition.cpp)
