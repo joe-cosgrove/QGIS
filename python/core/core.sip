@@ -183,6 +183,7 @@
 %Include layertree/qgslayertreeutils.sip
 
 %Include layout/qgslayoutmeasurement.sip
+%Include layout/qgspagesizeregistry.sip
 
 %Include raster/qgsraster.sip
 %Include raster/qgscliptominmaxenhancement.sip

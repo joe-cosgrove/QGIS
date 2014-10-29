@@ -216,6 +216,7 @@ SET(QGIS_CORE_SRCS
   dxf/qgsdxfpallabeling.cpp
 
   layout/qgslayoutmeasurement.cpp
+  layout/qgspagesizeregistry.cpp
 
   pal/costcalculator.cpp
   pal/feature.cpp
@@ -600,6 +601,7 @@ SET(QGIS_CORE_HDRS
   composer/qgscomposeritemcommand.h
 
   layout/qgslayoutmeasurement.h
+  layout/qgspagesizeregistry.h
 
   raster/qgsraster.h
   raster/qgsrasterblock.h
