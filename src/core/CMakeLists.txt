@@ -215,7 +215,11 @@ SET(QGIS_CORE_SRCS
   dxf/qgsdxfpaintengine.cpp
   dxf/qgsdxfpallabeling.cpp
 
+  layout/qgslayout.cpp
+  layout/qgslayoutitem.cpp
+  layout/qgslayoutitemregistry.cpp
   layout/qgslayoutmeasurement.cpp
+  layout/qgslayoutobject.cpp
   layout/qgspagesizeregistry.cpp
 
   pal/costcalculator.cpp
@@ -423,6 +427,9 @@ SET(QGIS_CORE_MOC_HDRS
   gps/qgsnmeaconnection.h
   gps/qgsgpsdconnection.h
 
+  layout/qgslayout.h
+  layout/qgslayoutobject.h
+
   symbology-ng/qgscptcityarchive.h
   symbology-ng/qgssvgcache.h
   symbology-ng/qgsstylev2.h
@@ -600,7 +607,11 @@ SET(QGIS_CORE_HDRS
   composer/qgscomposertexttable.h
   composer/qgscomposeritemcommand.h
 
+  layout/qgslayout.h
+  layout/qgslayoutitem.h
+  layout/qgslayoutitemregistry.h
   layout/qgslayoutmeasurement.h
+  layout/qgslayoutobject.h
   layout/qgspagesizeregistry.h
 
   raster/qgsraster.h
