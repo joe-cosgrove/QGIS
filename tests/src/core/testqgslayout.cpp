@@ -30,6 +30,8 @@ class TestQgsLayout: public QObject
     void cleanup();// will be called after every testfunction.
     void creation(); //test creation of QgsLayout
     void flags(); //test QgsLayout flags
+    void name();
+    void units();
 
   private:
     QString mReport;
@@ -83,6 +85,35 @@ void TestQgsLayout::flags()
   QVERIFY( layout.testFlag( QgsLayout::Debug ) );
   layout.setFlag( QgsLayout::Debug, false );
   QVERIFY( ! layout.testFlag( QgsLayout::Debug ) );
+}
+
+void TestQgsLayout::name()
+{
+  QgsLayout layout;
+  QString layoutName = "test name";
+  layout.setName( layoutName );
+  QCOMPARE( layout.name(), layoutName );
+}
+
+void TestQgsLayout::units()
+{
+  QgsLayout layout;
+  QVERIFY( layout.measurementConverter() );
+  layout.setUnits( QgsLayoutMeasurement::Centimeters );
+  QCOMPARE( layout.units(), QgsLayoutMeasurement::Centimeters );
+  QCOMPARE( layout.convertToLayoutUnits( QgsLayoutMeasurement( 10.0, QgsLayoutMeasurement::Millimeters ) ), 1.0 );
+  QCOMPARE( layout.convertToLayoutUnits( QgsLayoutSize( 10.0, 20.0, QgsLayoutMeasurement::Millimeters ) ), QSizeF( 1.0, 2.0 ) );
+
+  //check with dpi conversion
+  layout.setUnits( QgsLayoutMeasurement::Inches );
+  layout.setDpi( 96.0 );
+  QCOMPARE( layout.dpi(), 96.0 );
+  QCOMPARE( layout.measurementConverter()->dpi(), 96.0 );
+  QCOMPARE( layout.convertToLayoutUnits( QgsLayoutMeasurement( 96, QgsLayoutMeasurement::Pixels ) ), 1.0 );
+  QCOMPARE( layout.convertToLayoutUnits( QgsLayoutSize( 96, 96, QgsLayoutMeasurement::Pixels ) ), QSizeF( 1.0, 1.0 ) );
+  layout.setUnits( QgsLayoutMeasurement::Pixels );
+  QCOMPARE( layout.convertToLayoutUnits( QgsLayoutMeasurement( 1, QgsLayoutMeasurement::Inches ) ), 96.0 );
+  QCOMPARE( layout.convertToLayoutUnits( QgsLayoutSize( 1, 2, QgsLayoutMeasurement::Inches ) ), QSizeF( 96.0, 192.0 ) );
 }
 
 QTEST_MAIN( TestQgsLayout )

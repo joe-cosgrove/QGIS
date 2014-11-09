@@ -17,6 +17,7 @@
 #define QGSLAYOUT_H
 
 #include <QGraphicsScene>
+#include "qgslayoutmeasurement.h"
 
 /**\ingroup Layout
  * \class QgsLayout
@@ -79,9 +80,77 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
      */
     bool testFlag( const Flag flag ) const;
 
+    /**Sets the name for the layout.
+     * @param name new name
+     * @see name
+    */
+    void setName( const QString& name );
+
+    /**Name of the layout.
+     * @returns layout name
+     * @see setName
+    */
+    QString name() const { return mName; }
+
+    /**Sets the native measurement unit for the layout. These also form the default unit
+     * for measurements for the layout.
+     * @param units measurement units
+     * @see units
+     * @see convertToLayoutUnits
+    */
+    void setUnits( const QgsLayoutMeasurement::Units& units );
+
+    /**Native units for the layout.
+     * @returns native measurement units
+     * @see setUnits
+     * @see convertToLayoutUnits
+    */
+    QgsLayoutMeasurement::Units units() const { return mUnits; }
+
+    /**Sets the resolution of a layout.
+     * @param dpi resolution of layout in dots per inch
+     * @see dpi
+     * @see measurementConverter
+    */
+    void setDpi( const double dpi );
+
+    /**Resolution of the layout.
+     * @returns resolution of layout in dots per inch
+     * @see setDpi
+     * @see measurementConverter
+    */
+    double dpi() const;
+
+    /**Returns a pointer to the measurement converter used by the layout. This converter is used
+     * for translating between other measurement units and the layout's native unit.
+     * @returns layout's measurement converter
+     * @see dpi
+     * @see units
+     * @see convertToLayoutUnits
+    */
+    const QgsLayoutMeasurementConverter* measurementConverter() const;
+
+    /**Converts a measurement into the layout's native units.
+     * @returns length of measurement in layout units
+     * @see measurementConverter
+     * @see units
+    */
+    double convertToLayoutUnits( const QgsLayoutMeasurement& measurement ) const;
+
+    /**Converts a size into the layout's native units.
+     * @returns size of measurement in layout units
+     * @see measurementConverter
+     * @see units
+    */
+    QSizeF convertToLayoutUnits( const QgsLayoutSize& size ) const;
+
   private:
 
     Flags mFlags;
+
+    QString mName;
+    QgsLayoutMeasurement::Units mUnits;
+    QgsLayoutMeasurementConverter* mMeasurementConverter;
 
 };
 
