@@ -95,11 +95,88 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     const QgsLayout* layout() const { return mLayout; }
     QgsLayout* layout() { return mLayout; }
 
+    /**Stores item state in DOM element
+     * @param elem is DOM element corresponding to item tag
+     * @param doc is the DOM document
+     */
+    //TODO
+    virtual bool writeXML( QDomElement& elem, QDomDocument & doc ) const;
+
+    /**Sets item state from DOM element
+     * @param itemElem is DOM node corresponding to item tag
+     * @param doc is DOM document
+     */
+    //TODO
+    virtual bool readXML( const QDomElement& itemElem, const QDomDocument& doc );
+
+    /**Returns a reference to the data defined settings for one of the item's data defined properties.
+     * @param property data defined property to return
+     * @note this method was added in version 2.5
+    */
+    //TODO
+    QgsDataDefined* dataDefinedProperty( const DataDefinedProperty property ) const;
+
+    /**Sets parameters for a data defined property for the item
+     * @param property data defined property to set
+     * @param active true if data defined property is active, false if it is disabled
+     * @param useExpression true if the expression should be used
+     * @param expression expression for data defined property
+     * @param field field name if the data defined property should take its value from a field
+     * @note this method was added in version 2.5
+    */
+    //TODO
+    void setDataDefinedProperty( const DataDefinedProperty property, const bool active, const bool useExpression, const QString &expression, const QString &field );
+
+  public slots:
+
+    /**Triggers a redraw for the item*/
+    //TODO
+    virtual void repaint();
+
+    /**Refreshes a data defined property for the item by reevaluating the property's value
+     * and redrawing the item with this new value.
+     * @param property data defined property to refresh. If property is set to
+     * QgsLayoutObject::AllProperties then all data defined properties for the item will be
+     * refreshed.
+     * @note this method was added in version 2.5
+    */
+    //TODO
+    virtual void refreshDataDefinedProperty( const DataDefinedProperty property = AllProperties );
+
   protected:
 
     QgsLayout* mLayout;
 
+    /**Map of data defined properties for the item to string name to use when exporting item to xml*/
+    QMap< QgsLayoutObject::DataDefinedProperty, QString > mDataDefinedNames;
+
+    /**Evaluate a data defined property and return the calculated value
+     * @returns true if data defined property could be successfully evaluated
+     * @param property data defined property to evaluate
+     * @param expressionValue QVariant for storing the evaluated value
+     * @note this method was added in version 2.5
+    */
+    //TODO
+    bool dataDefinedEvaluate( const QgsLayoutObject::DataDefinedProperty property, QVariant &expressionValue );
+
+  signals:
+    /**Emitted when the object changes. Signifies that the widgets must update their
+     * gui elements.
+    */
+    //TODO
+    void itemChanged();
+
+  private slots:
+    /**Prepares all layout object data defined expressions using the current atlas coverage layer if set.
+     * @note this method was added in version 2.5
+    */
+    //TODO
+    void prepareDataDefinedExpressions() const;
+
   private:
+
+    /**Map of current data defined properties*/
+    QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* > mDataDefinedProperties;
 
     friend class TestQgsLayoutObject;
 };

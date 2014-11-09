@@ -220,6 +220,9 @@ SET(QGIS_CORE_SRCS
   layout/qgslayoutitemregistry.cpp
   layout/qgslayoutmeasurement.cpp
   layout/qgslayoutobject.cpp
+  layout/qgslayoutpage.cpp
+  layout/qgspagecollection.cpp
+  layout/qgslayoututils.cpp
   layout/qgspagesizeregistry.cpp
 
   pal/costcalculator.cpp
@@ -612,6 +615,9 @@ SET(QGIS_CORE_HDRS
   layout/qgslayoutitemregistry.h
   layout/qgslayoutmeasurement.h
   layout/qgslayoutobject.h
+  layout/qgslayoutpage.h
+  layout/qgspagecollection.h
+  layout/qgslayoututils.h
   layout/qgspagesizeregistry.h
 
   raster/qgsraster.h
