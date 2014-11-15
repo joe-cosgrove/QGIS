@@ -22,35 +22,35 @@
 
 QgsPageSizeRegistry::QgsPageSizeRegistry()
 {
-  add( QgsPageSize( QString( "A6" ), QgsLayoutSize( 105, 148, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "A5" ), QgsLayoutSize( 148, 210, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "A4" ), QgsLayoutSize( 210, 297, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "A3" ), QgsLayoutSize( 297, 420, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "A2" ), QgsLayoutSize( 420, 594, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "A1" ), QgsLayoutSize( 594, 841, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "A0" ), QgsLayoutSize( 841, 1189, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B6" ), QgsLayoutSize( 125, 176, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B5" ), QgsLayoutSize( 176, 250, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B4" ), QgsLayoutSize( 250, 353, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B3" ), QgsLayoutSize( 353, 500, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B2" ), QgsLayoutSize( 500, 707, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B1" ), QgsLayoutSize( 707, 1000, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "B0" ), QgsLayoutSize( 1000, 1414, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Legal" ), QgsLayoutSize( 215.9, 355.6, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Letter" ), QgsLayoutSize( 215.9, 279.4, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "ANSI A" ), QgsLayoutSize( 215.9, 279.4, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "ANSI B" ), QgsLayoutSize( 279.4, 431.8, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "ANSI C" ), QgsLayoutSize( 431.8, 558.8, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "ANSI D" ), QgsLayoutSize( 558.8, 863.6, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "ANSI E" ), QgsLayoutSize( 863.6, 1117.6, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch A" ), QgsLayoutSize( 228.6, 304.8, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch B" ), QgsLayoutSize( 304.8, 457.2, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch C" ), QgsLayoutSize( 457.2, 609.6, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch D" ), QgsLayoutSize( 609.6, 914.4, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch E" ), QgsLayoutSize( 914.4, 1219.2, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch E1" ), QgsLayoutSize( 762, 1066.8, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch E2" ), QgsLayoutSize( 660, 965, QgsLayoutMeasurement::Millimeters ) ) );
-  add( QgsPageSize( QString( "Arch E3" ), QgsLayoutSize( 686, 991, QgsLayoutMeasurement::Millimeters ) ) );
+  add( QgsPageSize( QString( "A6" ), QgsLayoutSize( 105, 148, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "A5" ), QgsLayoutSize( 148, 210, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "A4" ), QgsLayoutSize( 210, 297, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "A3" ), QgsLayoutSize( 297, 420, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "A2" ), QgsLayoutSize( 420, 594, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "A1" ), QgsLayoutSize( 594, 841, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "A0" ), QgsLayoutSize( 841, 1189, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B6" ), QgsLayoutSize( 125, 176, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B5" ), QgsLayoutSize( 176, 250, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B4" ), QgsLayoutSize( 250, 353, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B3" ), QgsLayoutSize( 353, 500, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B2" ), QgsLayoutSize( 500, 707, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B1" ), QgsLayoutSize( 707, 1000, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "B0" ), QgsLayoutSize( 1000, 1414, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Legal" ), QgsLayoutSize( 215.9, 355.6, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Letter" ), QgsLayoutSize( 215.9, 279.4, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "ANSI A" ), QgsLayoutSize( 215.9, 279.4, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "ANSI B" ), QgsLayoutSize( 279.4, 431.8, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "ANSI C" ), QgsLayoutSize( 431.8, 558.8, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "ANSI D" ), QgsLayoutSize( 558.8, 863.6, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "ANSI E" ), QgsLayoutSize( 863.6, 1117.6, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch A" ), QgsLayoutSize( 228.6, 304.8, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch B" ), QgsLayoutSize( 304.8, 457.2, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch C" ), QgsLayoutSize( 457.2, 609.6, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch D" ), QgsLayoutSize( 609.6, 914.4, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch E" ), QgsLayoutSize( 914.4, 1219.2, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch E1" ), QgsLayoutSize( 762, 1066.8, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch E2" ), QgsLayoutSize( 660, 965, QgsLayoutUnits::Millimeters ) ) );
+  add( QgsPageSize( QString( "Arch E3" ), QgsLayoutSize( 686, 991, QgsLayoutUnits::Millimeters ) ) );
 }
 
 QgsPageSizeRegistry *QgsPageSizeRegistry::mInstance = 0;

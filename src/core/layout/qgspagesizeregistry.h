@@ -16,7 +16,7 @@
 #ifndef QGSPAGESIZEREGISTRY_H
 #define QGSPAGESIZEREGISTRY_H
 
-#include "qgslayoutmeasurement.h"
+#include "qgslayoutsize.h"
 #include <QString>
 #include <QSizeF>
 #include <QList>

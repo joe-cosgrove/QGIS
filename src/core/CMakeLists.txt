@@ -219,8 +219,12 @@ SET(QGIS_CORE_SRCS
   layout/qgslayoutitem.cpp
   layout/qgslayoutitemregistry.cpp
   layout/qgslayoutmeasurement.cpp
+  layout/qgslayoutmeasurementconverter.cpp
   layout/qgslayoutobject.cpp
   layout/qgslayoutpage.cpp
+  layout/qgslayoutpoint.cpp
+  layout/qgslayoutsize.cpp
+  layout/qgslayoutunits.cpp
   layout/qgspagecollection.cpp
   layout/qgslayoututils.cpp
   layout/qgspagesizeregistry.cpp
@@ -615,8 +619,12 @@ SET(QGIS_CORE_HDRS
   layout/qgslayoutitem.h
   layout/qgslayoutitemregistry.h
   layout/qgslayoutmeasurement.h
+  layout/qgslayoutmeasurementconverter.h
   layout/qgslayoutobject.h
   layout/qgslayoutpage.h
+  layout/qgslayoutpoint.h
+  layout/qgslayoutsize.h
+  layout/qgslayoutunits.h
   layout/qgspagecollection.h
   layout/qgslayoututils.h
   layout/qgspagesizeregistry.h

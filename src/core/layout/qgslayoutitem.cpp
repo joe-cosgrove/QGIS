@@ -26,7 +26,7 @@ QgsLayoutItem::QgsLayoutItem( QgsLayout *layout )
   setCacheMode( QGraphicsItem::DeviceCoordinateCache );
 
   //record initial position
-  QgsLayoutMeasurement::Units initialUnits = layout ? layout->units() : QgsLayoutMeasurement::Millimeters;
+  QgsLayoutUnits::Units initialUnits = layout ? layout->units() : QgsLayoutUnits::Millimeters;
   mItemPosition = QgsLayoutPoint( scenePos().x(), scenePos().y(), initialUnits );
   mItemSize = QgsLayoutSize( rect().width(), rect().height(), initialUnits );
 
@@ -197,14 +197,14 @@ void QgsLayoutItem::layoutDpiChanged( const double dpi )
 {
   Q_UNUSED( dpi );
 
-  if ( QgsLayoutMeasurement::unitType( mLayout->units() ) !=
-       QgsLayoutMeasurement::unitType( mItemSize.units() ) )
+  if ( QgsLayoutUnits::unitType( mLayout->units() ) !=
+       QgsLayoutUnits::unitType( mItemSize.units() ) )
   {
     //conversion required, item and layout units are in a mix of both paper and screen units
     refreshItemSize();
   }
-  if ( QgsLayoutMeasurement::unitType( mLayout->units() ) !=
-       QgsLayoutMeasurement::unitType( mItemPosition.units() ) )
+  if ( QgsLayoutUnits::unitType( mLayout->units() ) !=
+       QgsLayoutUnits::unitType( mItemPosition.units() ) )
   {
     //conversion required, item and layout units are in a mix of both paper and screen units
     refreshItemPosition();

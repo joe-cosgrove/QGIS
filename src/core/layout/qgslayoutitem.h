@@ -18,7 +18,8 @@
 
 #include "qgslayoutobject.h"
 #include "qgslayoutitemregistry.h"
-#include "qgslayoutmeasurement.h"
+#include "qgslayoutpoint.h"
+#include "qgslayoutsize.h"
 #include <QGraphicsRectItem>
 
 class QgsLayout;

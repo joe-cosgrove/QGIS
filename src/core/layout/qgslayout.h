@@ -18,6 +18,10 @@
 
 #include <QGraphicsScene>
 #include "qgslayoutmeasurement.h"
+#include "qgslayoutsize.h"
+#include "qgslayoutpoint.h"
+
+class QgsLayoutMeasurementConverter;
 
 /**\ingroup Layout
  * \class QgsLayout
@@ -98,14 +102,14 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
      * @see units
      * @see convertToLayoutUnits
     */
-    void setUnits( const QgsLayoutMeasurement::Units& units );
+    void setUnits( const QgsLayoutUnits::Units& units );
 
     /**Native units for the layout.
      * @returns native measurement units
      * @see setUnits
      * @see convertToLayoutUnits
     */
-    QgsLayoutMeasurement::Units units() const { return mUnits; }
+    QgsLayoutUnits::Units units() const { return mUnits; }
 
     /**Sets the resolution of a layout.
      * @param dpi resolution of layout in dots per inch
@@ -165,7 +169,7 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
      * @see convertToLayoutUnits
      * @see units
     */
-    QgsLayoutMeasurement convertFromLayoutUnits( const double length, const QgsLayoutMeasurement::Units units ) const;
+    QgsLayoutMeasurement convertFromLayoutUnits( const double length, const QgsLayoutUnits::Units units ) const;
 
     /**Converts a size from the layout's native units to a specified unit.
      * @param size size in layout units to convert
@@ -174,7 +178,7 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
      * @see measurementConverter
      * @see units
     */
-    QgsLayoutSize convertFromLayoutUnits( const QSizeF& size, const QgsLayoutMeasurement::Units units ) const;
+    QgsLayoutSize convertFromLayoutUnits( const QSizeF& size, const QgsLayoutUnits::Units units ) const;
 
     /**Converts a point from the layout's native units to a specified unit.
      * @param point point in layout units to convert
@@ -183,7 +187,7 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
      * @see measurementConverter
      * @see units
     */
-    QgsLayoutPoint convertFromLayoutUnits( const QPointF& point, const QgsLayoutMeasurement::Units units ) const;
+    QgsLayoutPoint convertFromLayoutUnits( const QPointF& point, const QgsLayoutUnits::Units units ) const;
 
   signals:
 
@@ -194,7 +198,7 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
     Flags mFlags;
 
     QString mName;
-    QgsLayoutMeasurement::Units mUnits;
+    QgsLayoutUnits::Units mUnits;
     QgsLayoutMeasurementConverter* mMeasurementConverter;
 
 };

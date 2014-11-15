@@ -16,11 +16,12 @@
 
 #include "qgslayout.h"
 #include "qgspagecollection.h"
+#include "qgslayoutmeasurementconverter.h"
 
 QgsLayout::QgsLayout()
     : QGraphicsScene()
     , mFlags( Antialiasing | UseAdvancedEffects )
-    , mUnits( QgsLayoutMeasurement::Millimeters )
+    , mUnits( QgsLayoutUnits::Millimeters )
     , mMeasurementConverter( 0 )
 {
   mMeasurementConverter = new QgsLayoutMeasurementConverter();
@@ -60,7 +61,7 @@ void QgsLayout::setName( const QString &name )
   mName = name;
 }
 
-void QgsLayout::setUnits( const QgsLayoutMeasurement::Units &units )
+void QgsLayout::setUnits( const QgsLayoutUnits::Units &units )
 {
   mUnits = units;
 }
@@ -100,17 +101,17 @@ QSizeF QgsLayout::convertToLayoutUnits( const QgsLayoutSize &size ) const
   return mMeasurementConverter->convert( size, mUnits ).toQSizeF();
 }
 
-QgsLayoutMeasurement QgsLayout::convertFromLayoutUnits( const double length, const QgsLayoutMeasurement::Units units ) const
+QgsLayoutMeasurement QgsLayout::convertFromLayoutUnits( const double length, const QgsLayoutUnits::Units units ) const
 {
   return mMeasurementConverter->convert( QgsLayoutMeasurement( length, mUnits ), units );
 }
 
-QgsLayoutSize QgsLayout::convertFromLayoutUnits( const QSizeF &size, const QgsLayoutMeasurement::Units units ) const
+QgsLayoutSize QgsLayout::convertFromLayoutUnits( const QSizeF &size, const QgsLayoutUnits::Units units ) const
 {
   return mMeasurementConverter->convert( QgsLayoutSize( size.width(), size.height(), mUnits ), units );
 }
 
-QgsLayoutPoint QgsLayout::convertFromLayoutUnits( const QPointF &point, const QgsLayoutMeasurement::Units units ) const
+QgsLayoutPoint QgsLayout::convertFromLayoutUnits( const QPointF &point, const QgsLayoutUnits::Units units ) const
 {
   return mMeasurementConverter->convert( QgsLayoutPoint( point.x(), point.y(), mUnits ), units );
 }
