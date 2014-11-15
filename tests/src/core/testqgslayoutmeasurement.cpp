@@ -37,6 +37,7 @@ class TestQgsLayoutMeasurement : public QObject
     void equality(); //test measurement equality
     void assignment(); //test measurement assignment
     void operators(); //test measurement operators
+    void unitTypes(); //test unit types
 
     //QgsLayoutSize
     void createSize(); //test creating new layout size
@@ -45,7 +46,18 @@ class TestQgsLayoutMeasurement : public QObject
     void sizeEquality(); //test size equality
     void sizeAssignment(); //test size assignment
     void sizeOperators(); //test size operators
+    void isEmpty(); //test isEmpty method
     void toQSizeF(); //test conversion to QSizeF
+
+    //QgsLayoutPoint
+    void createPoint(); //test creating new layout point
+    void pointGettersSetters(); //test getting/setting properties
+    void pointCopyConstructor(); //test copy constructor
+    void pointEquality(); //test point equality
+    void pointAssignment(); //test point assignment
+    void pointOperators(); //test point operators
+    void isNull(); //test isEmpty method
+    void toQPointF(); //test conversion to QPointF
 
     void converterCreate(); //test creating new converter
     void converterCopy(); //test creating new converter using copy constructor
@@ -60,6 +72,7 @@ class TestQgsLayoutMeasurement : public QObject
     void conversionFromPixels(); //test conversion from pixels and handling of dpi
     void conversionToPixels(); //test conversion to pixels and handling of dpi
     void sizeConversion(); //test conversion of QgsLayoutSizes
+    void pointConversion(); //test conversion of QgsLayoutPoint
 
   private:
 
@@ -188,6 +201,12 @@ void TestQgsLayoutMeasurement::operators()
   QCOMPARE( m9.length(), 3.0 );
 }
 
+void TestQgsLayoutMeasurement::unitTypes()
+{
+  QCOMPARE( QgsLayoutMeasurement::unitType( QgsLayoutMeasurement::Centimeters ), QgsLayoutMeasurement::Paper );
+  QCOMPARE( QgsLayoutMeasurement::unitType( QgsLayoutMeasurement::Pixels ), QgsLayoutMeasurement::Screen );
+}
+
 void TestQgsLayoutMeasurement::createSize()
 {
   QgsLayoutSize defaultUnits( 5.0, 6.0 );
@@ -201,6 +220,12 @@ void TestQgsLayoutMeasurement::createSize()
   QCOMPARE( inches.units(), QgsLayoutMeasurement::Inches );
   QCOMPARE( inches.width(), 7.0 );
   QCOMPARE( inches.height(), 8.0 );
+
+  //test empty constructor
+  QgsLayoutSize empty( QgsLayoutMeasurement::Pixels );
+  QCOMPARE( empty.units(), QgsLayoutMeasurement::Pixels );
+  QCOMPARE( empty.width(), 0.0 );
+  QCOMPARE( empty.height(), 0.0 );
 }
 
 void TestQgsLayoutMeasurement::sizeGettersSetters()
@@ -287,12 +312,145 @@ void TestQgsLayoutMeasurement::sizeOperators()
   QCOMPARE( s5.height(), 6.0 );
 }
 
+void TestQgsLayoutMeasurement::isEmpty()
+{
+  QgsLayoutSize size( 6.0, 12.0, QgsLayoutMeasurement::Inches );
+  QVERIFY( !size.isEmpty() );
+  size.setSize( 0, 0 );
+  QVERIFY( size.isEmpty() );
+  QgsLayoutSize size2( QgsLayoutMeasurement::Millimeters ); //test empty constructor
+  QVERIFY( size2.isEmpty() );
+}
+
 void TestQgsLayoutMeasurement::toQSizeF()
 {
   QgsLayoutSize size( 6.0, 12.0, QgsLayoutMeasurement::Inches );
   QSizeF converted = size.toQSizeF();
   QCOMPARE( converted.width(), size.width() );
   QCOMPARE( converted.height(), size.height() );
+}
+
+void TestQgsLayoutMeasurement::createPoint()
+{
+  QgsLayoutPoint defaultUnits( 5.0, 6.0 );
+  //default units should be millimetres
+  QCOMPARE( defaultUnits.units(), QgsLayoutMeasurement::Millimeters );
+  QCOMPARE( defaultUnits.x(), 5.0 );
+  QCOMPARE( defaultUnits.y(), 6.0 );
+
+  //test overriding default unit
+  QgsLayoutPoint inches( 7.0, 8.0, QgsLayoutMeasurement::Inches );
+  QCOMPARE( inches.units(), QgsLayoutMeasurement::Inches );
+  QCOMPARE( inches.x(), 7.0 );
+  QCOMPARE( inches.y(), 8.0 );
+
+  //test empty constructor
+  QgsLayoutPoint empty( QgsLayoutMeasurement::Pixels );
+  QCOMPARE( empty.units(), QgsLayoutMeasurement::Pixels );
+  QCOMPARE( empty.x(), 0.0 );
+  QCOMPARE( empty.y(), 0.0 );
+}
+
+void TestQgsLayoutMeasurement::pointGettersSetters()
+{
+  QgsLayoutPoint point( 5.0, 6.0, QgsLayoutMeasurement::Picas );
+
+  point.setX( 9.0 );
+  point.setY( 10.0 );
+  QCOMPARE( point.x(), 9.0 );
+  QCOMPARE( point.y(), 10.0 );
+  QCOMPARE( point.units(), QgsLayoutMeasurement::Picas );
+
+  point.setUnits( QgsLayoutMeasurement::Inches );
+  QCOMPARE( point.x(), 9.0 );
+  QCOMPARE( point.y(), 10.0 );
+  QCOMPARE( point.units(), QgsLayoutMeasurement::Inches );
+
+  point.setPoint( 11.0, 12.0 );
+  QCOMPARE( point.x(), 11.0 );
+  QCOMPARE( point.y(), 12.0 );
+  QCOMPARE( point.units(), QgsLayoutMeasurement::Inches );
+}
+
+void TestQgsLayoutMeasurement::pointCopyConstructor()
+{
+  QgsLayoutPoint source( 6.0, 7.0, QgsLayoutMeasurement::Inches );
+  QgsLayoutPoint dest( source );
+  QCOMPARE( source, dest );
+}
+
+void TestQgsLayoutMeasurement::pointEquality()
+{
+  QgsLayoutPoint p1( 6.0, 7.0, QgsLayoutMeasurement::Inches );
+  QgsLayoutPoint p2( 6.0, 7.0, QgsLayoutMeasurement::Inches );
+  QgsLayoutPoint p3( 7.0, 8.0, QgsLayoutMeasurement::Inches );
+  QgsLayoutPoint p4( 6.0, 7.0, QgsLayoutMeasurement::Points );
+
+  QVERIFY( p1 == p2 );
+  QVERIFY( !( p1 == p3 ) );
+  QVERIFY( !( p1 == p4 ) );
+  QVERIFY( !( p3 == p4 ) );
+  QVERIFY( !( p1 != p2 ) );
+  QVERIFY( p1 != p3 );
+  QVERIFY( p1 != p4 );
+  QVERIFY( p3 != p4 );
+}
+
+void TestQgsLayoutMeasurement::pointAssignment()
+{
+  QgsLayoutPoint p1( 6.0, 7.0, QgsLayoutMeasurement::Inches );
+  QgsLayoutPoint p2( 9.0, 10.0, QgsLayoutMeasurement::Points );
+  p2 = p1;
+  QCOMPARE( p2, p1 );
+}
+
+void TestQgsLayoutMeasurement::pointOperators()
+{
+  QgsLayoutPoint p1( 6.0, 12.0, QgsLayoutMeasurement::Inches );
+
+  // *
+  QgsLayoutPoint p2 = p1 * 3.0;
+  QCOMPARE( p2.units(), p1.units() );
+  QCOMPARE( p2.x(), 18.0 );
+  QCOMPARE( p2.y(), 36.0 );
+
+  // *=
+  QgsLayoutPoint p3( 6.0, 12.0, QgsLayoutMeasurement::Inches );
+  p3 *= 2.0;
+  QCOMPARE( p3.units(), QgsLayoutMeasurement::Inches );
+  QCOMPARE( p3.x(), 12.0 );
+  QCOMPARE( p3.y(), 24.0 );
+
+  // /
+  QgsLayoutPoint p4 = p1 / 3.0;
+  QCOMPARE( p4.units(), p1.units() );
+  QCOMPARE( p4.x(), 2.0 );
+  QCOMPARE( p4.y(), 4.0 );
+
+  // /=
+  QgsLayoutPoint p5( 6.0, 12.0, QgsLayoutMeasurement::Inches );
+  p5 /= 2.0;
+  QCOMPARE( p5.units(), QgsLayoutMeasurement::Inches );
+  QCOMPARE( p5.x(), 3.0 );
+  QCOMPARE( p5.y(), 6.0 );
+}
+
+void TestQgsLayoutMeasurement::isNull()
+{
+  QgsLayoutPoint point( 6.0, 12.0, QgsLayoutMeasurement::Inches );
+  QVERIFY( !point.isNull() );
+  point.setPoint( 0, 0 );
+  QVERIFY( point.isNull() );
+  QgsLayoutPoint point2( QgsLayoutMeasurement::Millimeters ); //test empty constructor
+  QVERIFY( point2.isNull() );
+}
+
+void TestQgsLayoutMeasurement::toQPointF()
+{
+  QgsLayoutPoint point( 6.0, 12.0, QgsLayoutMeasurement::Inches );
+  QPointF converted = point.toQPointF();
+  QCOMPARE( converted.x(), point.x() );
+  QCOMPARE( converted.y(), point.y() );
 }
 
 void TestQgsLayoutMeasurement::converterCreate()
@@ -637,6 +795,28 @@ void TestQgsLayoutMeasurement::sizeConversion()
   QgsLayoutSize convertedToInches = converter.convert( QgsLayoutSize( 96, 192, QgsLayoutMeasurement::Pixels ), QgsLayoutMeasurement::Inches );
   QCOMPARE( convertedToInches.width(), 1.0 );
   QCOMPARE( convertedToInches.height(), 2.0 );
+  QCOMPARE( convertedToInches.units(), QgsLayoutMeasurement::Inches );
+}
+
+void TestQgsLayoutMeasurement::pointConversion()
+{
+  QgsLayoutPoint pointInMM( 1.0, 2.0, QgsLayoutMeasurement::Millimeters );
+  QgsLayoutMeasurementConverter converter;
+
+  //test conversion to same units
+  QgsLayoutPoint convertedPoint = converter.convert( pointInMM, QgsLayoutMeasurement::Millimeters );
+  QCOMPARE( convertedPoint, pointInMM );
+
+  //convert to other units
+  convertedPoint = converter.convert( pointInMM, QgsLayoutMeasurement::Centimeters );
+  QgsLayoutPoint expectedPoint( 0.1, 0.2, QgsLayoutMeasurement::Centimeters );
+  QCOMPARE( convertedPoint, expectedPoint );
+
+  //pixel conversion
+  converter.setDpi( 96.0 );
+  QgsLayoutPoint convertedToInches = converter.convert( QgsLayoutPoint( 96, 192, QgsLayoutMeasurement::Pixels ), QgsLayoutMeasurement::Inches );
+  QCOMPARE( convertedToInches.x(), 1.0 );
+  QCOMPARE( convertedToInches.y(), 2.0 );
   QCOMPARE( convertedToInches.units(), QgsLayoutMeasurement::Inches );
 }
 

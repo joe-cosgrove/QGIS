@@ -37,6 +37,11 @@ class TestQgsLayoutItem: public QObject
     void preparePainter();
     void debugRect();
     void draw();
+    void resize();
+    void referencePoint();
+    void fixedSize();
+    void minSize();
+    void move();
 
   private:
 
@@ -61,6 +66,53 @@ class TestQgsLayoutItem: public QObject
           painter->drawRect( rect() );
           painter->restore();
         }
+    };
+
+    //item with minimum size
+    class MinSizedItem : public TestItem
+    {
+      public:
+        MinSizedItem( QgsLayout* layout ) : TestItem( layout )
+        {
+          setMinimumSize( QgsLayoutSize( 5.0, 10.0, QgsLayoutMeasurement::Centimeters ) );
+        }
+
+        void updateMinSize( QgsLayoutSize size )
+        {
+          setMinimumSize( size );
+        }
+
+        ~MinSizedItem() {}
+    };
+
+    //item with fixed size
+    class FixedSizedItem : public TestItem
+    {
+      public:
+
+        FixedSizedItem( QgsLayout* layout ) : TestItem( layout )
+        {
+          setFixedSize( QgsLayoutSize( 2.0, 4.0, QgsLayoutMeasurement::Inches ) );
+        }
+
+        void updateFixedSize( QgsLayoutSize size )
+        {
+          setFixedSize( size );
+        }
+        ~FixedSizedItem() {}
+    };
+
+    //item with both conflicting fixed and minimum size
+    class FixedMinSizedItem : public TestItem
+    {
+      public:
+
+        FixedMinSizedItem( QgsLayout* layout ) : TestItem( layout )
+        {
+          setFixedSize( QgsLayoutSize( 2.0, 4.0, QgsLayoutMeasurement::Centimeters ) );
+          setMinimumSize( QgsLayoutSize( 5.0, 9.0, QgsLayoutMeasurement::Centimeters ) );
+        }
+        ~FixedMinSizedItem() {}
     };
 
     QgsLayout* mLayout;
@@ -182,6 +234,213 @@ void TestQgsLayoutItem::draw()
 
   bool result = renderCheck( "layoutitem_draw", image, 0 );
   QVERIFY( result );
+}
+
+void TestQgsLayoutItem::resize()
+{
+  //resize test item (no restrictions), same units as layout
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+  TestItem* item = new TestItem( mLayout );
+  item->setRect( 0, 0, 55, 45 );
+  item->setPos( 27, 29 );
+  item->attemptResize( QgsLayoutSize( 100.0, 200.0, QgsLayoutMeasurement::Millimeters ) );
+  QCOMPARE( item->rect().width(), 100.0 );
+  QCOMPARE( item->rect().height(), 200.0 );
+  QCOMPARE( item->pos().x(), 27.0 ); //item should not move
+  QCOMPARE( item->pos().y(), 29.0 );
+
+  //test conversion of units
+  mLayout->setUnits( QgsLayoutMeasurement::Centimeters );
+  item->setRect( 0, 0, 100, 200 );
+  item->attemptResize( QgsLayoutSize( 0.30, 0.45, QgsLayoutMeasurement::Meters ) );
+  QCOMPARE( item->rect().width(), 30.0 );
+  QCOMPARE( item->rect().height(), 45.0 );
+
+  //test pixel -> page conversion
+  mLayout->setUnits( QgsLayoutMeasurement::Inches );
+  mLayout->setDpi( 100.0 );
+  item->setRect( 0, 0, 1, 2 );
+  item->attemptResize( QgsLayoutSize( 140, 280, QgsLayoutMeasurement::Pixels ) );
+  QCOMPARE( item->rect().width(), 1.4 );
+  QCOMPARE( item->rect().height(), 2.8 );
+  //changing the dpi should resize the item
+  mLayout->setDpi( 200.0 );
+  QCOMPARE( item->rect().width(), 0.7 );
+  QCOMPARE( item->rect().height(), 1.4 );
+
+  //test page -> pixel conversion
+  mLayout->setUnits( QgsLayoutMeasurement::Pixels );
+  mLayout->setDpi( 100.0 );
+  item->setRect( 0, 0, 2, 2 );
+  item->attemptResize( QgsLayoutSize( 1, 3, QgsLayoutMeasurement::Inches ) );
+  QCOMPARE( item->rect().width(), 100.0 );
+  QCOMPARE( item->rect().height(), 300.0 );
+  //changing dpi results in item resize
+  mLayout->setDpi( 200.0 );
+  QCOMPARE( item->rect().width(), 200.0 );
+  QCOMPARE( item->rect().height(), 600.0 );
+
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+}
+
+void TestQgsLayoutItem::referencePoint()
+{
+  //test setting/getting reference point
+  TestItem* item = new TestItem( mLayout );
+  item->setReferencePoint( QgsLayoutItem::LowerMiddle );
+  QCOMPARE( item->referencePoint(), QgsLayoutItem::LowerMiddle );
+
+  //test that setting item position is done relative to reference point
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+  item->attemptResize( QgsLayoutSize( 2, 4 ) );
+  item->setReferencePoint( QgsLayoutItem::UpperLeft );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), 1.0 );
+  QCOMPARE( item->pos().y(), 2.0 );
+  item->setReferencePoint( QgsLayoutItem::UpperMiddle );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), 0.0 );
+  QCOMPARE( item->pos().y(), 2.0 );
+  item->setReferencePoint( QgsLayoutItem::UpperRight );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), -1.0 );
+  QCOMPARE( item->pos().y(), 2.0 );
+  item->setReferencePoint( QgsLayoutItem::MiddleLeft );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), 1.0 );
+  QCOMPARE( item->pos().y(), 0.0 );
+  item->setReferencePoint( QgsLayoutItem::Middle );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), 0.0 );
+  QCOMPARE( item->pos().y(), 0.0 );
+  item->setReferencePoint( QgsLayoutItem::MiddleRight );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), -1.0 );
+  QCOMPARE( item->pos().y(), 0.0 );
+  item->setReferencePoint( QgsLayoutItem::LowerLeft );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), 1.0 );
+  QCOMPARE( item->pos().y(), -2.0 );
+  item->setReferencePoint( QgsLayoutItem::LowerMiddle );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), 0.0 );
+  QCOMPARE( item->pos().y(), -2.0 );
+  item->setReferencePoint( QgsLayoutItem::LowerRight );
+  item->attemptMove( QgsLayoutPoint( 1, 2 ) );
+  QCOMPARE( item->pos().x(), -1.0 );
+  QCOMPARE( item->pos().y(), -2.0 );
+
+  //test that resizing is done relative to reference point
+
+}
+
+void TestQgsLayoutItem::fixedSize()
+{
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+  FixedSizedItem* item = new FixedSizedItem( mLayout );
+  QCOMPARE( item->fixedSize().width(), 2.0 );
+  QCOMPARE( item->fixedSize().height(), 4.0 );
+  QCOMPARE( item->fixedSize().units(), QgsLayoutMeasurement::Inches );
+
+  item->setRect( 0, 0, 5.0, 6.0 ); //temporarily set rect to random size
+  item->attemptResize( QgsLayoutSize( 7.0, 8.0, QgsLayoutMeasurement::Points ) );
+  //check size matches fixed item size converted to mm
+  QVERIFY( qgsDoubleNear( item->rect().width(), 2.0 * 25.4 ) );
+  QVERIFY( qgsDoubleNear( item->rect().height(), 4.0 * 25.4 ) );
+
+  //check that setting a fixed size applies this size immediately
+  item->updateFixedSize( QgsLayoutSize( 150, 250, QgsLayoutMeasurement::Millimeters ) );
+  QVERIFY( qgsDoubleNear( item->rect().width(), 150.0 ) );
+  QVERIFY( qgsDoubleNear( item->rect().height(), 250.0 ) );
+}
+
+void TestQgsLayoutItem::minSize()
+{
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+  MinSizedItem* item = new MinSizedItem( mLayout );
+  QCOMPARE( item->minimumSize().width(), 5.0 );
+  QCOMPARE( item->minimumSize().height(), 10.0 );
+  QCOMPARE( item->minimumSize().units(), QgsLayoutMeasurement::Centimeters );
+
+  item->setRect( 0, 0, 9.0, 6.0 ); //temporarily set rect to random size
+  //try to resize to less than minimum size
+  item->attemptResize( QgsLayoutSize( 1.0, 0.5, QgsLayoutMeasurement::Points ) );
+  //check size matches min item size converted to mm
+  QVERIFY( qgsDoubleNear( item->rect().width(), 50.0 ) );
+  QVERIFY( qgsDoubleNear( item->rect().height(), 100.0 ) );
+
+  //check that resize to larger than min size works
+  item->attemptResize( QgsLayoutSize( 0.1, 0.2, QgsLayoutMeasurement::Meters ) );
+  QVERIFY( qgsDoubleNear( item->rect().width(), 100.0 ) );
+  QVERIFY( qgsDoubleNear( item->rect().height(), 200.0 ) );
+
+  //check that setting a minimum size applies this size immediately
+  item->updateMinSize( QgsLayoutSize( 150, 250, QgsLayoutMeasurement::Millimeters ) );
+  QVERIFY( qgsDoubleNear( item->rect().width(), 150.0 ) );
+  QVERIFY( qgsDoubleNear( item->rect().height(), 250.0 ) );
+
+  //also need check that fixed size trumps min size
+  FixedMinSizedItem* fixedMinItem = new FixedMinSizedItem( mLayout );
+  QCOMPARE( fixedMinItem->minimumSize().width(), 5.0 );
+  QCOMPARE( fixedMinItem->minimumSize().height(), 9.0 );
+  QCOMPARE( fixedMinItem->minimumSize().units(), QgsLayoutMeasurement::Centimeters );
+  QCOMPARE( fixedMinItem->fixedSize().width(), 2.0 );
+  QCOMPARE( fixedMinItem->fixedSize().height(), 4.0 );
+  QCOMPARE( fixedMinItem->fixedSize().units(), QgsLayoutMeasurement::Centimeters );
+  //try to resize to less than minimum size
+  fixedMinItem->attemptResize( QgsLayoutSize( 1.0, 0.5, QgsLayoutMeasurement::Points ) );
+  //check size matches fixed item size, not minimum size (converted to mm)
+  QVERIFY( qgsDoubleNear( fixedMinItem->rect().width(), 50.0 ) );
+  QVERIFY( qgsDoubleNear( fixedMinItem->rect().height(), 90.0 ) );
+}
+
+void TestQgsLayoutItem::move()
+{
+  //move test item, same units as layout
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+  TestItem* item = new TestItem( mLayout );
+  item->setRect( 0, 0, 55, 45 );
+  item->setPos( 27, 29 );
+  item->attemptMove( QgsLayoutPoint( 60.0, 15.0, QgsLayoutMeasurement::Millimeters ) );
+  QCOMPARE( item->rect().width(), 55.0 ); //size should not change
+  QCOMPARE( item->rect().height(), 45.0 );
+  QCOMPARE( item->pos().x(), 60.0 );
+  QCOMPARE( item->pos().y(), 15.0 );
+
+  //test conversion of units
+  mLayout->setUnits( QgsLayoutMeasurement::Centimeters );
+  item->setPos( 100, 200 );
+  item->attemptMove( QgsLayoutPoint( 0.30, 0.45, QgsLayoutMeasurement::Meters ) );
+  QCOMPARE( item->pos().x(), 30.0 );
+  QCOMPARE( item->pos().y(), 45.0 );
+
+  //test pixel -> page conversion
+  mLayout->setUnits( QgsLayoutMeasurement::Inches );
+  mLayout->setDpi( 100.0 );
+  item->setPos( 1, 2 );
+  item->attemptMove( QgsLayoutPoint( 140, 280, QgsLayoutMeasurement::Pixels ) );
+  QCOMPARE( item->pos().x(), 1.4 );
+  QCOMPARE( item->pos().y(), 2.8 );
+  //changing the dpi should move the item
+  mLayout->setDpi( 200.0 );
+  QCOMPARE( item->pos().x(), 0.7 );
+  QCOMPARE( item->pos().y(), 1.4 );
+
+  //test page -> pixel conversion
+  mLayout->setUnits( QgsLayoutMeasurement::Pixels );
+  mLayout->setDpi( 100.0 );
+  item->setPos( 2, 2 );
+  item->attemptMove( QgsLayoutPoint( 1, 3, QgsLayoutMeasurement::Inches ) );
+  QCOMPARE( item->pos().x(), 100.0 );
+  QCOMPARE( item->pos().y(), 300.0 );
+  //changing dpi results in item move
+  mLayout->setDpi( 200.0 );
+  QCOMPARE( item->pos().x(), 200.0 );
+  QCOMPARE( item->pos().y(), 600.0 );
+
+  mLayout->setUnits( QgsLayoutMeasurement::Millimeters );
+
+  //TODO - reference points
 }
 
 bool TestQgsLayoutItem::renderCheck( QString testName, QImage &image, int mismatchCount )

@@ -16,6 +16,7 @@
  ***************************************************************************/
 
 #include "qgslayoutmeasurement.h"
+#include "qgis.h"
 
 //
 // QgsLayoutMeasurement
@@ -27,14 +28,26 @@ QgsLayoutMeasurement::QgsLayoutMeasurement( const double length, const QgsLayout
 {
 }
 
-QgsLayoutMeasurement::QgsLayoutMeasurement( const QgsLayoutMeasurement &other )
-    : mLength( other.length() )
-    , mUnits( other.units() )
+QgsLayoutMeasurement::~QgsLayoutMeasurement()
 {
 }
 
-QgsLayoutMeasurement::~QgsLayoutMeasurement()
+QgsLayoutMeasurement::UnitType QgsLayoutMeasurement::unitType( const QgsLayoutMeasurement::Units units )
 {
+  switch ( units )
+  {
+    case Pixels:
+      return QgsLayoutMeasurement::Screen;
+    case  Millimeters:
+    case Centimeters:
+    case Meters:
+    case Inches:
+    case Feet:
+    case Points:
+    case Picas:
+    default:
+      return QgsLayoutMeasurement::Paper;
+  }
 }
 
 bool QgsLayoutMeasurement::operator==( const QgsLayoutMeasurement &other ) const
@@ -45,16 +58,6 @@ bool QgsLayoutMeasurement::operator==( const QgsLayoutMeasurement &other ) const
 bool QgsLayoutMeasurement::operator!=( const QgsLayoutMeasurement &other ) const
 {
   return ( ! operator==( other ) );
-}
-
-QgsLayoutMeasurement &QgsLayoutMeasurement::operator=( const QgsLayoutMeasurement & other )
-{
-  if ( &other != this )
-  {
-    mUnits = other.units();
-    mLength = other.length();
-  }
-  return *this;
 }
 
 QgsLayoutMeasurement QgsLayoutMeasurement::operator+( const double v ) const
@@ -113,15 +116,21 @@ QgsLayoutSize::QgsLayoutSize( const double width, const double height, const Qgs
 {
 }
 
-QgsLayoutSize::QgsLayoutSize( const QgsLayoutSize &other )
-    : mWidth( other.width() )
-    , mHeight( other.height() )
-    , mUnits( other.units() )
+QgsLayoutSize::QgsLayoutSize( const QgsLayoutMeasurement::Units units )
+    : mWidth( 0.0 )
+    , mHeight( 0.0 )
+    , mUnits( units )
 {
+
 }
 
 QgsLayoutSize::~QgsLayoutSize()
 {
+}
+
+bool QgsLayoutSize::isEmpty() const
+{
+  return qgsDoubleNear( mWidth, 0 ) && qgsDoubleNear( mHeight, 0 );
 }
 
 QSizeF QgsLayoutSize::toQSizeF() const
@@ -137,17 +146,6 @@ bool QgsLayoutSize::operator==( const QgsLayoutSize &other ) const
 bool QgsLayoutSize::operator!=( const QgsLayoutSize &other ) const
 {
   return ( ! operator==( other ) );
-}
-
-QgsLayoutSize &QgsLayoutSize::operator=( const QgsLayoutSize & other )
-{
-  if ( &other != this )
-  {
-    mUnits = other.units();
-    mWidth = other.width();
-    mHeight = other.height();
-  }
-  return *this;
 }
 
 QgsLayoutSize QgsLayoutSize::operator*( const double v ) const
@@ -174,16 +172,79 @@ QgsLayoutSize QgsLayoutSize::operator/=( const double v )
 
 
 //
+// QgsLayoutPoint
+//
+
+QgsLayoutPoint::QgsLayoutPoint( const double x, const double y, const QgsLayoutMeasurement::Units units )
+    : mX( x )
+    , mY( y )
+    , mUnits( units )
+{
+
+}
+
+QgsLayoutPoint::QgsLayoutPoint( const QgsLayoutMeasurement::Units units )
+    : mX( 0.0 )
+    , mY( 0.0 )
+    , mUnits( units )
+{
+
+}
+
+QgsLayoutPoint::~QgsLayoutPoint()
+{
+
+}
+
+bool QgsLayoutPoint::isNull() const
+{
+  return qgsDoubleNear( mX, 0 ) && qgsDoubleNear( mY, 0 );
+}
+
+QPointF QgsLayoutPoint::toQPointF() const
+{
+  return QPointF( mX, mY );
+}
+
+bool QgsLayoutPoint::operator==( const QgsLayoutPoint &other ) const
+{
+  return other.units() == mUnits && other.x() == mX && other.y() == mY;
+}
+
+bool QgsLayoutPoint::operator!=( const QgsLayoutPoint &other ) const
+{
+  return ( ! operator==( other ) );
+}
+
+QgsLayoutPoint QgsLayoutPoint::operator*( const double v ) const
+{
+  return QgsLayoutPoint( mX * v, mY * v, mUnits );
+}
+
+QgsLayoutPoint QgsLayoutPoint::operator*=( const double v )
+{
+  *this = *this * v;
+  return *this;
+}
+
+QgsLayoutPoint QgsLayoutPoint::operator/( const double v ) const
+{
+  return QgsLayoutPoint( mX / v, mY / v, mUnits );
+}
+
+QgsLayoutPoint QgsLayoutPoint::operator/=( const double v )
+{
+  *this = *this / v;
+  return *this;
+}
+
+
+//
 // QgsLayoutMeasurementConvertor
 //
 
 QgsLayoutMeasurementConverter::QgsLayoutMeasurementConverter()
     : mDpi( 300.0 )
-{
-}
-
-QgsLayoutMeasurementConverter::QgsLayoutMeasurementConverter( const QgsLayoutMeasurementConverter &other )
-    : mDpi( other.dpi() )
 {
 }
 
@@ -219,7 +280,7 @@ QgsLayoutMeasurement QgsLayoutMeasurementConverter::convert( const QgsLayoutMeas
   }
 
   //will never be reached, but required to prevent warnings
-  return convertToMillimeters( measurement );
+  return QgsLayoutMeasurement( convertToMillimeters( measurement ), QgsLayoutMeasurement::Millimeters );
 }
 
 QgsLayoutSize QgsLayoutMeasurementConverter::convert( const QgsLayoutSize &size, const QgsLayoutMeasurement::Units targetUnits ) const
@@ -258,6 +319,47 @@ QgsLayoutSize QgsLayoutMeasurementConverter::convert( const QgsLayoutSize &size,
       break;
     case QgsLayoutMeasurement::Pixels:
       result.setSize( convertToPixels( width ), convertToPixels( height ) );
+      break;
+  }
+  return result;
+}
+
+QgsLayoutPoint QgsLayoutMeasurementConverter::convert( const QgsLayoutPoint &point, const QgsLayoutMeasurement::Units targetUnits ) const
+{
+  if ( point.units() == targetUnits )
+  {
+    return point;
+  }
+
+  QgsLayoutPoint result( point );
+  result.setUnits( targetUnits );
+  QgsLayoutMeasurement x = QgsLayoutMeasurement( point.x(), point.units() );
+  QgsLayoutMeasurement y = QgsLayoutMeasurement( point.y(), point.units() );
+  switch ( targetUnits )
+  {
+    case QgsLayoutMeasurement::Millimeters:
+      result.setPoint( convertToMillimeters( x ), convertToMillimeters( y ) );
+      break;
+    case QgsLayoutMeasurement::Centimeters:
+      result.setPoint( convertToCentimeters( x ), convertToCentimeters( y ) );
+      break;
+    case QgsLayoutMeasurement::Meters:
+      result.setPoint( convertToMeters( x ), convertToMeters( y ) );
+      break;
+    case QgsLayoutMeasurement::Inches:
+      result.setPoint( convertToInches( x ), convertToInches( y ) );
+      break;
+    case QgsLayoutMeasurement::Feet:
+      result.setPoint( convertToFeet( x ), convertToFeet( y ) );
+      break;
+    case QgsLayoutMeasurement::Points:
+      result.setPoint( convertToPoints( x ), convertToPoints( y ) );
+      break;
+    case QgsLayoutMeasurement::Picas:
+      result.setPoint( convertToPicas( x ), convertToPicas( y ) );
+      break;
+    case QgsLayoutMeasurement::Pixels:
+      result.setPoint( convertToPixels( x ), convertToPixels( y ) );
       break;
   }
   return result;

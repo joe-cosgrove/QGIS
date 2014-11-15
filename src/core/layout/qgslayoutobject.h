@@ -86,7 +86,7 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * classes which are derived from QgsLayoutObject (such as QgsLayoutItem)
      * may transfer their ownership to a layout upon construction.
      */
-    QgsLayoutObject( QgsLayout* layout );
+    explicit QgsLayoutObject( QgsLayout* layout );
     virtual ~QgsLayoutObject();
 
     /**Returns the layout the item is attached to.

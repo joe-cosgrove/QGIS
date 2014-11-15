@@ -431,6 +431,7 @@ SET(QGIS_CORE_MOC_HDRS
   gps/qgsgpsdconnection.h
 
   layout/qgslayout.h
+  layout/qgslayoutitem.h
   layout/qgslayoutobject.h
 
   symbology-ng/qgscptcityarchive.h

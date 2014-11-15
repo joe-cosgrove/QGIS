@@ -72,6 +72,7 @@ void QgsLayout::setDpi( const double dpi )
     return;
   }
   mMeasurementConverter->setDpi( dpi );
+  emit dpiChanged( dpi );
 }
 
 double QgsLayout::dpi() const
@@ -89,9 +90,27 @@ double QgsLayout::convertToLayoutUnits( const QgsLayoutMeasurement &measurement 
   return mMeasurementConverter->convert( measurement, mUnits ).length();
 }
 
+QPointF QgsLayout::convertToLayoutUnits( const QgsLayoutPoint &point ) const
+{
+  return mMeasurementConverter->convert( point, mUnits ).toQPointF();
+}
+
 QSizeF QgsLayout::convertToLayoutUnits( const QgsLayoutSize &size ) const
 {
   return mMeasurementConverter->convert( size, mUnits ).toQSizeF();
 }
 
+QgsLayoutMeasurement QgsLayout::convertFromLayoutUnits( const double length, const QgsLayoutMeasurement::Units units ) const
+{
+  return mMeasurementConverter->convert( QgsLayoutMeasurement( length, mUnits ), units );
+}
 
+QgsLayoutSize QgsLayout::convertFromLayoutUnits( const QSizeF &size, const QgsLayoutMeasurement::Units units ) const
+{
+  return mMeasurementConverter->convert( QgsLayoutSize( size.width(), size.height(), mUnits ), units );
+}
+
+QgsLayoutPoint QgsLayout::convertFromLayoutUnits( const QPointF &point, const QgsLayoutMeasurement::Units units ) const
+{
+  return mMeasurementConverter->convert( QgsLayoutPoint( point.x(), point.y(), mUnits ), units );
+}

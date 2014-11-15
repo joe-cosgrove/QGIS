@@ -18,6 +18,7 @@
 
 #include "qgslayoutobject.h"
 #include "qgslayoutitemregistry.h"
+#include "qgslayoutmeasurement.h"
 #include <QGraphicsRectItem>
 
 class QgsLayout;
@@ -31,9 +32,24 @@ class QPainter;
 class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectItem
 {
 
+    Q_OBJECT
+
   public:
 
-    QgsLayoutItem( QgsLayout* layout );
+    enum ReferencePoint
+    {
+      UpperLeft,
+      UpperMiddle,
+      UpperRight,
+      MiddleLeft,
+      Middle,
+      MiddleRight,
+      LowerLeft,
+      LowerMiddle,
+      LowerRight
+    };
+
+    explicit QgsLayoutItem( QgsLayout* layout );
 
     virtual ~QgsLayoutItem();
 
@@ -50,6 +66,60 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      */
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* itemStyle, QWidget* pWidget );
 
+    /**Sets the reference point for positioning of the layout item. This point is also
+     * fixed during resizing of the item, and any size changes will be performed
+     * so that the position of the reference point within the layout remains unchanged.
+     * @param reference reference point
+     * @see referencePoint
+    */
+    void setReferencePoint( const ReferencePoint& reference );
+
+    /**Returns the reference point for positioning of the layout item. This point is also
+     * fixed during resizing of the item, and any size changes will be performed
+     * so that the position of the reference point within the layout remains unchanged.
+     * @returns reference point
+     * @see setReferencePoint
+    */
+    ReferencePoint referencePoint() const { return mReferencePoint; }
+
+    /**Returns the fixed size of the item, if applicable.
+     * @returns fixed size for layout item, or an empty size is item can be freely
+     * resized
+     * @see setFixedSize
+     * @see minimumSize
+    */
+    QgsLayoutSize fixedSize() { return mFixedSize; }
+
+    /**Returns the minimum allowed size of the item, if applicable.
+     * @returns minimum allowed size for layout item, or an empty size is item can be freely
+     * resized
+     * @see setMinimumSize
+     * @see fixedSize
+    */
+    virtual QgsLayoutSize minimumSize() { return mMinimumSize; }
+
+    /**Attempts to resize the item to a specified size. Note that the final size of the
+     * item may not match the specified target size, as items with a fixed or minimum
+     * size will place restrictions on the allowed item size. Data defined item size
+     * will also override the specified target size.
+     * @param targetSize desired size for item
+     * @see minimumSize
+     * @see fixedSize
+     * @see attemptMove
+    */
+    virtual void attemptResize( const QgsLayoutSize& targetSize );
+
+    /**Attempts to move the item to a specified position. This method respects the item's
+     * reference point, in that the item will be moved so that its current reference
+     * point is placed at the specified target point.
+     * Note that the final position of the item may not match the specified target position,
+     * as data defined item position may override the specified value.
+     * @param targetPoint desired position for reference point of item
+     * @see attemptResize
+     * @see referencePoint
+    */
+    virtual void attemptMove( const QgsLayoutPoint& targetPoint );
+
   protected:
 
     /**Draws a debugging rectangle of the item's current bounds within the specified
@@ -58,13 +128,68 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      */
     virtual void drawDebugRect( QPainter* painter );
 
+    /**Sets a fixed size for the layout item, which prevents it from being freely
+     * resized.
+     * @param size fixed size for layout item, or an empty size is item can be freely
+     * resized
+     * @see fixedSize
+     * @see setMinimumSize
+    */
+    virtual void setFixedSize( const QgsLayoutSize& size );
+
+    /**Sets the minimum allowed size for the layout item.
+     * @param size minimum size for layout item, or an empty size is item can be freely
+     * resized
+     * @see minimumSize
+     * @see setFixedSize
+    */
+    virtual void setMinimumSize( const QgsLayoutSize& size );
+
+  protected:
+
+    /**Refreshes an item's size by rechecking it against any possible item fixed
+     * or minimum sizes.
+     * @see setFixedSize
+     * @see setMinimumSize
+     * @see refreshItemPosition
+     */
+    void refreshItemSize();
+
+    /**Refreshes an item's position by rechecking it against any possible overrides
+     * such as data defined positioning.
+     * @see refreshItemSize
+     */
+    void refreshItemPosition();
+
+    QPointF adjustPointForReferencePosition( const QPointF& position, const QSizeF& size );
+
+  private slots:
+
+    /**Updates an item's size after the layout's dpi changes. This is required
+     * when the item uses a screen based measurement unit and the layout uses a paper
+     * based unit, or vice versa.
+     * @param dpi new dpi for the layout
+    */
+    void layoutDpiChanged( const double dpi );
+
   private:
+
+    ReferencePoint mReferencePoint;
+    QgsLayoutSize mFixedSize;
+    QgsLayoutSize mMinimumSize;
+
+    QgsLayoutSize mItemSize;
+    QgsLayoutPoint mItemPosition;
+
+    void initConnectionsToLayout();
 
     /**Prepares a painter by setting rendering flags*/
     void preparePainter( QPainter* painter );
     bool shouldDrawAntialiased() const;
     bool shouldDrawDebugRect() const;
 
+    QSizeF applyMinimumSize( const QSizeF &targetSize );
+    QSizeF applyFixedSize( const QSizeF &targetSize );
 
     friend class TestQgsLayoutItem;
 };

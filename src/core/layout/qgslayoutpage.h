@@ -34,7 +34,7 @@ class CORE_EXPORT QgsLayoutPage : public QgsLayoutItem
       Landscape
     };
 
-    QgsLayoutPage( QgsLayout* layout );
+    explicit QgsLayoutPage( QgsLayout* layout );
 
     virtual ~QgsLayoutPage();
 

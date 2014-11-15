@@ -131,18 +131,63 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
     const QgsLayoutMeasurementConverter* measurementConverter() const;
 
     /**Converts a measurement into the layout's native units.
+     * @param measurement measurement to convert
      * @returns length of measurement in layout units
      * @see measurementConverter
+     * @see convertFromLayoutUnits
      * @see units
     */
     double convertToLayoutUnits( const QgsLayoutMeasurement& measurement ) const;
 
     /**Converts a size into the layout's native units.
+     * @param size size to convert
      * @returns size of measurement in layout units
      * @see measurementConverter
+     * @see convertFromLayoutUnits
      * @see units
     */
     QSizeF convertToLayoutUnits( const QgsLayoutSize& size ) const;
+
+    /**Converts a point into the layout's native units.
+     * @param point point to convert
+     * @returns point in layout units
+     * @see measurementConverter
+     * @see convertFromLayoutUnits
+     * @see units
+    */
+    QPointF convertToLayoutUnits( const QgsLayoutPoint& point ) const;
+
+    /**Converts a measurement from the layout's native units to a specified unit.
+     * @param length length in layout units to convert
+     * @param units target units
+     * @returns length of measurement in specified units
+     * @see measurementConverter
+     * @see convertToLayoutUnits
+     * @see units
+    */
+    QgsLayoutMeasurement convertFromLayoutUnits( const double length, const QgsLayoutMeasurement::Units units ) const;
+
+    /**Converts a size from the layout's native units to a specified unit.
+     * @param size size in layout units to convert
+     * @param units target units
+     * @returns size of measurement in specified units
+     * @see measurementConverter
+     * @see units
+    */
+    QgsLayoutSize convertFromLayoutUnits( const QSizeF& size, const QgsLayoutMeasurement::Units units ) const;
+
+    /**Converts a point from the layout's native units to a specified unit.
+     * @param point point in layout units to convert
+     * @param units target units
+     * @returns point in specified units
+     * @see measurementConverter
+     * @see units
+    */
+    QgsLayoutPoint convertFromLayoutUnits( const QPointF& point, const QgsLayoutMeasurement::Units units ) const;
+
+  signals:
+
+    void dpiChanged( const double dpi );
 
   private:
 
