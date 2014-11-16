@@ -121,6 +121,15 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
     */
     virtual void attemptMove( const QgsLayoutPoint& targetPoint );
 
+    /**Returns the item's current position, including units. The position returned
+     * is the position of the item's reference point, which may not necessarily be the top
+     * left corner of the item.
+     * @returns position of item's reference point within the layout
+     * @see attemptMove
+     * @see referencePoint
+     */
+    QgsLayoutPoint positionWithUnits() const { return mItemPosition; }
+
   protected:
 
     /**Draws a debugging rectangle of the item's current bounds within the specified
@@ -146,8 +155,6 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
     */
     virtual void setMinimumSize( const QgsLayoutSize& size );
 
-  protected:
-
     /**Refreshes an item's size by rechecking it against any possible item fixed
      * or minimum sizes.
      * @see setFixedSize
@@ -162,6 +169,12 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      */
     void refreshItemPosition();
 
+    /**Adjusts a point to account for the item's reference point.
+     * @param position position of reference point.
+     * @param size size of item
+     * @returns top left coordinate of item
+     * @see referencePoint
+     */
     QPointF adjustPointForReferencePosition( const QPointF& position, const QSizeF& size );
 
   private slots:
