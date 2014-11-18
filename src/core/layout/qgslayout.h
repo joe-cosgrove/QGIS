@@ -21,6 +21,7 @@
 #include "qgslayoutsize.h"
 #include "qgslayoutpoint.h"
 
+class QgsLayoutContext;
 class QgsLayoutMeasurementConverter;
 
 /**\ingroup Layout
@@ -34,17 +35,6 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
 
   public:
 
-    /**Flags for controlling how a layout is rendered
-     */
-    enum Flag
-    {
-      Debug       = 0x01,  /*< debug/testing mode, items are drawn as solid rectangles */
-      OutlineOnly    = 0x02, /*< render items as outlines only */
-      Antialiasing  = 0x04, /*< use antialiasing when drawing items  */
-      UseAdvancedEffects = 0x08 /*< enable advanced effects such as blend modes */
-    };
-    Q_DECLARE_FLAGS( Flags, Flag )
-
     QgsLayout();
 
     virtual ~QgsLayout();
@@ -55,34 +45,8 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
      * @see flags
      * @see testFlag
      */
-    void setFlags( const QgsLayout::Flags flags );
 
-    /**Enable or disable a particular rendering flag for the layout. Other existing
-     * flags are not affected.
-     * @param flag rendering flag to set
-     * @param on set to true to enable flag
-     * @see setFlags
-     * @see flags
-     * @see testFlag
-     */
-    void setFlag( const Flag flag, const bool on = true );
-
-    /**Returns the current combination of flags used for rendering the layout.
-     * @returns layout rendering flags
-     * @see setFlags
-     * @see setFlag
-     * @see testFlag
-     */
-    Flags flags() const;
-
-    /**Check whether a particular rendering flag is enabled for the layout.
-     * @param flag flag to test
-     * @returns true if flag is enabled
-     * @see setFlags
-     * @see setFlag
-     * @see flags
-     */
-    bool testFlag( const Flag flag ) const;
+    QgsLayoutContext* context() { return mContext; }
 
     /**Sets the name for the layout.
      * @param name new name
@@ -195,7 +159,7 @@ class CORE_EXPORT QgsLayout : public QGraphicsScene
 
   private:
 
-    Flags mFlags;
+    QgsLayoutContext* mContext;
 
     QString mName;
     QgsLayoutUnits::Units mUnits;

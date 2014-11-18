@@ -17,6 +17,7 @@
 
 #include "qgslayoutitem.h"
 #include "qgslayout.h"
+#include "qgslayoutcontext.h"
 #include "qgscompositionchecker.h"
 #include <QObject>
 #include <QtTest>
@@ -164,9 +165,9 @@ void TestQgsLayoutItem::creation()
 void TestQgsLayoutItem::shouldDrawDebug()
 {
   TestItem* item = new TestItem( mLayout );
-  mLayout->setFlag( QgsLayout::Debug, true );
+  mLayout->context()->setFlag( QgsLayoutContext::Debug, true );
   QVERIFY( item->shouldDrawDebugRect() );
-  mLayout->setFlag( QgsLayout::Debug, false );
+  mLayout->context()->setFlag( QgsLayoutContext::Debug, false );
   QVERIFY( !item->shouldDrawDebugRect() );
   delete item;
 }
@@ -174,9 +175,9 @@ void TestQgsLayoutItem::shouldDrawDebug()
 void TestQgsLayoutItem::shouldDrawAntialiased()
 {
   TestItem* item = new TestItem( mLayout );
-  mLayout->setFlag( QgsLayout::Antialiasing, false );
+  mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, false );
   QVERIFY( !item->shouldDrawAntialiased() );
-  mLayout->setFlag( QgsLayout::Antialiasing, true );
+  mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, true );
   QVERIFY( item->shouldDrawAntialiased() );
   delete item;
 }
@@ -191,10 +192,10 @@ void TestQgsLayoutItem::preparePainter()
   QImage image( QSize( 100, 100 ), QImage::Format_ARGB32 );
   QPainter painter;
   painter.begin( &image );
-  mLayout->setFlag( QgsLayout::Antialiasing, false );
+  mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, false );
   item->preparePainter( &painter );
   QVERIFY( !( painter.renderHints() & QPainter::Antialiasing ) );
-  mLayout->setFlag( QgsLayout::Antialiasing, true );
+  mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, true );
   item->preparePainter( &painter );
   QVERIFY( painter.renderHints() & QPainter::Antialiasing );
   delete item;
@@ -207,7 +208,7 @@ void TestQgsLayoutItem::debugRect()
   item->setPos( 100, 100 );
   item->setRect( 0, 0, 200, 200 );
   mLayout->setSceneRect( 0, 0, 400, 400 );
-  mLayout->setFlag( QgsLayout::Debug, true );
+  mLayout->context()->setFlag( QgsLayoutContext::Debug, true );
   QImage image( mLayout->sceneRect().size().toSize(), QImage::Format_ARGB32 );
   image.fill( 0 );
   QPainter painter( &image );
@@ -215,7 +216,7 @@ void TestQgsLayoutItem::debugRect()
   painter.end();
 
   bool result = renderCheck( "layoutitem_debugrect", image, 0 );
-  mLayout->setFlag( QgsLayout::Debug, false );
+  mLayout->context()->setFlag( QgsLayoutContext::Debug, false );
   QVERIFY( result );
 }
 
@@ -226,13 +227,13 @@ void TestQgsLayoutItem::draw()
   item->setPos( 100, 100 );
   item->setRect( 0, 0, 200, 200 );
   mLayout->setSceneRect( 0, 0, 400, 400 );
-  mLayout->setFlag( QgsLayout::Antialiasing, false ); //disable antialiasing to limit cross platform differences
+  mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, false ); //disable antialiasing to limit cross platform differences
   QImage image( mLayout->sceneRect().size().toSize(), QImage::Format_ARGB32 );
   image.fill( 0 );
   QPainter painter( &image );
   mLayout->render( &painter );
   painter.end();
-  mLayout->setFlag( QgsLayout::Antialiasing, true );
+  mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, true );
 
   bool result = renderCheck( "layoutitem_draw", image, 0 );
   QVERIFY( result );

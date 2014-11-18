@@ -15,15 +15,17 @@
  ***************************************************************************/
 
 #include "qgslayout.h"
+#include "qgslayoutcontext.h"
 #include "qgspagecollection.h"
 #include "qgslayoutmeasurementconverter.h"
 
 QgsLayout::QgsLayout()
     : QGraphicsScene()
-    , mFlags( Antialiasing | UseAdvancedEffects )
+    , mContext( 0 )
     , mUnits( QgsLayoutUnits::Millimeters )
     , mMeasurementConverter( 0 )
 {
+  mContext = new QgsLayoutContext();
   mMeasurementConverter = new QgsLayoutMeasurementConverter();
   mMeasurementConverter->setDpi( 300.0 );
 }
@@ -31,29 +33,7 @@ QgsLayout::QgsLayout()
 QgsLayout::~QgsLayout()
 {
   delete mMeasurementConverter;
-}
-
-void QgsLayout::setFlags( const Flags flags )
-{
-  mFlags = flags;
-}
-
-void QgsLayout::setFlag( const QgsLayout::Flag flag, const bool on )
-{
-  if ( on )
-    mFlags |= flag;
-  else
-    mFlags &= ~flag;
-}
-
-QgsLayout::Flags QgsLayout::flags() const
-{
-  return mFlags;
-}
-
-bool QgsLayout::testFlag( const QgsLayout::Flag flag ) const
-{
-  return mFlags.testFlag( flag );
+  delete mContext;
 }
 
 void QgsLayout::setName( const QString &name )

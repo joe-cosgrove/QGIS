@@ -16,6 +16,7 @@
 
 #include "qgslayoutitem.h"
 #include "qgslayout.h"
+#include "qgslayoutcontext.h"
 #include <QPainter>
 
 QgsLayoutItem::QgsLayoutItem( QgsLayout *layout )
@@ -251,11 +252,11 @@ bool QgsLayoutItem::shouldDrawAntialiased() const
   {
     return true;
   }
-  return mLayout->testFlag( QgsLayout::Antialiasing ) && !mLayout->testFlag( QgsLayout::Debug );
+  return mLayout->context()->testFlag( QgsLayoutContext::Antialiasing ) && !mLayout->context()->testFlag( QgsLayoutContext::Debug );
 }
 
 bool QgsLayoutItem::shouldDrawDebugRect() const
 {
-  return mLayout && mLayout->testFlag( QgsLayout::Debug );
+  return mLayout && mLayout->context()->testFlag( QgsLayoutContext::Debug );
 }
 

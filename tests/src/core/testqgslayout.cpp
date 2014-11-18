@@ -31,7 +31,7 @@ class TestQgsLayout: public QObject
     void init();// will be called before each testfunction is executed.
     void cleanup();// will be called after every testfunction.
     void creation(); //test creation of QgsLayout
-    void flags(); //test QgsLayout flags
+    void context();
     void name();
     void dpi();
     void units();
@@ -75,19 +75,11 @@ void TestQgsLayout::creation()
   delete layout;
 }
 
-void TestQgsLayout::flags()
+void TestQgsLayout::context()
 {
+  //test accessing layout context
   QgsLayout layout;
-  //test getting and setting flags
-  layout.setFlags( QgsLayout::Flags( QgsLayout::Antialiasing | QgsLayout::UseAdvancedEffects ) );
-  QVERIFY( layout.flags() == ( QgsLayout::Antialiasing | QgsLayout::UseAdvancedEffects ) );
-  QVERIFY( layout.testFlag( QgsLayout::Antialiasing ) );
-  QVERIFY( layout.testFlag( QgsLayout::UseAdvancedEffects ) );
-  QVERIFY( ! layout.testFlag( QgsLayout::Debug ) );
-  layout.setFlag( QgsLayout::Debug );
-  QVERIFY( layout.testFlag( QgsLayout::Debug ) );
-  layout.setFlag( QgsLayout::Debug, false );
-  QVERIFY( ! layout.testFlag( QgsLayout::Debug ) );
+  QVERIFY( layout.context() );
 }
 
 void TestQgsLayout::name()
