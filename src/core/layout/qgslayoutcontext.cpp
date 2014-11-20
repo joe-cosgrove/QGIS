@@ -15,17 +15,21 @@
  ***************************************************************************/
 
 #include "qgslayoutcontext.h"
+#include "qgsfeature.h"
 
 
 QgsLayoutContext::QgsLayoutContext()
-    : mFlags( Antialiasing | UseAdvancedEffects )
+    : QObject( 0 )
+    , mFlags( Antialiasing | UseAdvancedEffects )
+    , mFeature( 0 )
+    , mLayer( 0 )
 {
 
 }
 
 QgsLayoutContext::~QgsLayoutContext()
 {
-
+  delete mFeature;
 }
 
 void QgsLayoutContext::setFlags( const QgsLayoutContext::Flags flags )
@@ -49,4 +53,37 @@ QgsLayoutContext::Flags QgsLayoutContext::flags() const
 bool QgsLayoutContext::testFlag( const QgsLayoutContext::Flag flag ) const
 {
   return mFlags.testFlag( flag );
+}
+
+void QgsLayoutContext::setFeature( const QgsFeature *feature )
+{
+  if ( !mFeature && !feature )
+  {
+    return;
+  }
+
+  delete mFeature;
+  mFeature = 0;
+
+  if ( !feature )
+  {
+    emit featureChanged( NULL );
+  }
+  else
+  {
+    //make a copy of the feature
+    mFeature = new QgsFeature( *feature );
+    emit featureChanged( mFeature );
+  }
+}
+
+void QgsLayoutContext::setLayer( QgsVectorLayer *layer )
+{
+  if ( layer == mLayer )
+  {
+    return;
+  }
+
+  mLayer = layer;
+  emit layerChanged( mLayer );
 }

@@ -17,6 +17,8 @@
 
 #include "qgslayoutcontext.h"
 #include "qgis.h"
+#include "qgsfeature.h"
+#include "qgsvectorlayer.h"
 #include <QObject>
 #include <QtTest>
 
@@ -31,6 +33,8 @@ class TestQgsLayoutContext: public QObject
     void cleanup();// will be called after every testfunction.
     void creation(); //test creation of QgsLayout
     void flags(); //test QgsLayout flags
+    void feature();
+    void layer();
 
   private:
     QString mReport;
@@ -84,6 +88,79 @@ void TestQgsLayoutContext::flags()
   QVERIFY( context.testFlag( QgsLayoutContext::Debug ) );
   context.setFlag( QgsLayoutContext::Debug, false );
   QVERIFY( ! context.testFlag( QgsLayoutContext::Debug ) );
+}
+
+void TestQgsLayoutContext::feature()
+{
+  QgsLayoutContext context;
+
+  //listen out for featureChanged signals
+  qRegisterMetaType< QgsFeature >();
+  QSignalSpy spyFeatureChanged( &context, SIGNAL( featureChanged( QgsFeature* ) ) );
+
+  //test removing feature
+  context.setFeature( NULL );
+  QVERIFY( !context.feature() );
+  //expect no feature changed signal, since going from no feature->no feature
+  QCOMPARE( spyFeatureChanged.count(), 0 );
+
+  //test setting/getting feature
+  QgsFeature testFeature;
+  testFeature.initAttributes( 1 );
+  testFeature.setAttribute( 0, "Test" );
+  context.setFeature( &testFeature );
+  QCOMPARE( context.feature()->attribute( 0 ), testFeature.attribute( 0 ) );
+  QCOMPARE( spyFeatureChanged.count(), 1 );
+
+  //test overwriting feature
+  QgsFeature* testFeature2 = new QgsFeature();
+  testFeature2->initAttributes( 1 );
+  testFeature2->setAttribute( 0, "Test2" );
+  context.setFeature( testFeature2 );
+  QCOMPARE( context.feature()->attribute( 0 ), testFeature2->attribute( 0 ) );
+  QCOMPARE( spyFeatureChanged.count(), 2 );
+
+  //test that feature was a copy
+  QVERIFY( context.feature() != testFeature2 );
+  delete testFeature2; //deleting original feature
+  QCOMPARE( context.feature()->attribute( 0 ), QVariant( "Test2" ) );
+}
+
+void TestQgsLayoutContext::layer()
+{
+  QgsLayoutContext context;
+
+  //listen out for layerChanged signals
+  QSignalSpy spyLayerChanged( &context, SIGNAL( layerChanged( QgsVectorLayer* ) ) );
+
+  //test clearing layer
+  context.setLayer( NULL );
+  QVERIFY( !context.layer() );
+  //expect no layer changed signal, since going from no layer->no layer
+  QCOMPARE( spyLayerChanged.count(), 0 );
+
+  //test setting/getting layer
+  QgsVectorLayer* layer = new QgsVectorLayer( "Point?field=id_a:integer", "A", "memory" );
+  context.setLayer( layer );
+  QCOMPARE( context.layer(), layer );
+  QCOMPARE( spyLayerChanged.count(), 1 );
+  //layer change signal should not be emitted if setting to same layer
+  context.setLayer( layer );
+  QCOMPARE( spyLayerChanged.count(), 1 );
+
+  //test overwriting layer
+  QgsVectorLayer* layer2 = new QgsVectorLayer( "Point?field=id_a:integer", "B", "memory" );
+  context.setLayer( layer2 );
+  QCOMPARE( context.layer(), layer2 );
+  QCOMPARE( spyLayerChanged.count(), 2 );
+
+  //clear layer
+  context.setLayer( NULL );
+  QVERIFY( !context.layer() );
+  QCOMPARE( spyLayerChanged.count(), 3 );
+
+  delete layer;
+  delete layer2;
 }
 
 QTEST_MAIN( TestQgsLayoutContext )

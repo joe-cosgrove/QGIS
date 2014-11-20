@@ -16,15 +16,19 @@
 #ifndef QGSLAYOUTCONTEXT_H
 #define QGSLAYOUTCONTEXT_H
 
-#include <QLibrary>
+#include <QObject>
+
+class QgsFeature;
+class QgsVectorLayer;
 
 /**\ingroup Layout
  * \class QgsLayoutContext
  * \brief
  * \note added in QGIS 2.7
  */
-class CORE_EXPORT QgsLayoutContext
+class CORE_EXPORT QgsLayoutContext: public QObject
 {
+    Q_OBJECT
 
   public:
 
@@ -78,9 +82,65 @@ class CORE_EXPORT QgsLayoutContext
      */
     bool testFlag( const Flag flag ) const;
 
+    /**Sets the current feature for evaluating the layout. This feature may
+     * be used for altering an item's content and appearance for a report
+     * or atlas layout.
+     * @param feature feature for layout. A copy of the feature is made and stored
+     * in the layout context.
+     * @see feature
+     * @see featureChanged
+     */
+    void setFeature( const QgsFeature* feature );
+
+    /**Returns the current feature for evaluating the layout. This feature may
+     * be used for altering an item's content and appearance for a report
+     * or atlas layout.
+     * @returns current feature for layout
+     * @see setFeature
+     * @see featureChanged
+     * @note when assigning a feature to a layout context, a copy of the feature is
+     * created by setFeature. Accordingly, the feature returned by this method
+     * will be a copy of the original assigned feature.
+     */
+    QgsFeature* feature() const { return mFeature; }
+
+    /**Returns the vector layer associated with the layout's context.
+     * @returns associated vector layer
+     * @see setLayer
+     */
+    QgsVectorLayer* layer() const { return mLayer; }
+
+    /**Sets the vector layer associated with the layout's context.
+     * @param layer associated vector layer
+     * @see layer
+     */
+    void setLayer( QgsVectorLayer* layer );
+
+  signals:
+
+    /**Emitted when the current feature changes for the layout context
+     * @param feature new feature
+     * @see feature
+     * @see setFeature
+     * @note when assigning a feature to a layout context, a copy of the feature is
+     * created by setFeature. Accordingly, the feature passed by this method
+     * will be a copy of the original assigned feature.
+     */
+    void featureChanged( QgsFeature* feature );
+
+    /**Emitted when the context's associated vector layer changes.
+     * @param layer new layer
+     * @see layer
+     * @see setLayer
+     */
+    void layerChanged( QgsVectorLayer* layer );
+
   private:
 
     Flags mFlags;
+
+    QgsFeature* mFeature;
+    QgsVectorLayer* mLayer;
 
 };
 
