@@ -24,6 +24,8 @@
 class QgsLayout;
 class QPainter;
 class QgsDataDefined;
+class QgsFeature;
+class QgsVectorLayer;
 
 /** \ingroup Layout
  * A base class for objects which belong to a layout.
@@ -113,19 +115,14 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * @param property data defined property to return
      * @note this method was added in version 2.5
     */
-    //TODO
     QgsDataDefined* dataDefinedProperty( const DataDefinedProperty property ) const;
 
     /**Sets parameters for a data defined property for the item
      * @param property data defined property to set
-     * @param active true if data defined property is active, false if it is disabled
-     * @param useExpression true if the expression should be used
-     * @param expression expression for data defined property
-     * @param field field name if the data defined property should take its value from a field
-     * @note this method was added in version 2.5
+     * @param dataDefined data defined container for property. Ownership of dataDefined will be
+     * transferred to the layout object.
     */
-    //TODO
-    void setDataDefinedProperty( const DataDefinedProperty property, const bool active, const bool useExpression, const QString &expression, const QString &field );
+    void setDataDefinedProperty( const DataDefinedProperty property, QgsDataDefined *dataDefined );
 
   public slots:
 
@@ -148,16 +145,25 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     QgsLayout* mLayout;
 
     /**Map of data defined properties for the item to string name to use when exporting item to xml*/
-    QMap< QgsLayoutObject::DataDefinedProperty, QString > mDataDefinedNames;
+    QMap< DataDefinedProperty, QString > mDataDefinedNames;
 
     /**Evaluate a data defined property and return the calculated value
-     * @returns true if data defined property could be successfully evaluated
      * @param property data defined property to evaluate
      * @param expressionValue QVariant for storing the evaluated value
-     * @note this method was added in version 2.5
+     * @returns true if data defined property could be successfully evaluated
     */
-    //TODO
-    bool dataDefinedEvaluate( const QgsLayoutObject::DataDefinedProperty property, QVariant &expressionValue );
+    bool evaluateDataDefinedProperty( const DataDefinedProperty property, QVariant &expressionValue );
+
+    /**Returns a double value after a data defined property override has been applied.
+     * If the data defined property is not set, not active, or evaluates to null, then the original
+     * value will be returned. If the data defined property can be successfully calculated,
+     * then the calculated value will be returned.
+     * @param originalValue original value of property
+     * @property data defined property to apply
+     * @returns either the calculated data defined value or the original value, depending on
+     * the success of evaluating the data defined property.
+    */
+    double applyDataDefinedProperty( const double originalValue, const DataDefinedProperty property );
 
   signals:
     /**Emitted when the object changes. Signifies that the widgets must update their
@@ -167,16 +173,19 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     void itemChanged();
 
   private slots:
-    /**Prepares all layout object data defined expressions using the current atlas coverage layer if set.
-     * @note this method was added in version 2.5
+    /**Prepares all layout object data defined expressions using the current layout context layer if set.
     */
-    //TODO
     void prepareDataDefinedExpressions() const;
 
   private:
 
     /**Map of current data defined properties*/
     QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* > mDataDefinedProperties;
+
+    bool propertyIsValid( const QgsLayoutObject::DataDefinedProperty property ) const;
+    bool hasDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property ) const;
+    bool shouldEvaluateDataDefinedProperty( const QgsDataDefined *dd ) const;
+    QVariant dataDefinedValue( QgsDataDefined *dd, const QgsFeature* feature, QgsVectorLayer *layer = 0 ) const;
 
     friend class TestQgsLayoutObject;
 };

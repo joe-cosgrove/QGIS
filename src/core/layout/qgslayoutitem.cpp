@@ -120,20 +120,48 @@ void QgsLayoutItem::attemptMove( const QgsLayoutPoint& targetPoint )
     return;
   }
 
-  QPointF targetPointLayoutUnits = mLayout->convertToLayoutUnits( targetPoint );
-  //TODO - apply data defined position here
-  targetPointLayoutUnits = adjustPointForReferencePosition( targetPointLayoutUnits, rect().size() );
-  QPointF actualPointLayoutUnits = targetPointLayoutUnits;
+  QgsLayoutPoint evaluatedPoint = applyDataDefinedPosition( targetPoint );
 
-  if ( actualPointLayoutUnits == pos() )
+  QPointF evaluatedPointLayoutUnits = mLayout->convertToLayoutUnits( evaluatedPoint );
+  evaluatedPointLayoutUnits = adjustPointForReferencePosition( evaluatedPointLayoutUnits, rect().size() );
+  QPointF actualPointLayoutUnits = evaluatedPointLayoutUnits;
+
+  if ( actualPointLayoutUnits == pos() && targetPoint.units() == mItemPosition.units() )
   {
+    //TODO - add test for second condition
     return;
   }
 
   QgsLayoutPoint actualPointTargetUnits = mLayout->convertFromLayoutUnits( actualPointLayoutUnits, targetPoint.units() );
   mItemPosition = actualPointTargetUnits;
 
-  setPos( targetPointLayoutUnits );
+  setPos( actualPointLayoutUnits );
+}
+
+QgsLayoutPoint QgsLayoutItem::applyDataDefinedPosition( const QgsLayoutPoint& position )
+{
+  if ( !mLayout )
+  {
+    return position;
+  }
+
+  double evaluatedX = applyDataDefinedProperty( position.x(), QgsLayoutObject::PositionX );
+  double evaluatedY = applyDataDefinedProperty( position.y(), QgsLayoutObject::PositionY );
+  return QgsLayoutPoint( evaluatedX, evaluatedY, position.units() );
+}
+
+void QgsLayoutItem::refreshDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property )
+{
+  //update data defined properties and update item to match
+
+  //evaulate width and height first, since they may affect position if non-top-left reference point set
+
+
+  if ( property == QgsLayoutObject::PositionX || property == QgsLayoutObject::PositionY ||
+       property == QgsLayoutObject::AllProperties )
+  {
+    refreshItemPosition();
+  }
 }
 
 QPointF QgsLayoutItem::adjustPointForReferencePosition( const QPointF& position, const QSizeF& size )

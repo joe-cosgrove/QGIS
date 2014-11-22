@@ -17,7 +17,7 @@
 
 #include "qgslayoutpage.h"
 #include <QObject>
-#include <QtTest>
+#include <QtTest/QtTest>
 
 class TestQgsLayoutPage : public QObject
 {

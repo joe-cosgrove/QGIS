@@ -19,7 +19,7 @@
 #include "qgslayout.h"
 #include "qgscompositionchecker.h"
 #include <QObject>
-#include <QtTest>
+#include <QtTest/QtTest>
 #include <QPainter>
 #include <QImage>
 

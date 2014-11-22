@@ -130,6 +130,18 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      */
     QgsLayoutPoint positionWithUnits() const { return mItemPosition; }
 
+  public slots:
+
+    /**Refreshes a data defined property for the item by reevaluating the property's value
+     * and redrawing the item with this new value.
+     * @param property data defined property to refresh. If property is set to
+     * QgsComposerItem::AllProperties then all data defined properties for the item will be
+     * refreshed.
+     * @note this method was added in version 2.5
+    */
+    virtual void refreshDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property = QgsLayoutObject::AllProperties );
+
+
   protected:
 
     /**Draws a debugging rectangle of the item's current bounds within the specified
@@ -204,6 +216,7 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
 
     QSizeF applyMinimumSize( const QSizeF &targetSize );
     QSizeF applyFixedSize( const QSizeF &targetSize );
+    QgsLayoutPoint applyDataDefinedPosition( const QgsLayoutPoint &position );
 
     friend class TestQgsLayoutItem;
 };

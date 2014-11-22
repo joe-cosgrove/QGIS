@@ -18,6 +18,7 @@
 #include <QPainter>
 
 #include "qgslayout.h"
+#include "qgslayoutcontext.h"
 #include "qgslayoututils.h"
 #include "qgslayoutobject.h"
 #include "qgsdatadefined.h"
@@ -38,6 +39,8 @@ QgsLayoutObject::QgsLayoutObject( QgsLayout* layout )
 
   if ( mLayout )
   {
+    //TODO
+
     //connect to atlas toggling on/off and coverage layer and feature changes
     //to update data defined values
 //    connect( &mLayout->atlasComposition(), SIGNAL( toggled( bool ) ), this, SLOT( refreshDataDefinedProperty() ) );
@@ -46,16 +49,15 @@ QgsLayoutObject::QgsLayoutObject( QgsLayout* layout )
     //also, refreshing composition triggers a recalculation of data defined properties
 //    connect( mLayout, SIGNAL( refreshItemsTriggered() ), this, SLOT( refreshDataDefinedProperty() ) );
 
-    //toggling atlas or changing coverage layer requires data defined expressions to be reprepared
-//    connect( &mLayout->atlasComposition(), SIGNAL( toggled( bool ) ), this, SLOT( prepareDataDefinedExpressions() ) );
-//    connect( &mLayout->atlasComposition(), SIGNAL( coverageLayerChanged( QgsVectorLayer* ) ), this, SLOT( prepareDataDefinedExpressions() ) );
+    //toggling changing layout's context layer requires data defined expressions to be reprepared
+    connect( mLayout->context(), SIGNAL( layerChanged( QgsVectorLayer* ) ), this, SLOT( prepareDataDefinedExpressions() ) );
   }
 
 }
 
 QgsLayoutObject::~QgsLayoutObject()
 {
-
+  qDeleteAll( mDataDefinedProperties );
 }
 
 bool QgsLayoutObject::writeXML( QDomElement &elem, QDomDocument &doc ) const
@@ -85,51 +87,45 @@ bool QgsLayoutObject::readXML( const QDomElement &itemElem, const QDomDocument &
   return true;
 }
 
-QgsDataDefined *QgsLayoutObject::dataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property ) const
+bool QgsLayoutObject::propertyIsValid( const QgsLayoutObject::DataDefinedProperty property ) const
 {
-  if ( property == QgsLayoutObject::AllProperties || property == QgsLayoutObject::NoProperty )
-  {
-    //bad property requested, don't return anything
-    return 0;
-  }
-
-  //find corresponding QgsDataDefined and return it
-  QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >::const_iterator it = mDataDefinedProperties.find( property );
-  if ( it != mDataDefinedProperties.constEnd() )
-  {
-    return it.value();
-  }
-
-  //could not find matching QgsDataDefined
-  return 0;
+  return ( property != QgsLayoutObject::AllProperties && property != QgsLayoutObject::NoProperty );
 }
 
-void QgsLayoutObject::setDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const bool active, const bool useExpression, const QString &expression, const QString &field )
+bool QgsLayoutObject::hasDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property ) const
 {
-  if ( property == QgsLayoutObject::AllProperties || property == QgsLayoutObject::NoProperty )
+  return ( mDataDefinedProperties.contains( property ) );
+}
+
+QgsDataDefined *QgsLayoutObject::dataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property ) const
+{
+  if ( !propertyIsValid( property ) || !hasDataDefinedProperty( property ) )
   {
-    //bad property requested
+    return NULL;
+  }
+
+  return mDataDefinedProperties.value( property );
+}
+
+void QgsLayoutObject::setDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, QgsDataDefined* dataDefined )
+{
+  if ( !propertyIsValid( property ) )
+  {
     return;
   }
 
-  bool defaultVals = ( !active && !useExpression && expression.isEmpty() && field.isEmpty() );
-
-  if ( mDataDefinedProperties.contains( property ) )
+  if ( hasDataDefinedProperty( property ) )
   {
-    QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >::const_iterator it = mDataDefinedProperties.find( property );
-    if ( it != mDataDefinedProperties.constEnd() )
-    {
-      QgsDataDefined* dd = it.value();
-      dd->setActive( active );
-      dd->setUseExpression( useExpression );
-      dd->setExpressionString( expression );
-      dd->setField( field );
-    }
+    delete mDataDefinedProperties.take( property );
   }
-  else if ( !defaultVals )
+  if ( !dataDefined->hasDefaultValues() )
   {
-    QgsDataDefined* dd = new QgsDataDefined( active, useExpression, expression, field );
-    mDataDefinedProperties.insert( property, dd );
+    mDataDefinedProperties.insert( property, dataDefined );
+  }
+  else
+  {
+    //since ownership was transferred to object and we are not using the data defined, delete it
+    delete dataDefined;
   }
 }
 
@@ -145,32 +141,107 @@ void QgsLayoutObject::refreshDataDefinedProperty( const DataDefinedProperty prop
   //nothing to do in base class for now
 }
 
-bool QgsLayoutObject::dataDefinedEvaluate( const DataDefinedProperty property, QVariant &expressionValue )
+bool QgsLayoutObject::evaluateDataDefinedProperty( const DataDefinedProperty property, QVariant &expressionValue )
 {
-  if ( !mLayout )
+  if ( !mLayout || !propertyIsValid( property ) || !hasDataDefinedProperty( property ) )
   {
     return false;
   }
-  //return mComposition->dataDefinedEvaluate( property, expressionValue, &mDataDefinedProperties );
+
+  //null passed-around QVariant
+  expressionValue.clear();
+
+  //get layer and feature from context
+  const QgsFeature* currentFeature = mLayout->context()->feature();
+  QgsVectorLayer* layer = mLayout->context()->layer();
+
+  //evaluate data defined property using current context
+  QgsDataDefined* dd = mDataDefinedProperties.value( property );
+  QVariant result = dataDefinedValue( dd, currentFeature, layer );
+
+  if ( result.isValid() )
+  {
+    expressionValue = result;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+double QgsLayoutObject::applyDataDefinedProperty( const double originalValue, const QgsLayoutObject::DataDefinedProperty property )
+{
+  QVariant evaluatedValue;
+  if ( evaluateDataDefinedProperty( property, evaluatedValue ) )
+  {
+    bool ok;
+    double convertedEvaluatedValue = evaluatedValue.toDouble( &ok );
+    if ( ok && !evaluatedValue.isNull() )
+    {
+      return convertedEvaluatedValue;
+    }
+  }
+  return originalValue;
+}
+
+bool QgsLayoutObject::shouldEvaluateDataDefinedProperty( const QgsDataDefined* dd ) const
+{
+  if ( !dd || dd->hasDefaultValues() || !dd->isActive() )
+  {
+    return false;
+  }
+
+  return true;
+}
+
+QVariant QgsLayoutObject::dataDefinedValue( QgsDataDefined* dd, const QgsFeature *feature, QgsVectorLayer* layer ) const
+{
+  if ( !shouldEvaluateDataDefinedProperty( dd ) )
+  {
+    return QVariant();
+  }
+
+  QVariant result = QVariant();
+  if ( !dd->expressionIsPrepared() )
+  {
+    dd->prepareExpression( layer );
+  }
+
+  if ( dd->useExpression() && dd->expressionIsPrepared() )
+  {
+    result = dd->expression()->evaluate( feature );
+    if ( dd->expression()->hasEvalError() )
+    {
+      QgsDebugMsgLevel( QString( "Evaluate error:" ) + dd->expression()->evalErrorString(), 4 );
+      return QVariant();
+    }
+  }
+  else if ( feature && !dd->useExpression() && !dd->field().isEmpty() && layer )
+  {
+    // use direct attribute access instead of evaluating "field" expression (much faster)
+    int fieldIndex = layer->pendingFields().indexFromName( dd->field() );
+    if ( fieldIndex != -1 )
+    {
+      result = feature->attribute( fieldIndex );
+    }
+  }
+  return result;
 }
 
 void QgsLayoutObject::prepareDataDefinedExpressions() const
 {
-  //use atlas coverage layer if set
-  QgsVectorLayer* atlasLayer = 0;
+  //use layout context layer if set
+  QgsVectorLayer* layer = 0;
   if ( mLayout )
   {
-    /*    QgsAtlasComposition* atlas = &mLayout->atlasComposition();
-        if ( atlas && atlas->enabled() )
-        {
-          atlasLayer = atlas->coverageLayer();
-        }*/
+    layer = mLayout->context()->layer();
   }
 
-  //prepare all QgsDataDefineds
+  //prepare all QgsDataDefined containers
   QMap< DataDefinedProperty, QgsDataDefined* >::const_iterator it = mDataDefinedProperties.constBegin();
   if ( it != mDataDefinedProperties.constEnd() )
   {
-    it.value()->prepareExpression( atlasLayer );
+    it.value()->prepareExpression( layer );
   }
 }

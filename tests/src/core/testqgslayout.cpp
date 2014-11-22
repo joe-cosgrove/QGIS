@@ -19,7 +19,7 @@
 #include "qgslayoutmeasurementconverter.h"
 #include "qgis.h"
 #include <QObject>
-#include <QtTest>
+#include <QtTest/QtTest>
 
 class TestQgsLayout: public QObject
 {

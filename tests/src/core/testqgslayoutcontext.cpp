@@ -20,7 +20,7 @@
 #include "qgsfeature.h"
 #include "qgsvectorlayer.h"
 #include <QObject>
-#include <QtTest>
+#include <QtTest/QtTest>
 
 class TestQgsLayoutContext: public QObject
 {

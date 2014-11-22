@@ -18,7 +18,7 @@
 #include "qgslayoutitemregistry.h"
 #include "qgis.h"
 #include <QObject>
-#include <QtTest>
+#include <QtTest/QtTest>
 
 class TestQgsLayoutItemRegistry : public QObject
 {

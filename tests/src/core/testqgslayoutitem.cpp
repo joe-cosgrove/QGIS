@@ -19,8 +19,9 @@
 #include "qgslayout.h"
 #include "qgslayoutcontext.h"
 #include "qgscompositionchecker.h"
+#include "qgsdatadefined.h"
 #include <QObject>
-#include <QtTest>
+#include <QtTest/QtTest>
 #include <QPainter>
 #include <QImage>
 
@@ -45,6 +46,7 @@ class TestQgsLayoutItem: public QObject
     void minSize();
     void move();
     void positionWithUnits();
+    void dataDefinedPosition();
 
   private:
 
@@ -575,6 +577,53 @@ void TestQgsLayoutItem::positionWithUnits()
   QCOMPARE( item->positionWithUnits().x(), 50.0 );
   QCOMPARE( item->positionWithUnits().y(), 100.0 );
   QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Pixels );
+}
+
+void TestQgsLayoutItem::dataDefinedPosition()
+{
+  //test setting data defined position
+  TestItem* item = new TestItem( mLayout );
+  mLayout->setUnits( QgsLayoutUnits::Millimeters );
+  item->attemptMove( QgsLayoutPoint( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+
+  // position x
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+7" ) ) );
+  item->refreshDataDefinedProperty( QgsLayoutObject::PositionX );
+  QCOMPARE( item->positionWithUnits().x(), 11.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 110.0 ); //mm
+
+  //position y
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+3" ) ) );
+  item->refreshDataDefinedProperty( QgsLayoutObject::PositionY );
+  QCOMPARE( item->positionWithUnits().y(), 5.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().y(), 50.0 ); //mm
+
+  //refreshPosition should also respect data defined positioning
+  item->setPos( 0, 0 );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  item->refreshItemPosition();
+  QCOMPARE( item->positionWithUnits().x(), 12.0 );
+  QCOMPARE( item->positionWithUnits().y(), 6.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 120.0 ); //mm
+  QCOMPARE( item->pos().y(), 60.0 ); //mm
+
+  //also check that data defined position overrides when attempting to move
+  item->attemptMove( QgsLayoutPoint( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  QCOMPARE( item->positionWithUnits().x(), 12.0 );
+  QCOMPARE( item->positionWithUnits().y(), 6.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 120.0 ); //mm
+  QCOMPARE( item->pos().y(), 60.0 ); //mm
+
+  //check change of units should apply to data defined position
+
+
+  //test that data defined position applies to item's reference point
+
 }
 
 bool TestQgsLayoutItem::renderCheck( QString testName, QImage &image, int mismatchCount )
