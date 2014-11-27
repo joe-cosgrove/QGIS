@@ -107,6 +107,7 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      * @see minimumSize
      * @see fixedSize
      * @see attemptMove
+     * @see sizeWithUnits
     */
     virtual void attemptResize( const QgsLayoutSize& targetSize );
 
@@ -118,6 +119,7 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      * @param targetPoint desired position for reference point of item
      * @see attemptResize
      * @see referencePoint
+     * @see positionWithUnits
     */
     virtual void attemptMove( const QgsLayoutPoint& targetPoint );
 
@@ -127,8 +129,16 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      * @returns position of item's reference point within the layout
      * @see attemptMove
      * @see referencePoint
+     * @see sizeWithUnits
      */
     QgsLayoutPoint positionWithUnits() const { return mItemPosition; }
+
+    /**Returns the item's current size, including units.
+     * @returns item size
+     * @see attemptResize
+     * @see positionWithUnits
+     */
+    QgsLayoutSize sizeWithUnits() const { return mItemSize; }
 
   public slots:
 
@@ -217,6 +227,7 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
     QSizeF applyMinimumSize( const QSizeF &targetSize );
     QSizeF applyFixedSize( const QSizeF &targetSize );
     QgsLayoutPoint applyDataDefinedPosition( const QgsLayoutPoint &position );
+    QgsLayoutSize applyDataDefinedSize( const QgsLayoutSize &size );
 
     friend class TestQgsLayoutItem;
 };

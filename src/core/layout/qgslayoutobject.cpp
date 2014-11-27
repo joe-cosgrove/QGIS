@@ -118,7 +118,11 @@ void QgsLayoutObject::setDataDefinedProperty( const QgsLayoutObject::DataDefined
   {
     delete mDataDefinedProperties.take( property );
   }
-  if ( !dataDefined->hasDefaultValues() )
+  if ( !dataDefined )
+  {
+    return;
+  }
+  else if ( !dataDefined->hasDefaultValues() )
   {
     mDataDefinedProperties.insert( property, dataDefined );
   }

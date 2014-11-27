@@ -120,7 +120,7 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     /**Sets parameters for a data defined property for the item
      * @param property data defined property to set
      * @param dataDefined data defined container for property. Ownership of dataDefined will be
-     * transferred to the layout object.
+     * transferred to the layout object. Set to NULL to clear the property.
     */
     void setDataDefinedProperty( const DataDefinedProperty property, QgsDataDefined *dataDefined );
 

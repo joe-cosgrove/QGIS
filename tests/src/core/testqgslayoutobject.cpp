@@ -174,6 +174,12 @@ void TestQgsLayoutObject::setRetrieveDDProperty()
   //should be nothing
   QVERIFY( !object->dataDefinedProperty( QgsLayoutObject::Transparency ) );
 
+  //test setting property to null should clear property
+  object->setDataDefinedProperty( QgsLayoutObject::Transparency, new QgsDataDefined( true, true, QString( "20 + 80" ), QString() ) );
+  QVERIFY( object->dataDefinedProperty( QgsLayoutObject::Transparency ) );
+  object->setDataDefinedProperty( QgsLayoutObject::Transparency, NULL );
+  QVERIFY( !object->dataDefinedProperty( QgsLayoutObject::Transparency ) );
+
   delete object;
 }
 

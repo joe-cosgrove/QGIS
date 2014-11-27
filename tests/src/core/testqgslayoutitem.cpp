@@ -46,7 +46,10 @@ class TestQgsLayoutItem: public QObject
     void minSize();
     void move();
     void positionWithUnits();
+    void sizeWithUnits();
     void dataDefinedPosition();
+    void dataDefinedSize();
+    void combinedDataDefinedPositionAndSize();
 
   private:
 
@@ -200,7 +203,6 @@ void TestQgsLayoutItem::preparePainter()
   mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, true );
   item->preparePainter( &painter );
   QVERIFY( painter.renderHints() & QPainter::Antialiasing );
-  delete item;
 }
 
 void TestQgsLayoutItem::debugRect()
@@ -219,6 +221,8 @@ void TestQgsLayoutItem::debugRect()
 
   bool result = renderCheck( "layoutitem_debugrect", image, 0 );
   mLayout->context()->setFlag( QgsLayoutContext::Debug, false );
+  mLayout->removeItem( item );
+  delete item;
   QVERIFY( result );
 }
 
@@ -236,8 +240,9 @@ void TestQgsLayoutItem::draw()
   mLayout->render( &painter );
   painter.end();
   mLayout->context()->setFlag( QgsLayoutContext::Antialiasing, true );
-
   bool result = renderCheck( "layoutitem_draw", image, 0 );
+  mLayout->removeItem( item );
+  delete item;
   QVERIFY( result );
 }
 
@@ -286,6 +291,7 @@ void TestQgsLayoutItem::resize()
   QCOMPARE( item->rect().height(), 600.0 );
 
   mLayout->setUnits( QgsLayoutUnits::Millimeters );
+  delete item;
 }
 
 void TestQgsLayoutItem::referencePoint()
@@ -416,6 +422,7 @@ void TestQgsLayoutItem::referencePoint()
   QCOMPARE( item->pos().x(), 2.0 );
   QCOMPARE( item->pos().y(), 1.0 );
 
+  delete item;
 }
 
 void TestQgsLayoutItem::adjustPointForReference()
@@ -457,6 +464,8 @@ void TestQgsLayoutItem::adjustPointForReference()
   result = item->adjustPointForReferencePosition( QPointF( 5, 7 ), QSizeF( 2, 4 ) );
   QCOMPARE( result.x(), 3.0 );
   QCOMPARE( result.y(), 3.0 );
+
+  delete item;
 }
 
 void TestQgsLayoutItem::fixedSize()
@@ -477,6 +486,8 @@ void TestQgsLayoutItem::fixedSize()
   item->updateFixedSize( QgsLayoutSize( 150, 250, QgsLayoutUnits::Millimeters ) );
   QVERIFY( qgsDoubleNear( item->rect().width(), 150.0 ) );
   QVERIFY( qgsDoubleNear( item->rect().height(), 250.0 ) );
+
+  delete item;
 }
 
 void TestQgsLayoutItem::minSize()
@@ -517,6 +528,9 @@ void TestQgsLayoutItem::minSize()
   //check size matches fixed item size, not minimum size (converted to mm)
   QVERIFY( qgsDoubleNear( fixedMinItem->rect().width(), 50.0 ) );
   QVERIFY( qgsDoubleNear( fixedMinItem->rect().height(), 90.0 ) );
+
+  delete fixedMinItem;
+  delete item;
 }
 
 void TestQgsLayoutItem::move()
@@ -564,6 +578,7 @@ void TestQgsLayoutItem::move()
   QCOMPARE( item->pos().y(), 600.0 );
 
   mLayout->setUnits( QgsLayoutUnits::Millimeters );
+  delete item;
 }
 
 void TestQgsLayoutItem::positionWithUnits()
@@ -577,6 +592,23 @@ void TestQgsLayoutItem::positionWithUnits()
   QCOMPARE( item->positionWithUnits().x(), 50.0 );
   QCOMPARE( item->positionWithUnits().y(), 100.0 );
   QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Pixels );
+
+  delete item;
+}
+
+void TestQgsLayoutItem::sizeWithUnits()
+{
+  TestItem* item = new TestItem( mLayout );
+  item->attemptResize( QgsLayoutSize( 60.0, 15.0, QgsLayoutUnits::Millimeters ) );
+  QCOMPARE( item->sizeWithUnits().width(), 60.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 15.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Millimeters );
+  item->attemptResize( QgsLayoutSize( 50.0, 100.0, QgsLayoutUnits::Pixels ) );
+  QCOMPARE( item->sizeWithUnits().width(), 50.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 100.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Pixels );
+
+  delete item;
 }
 
 void TestQgsLayoutItem::dataDefinedPosition()
@@ -585,8 +617,9 @@ void TestQgsLayoutItem::dataDefinedPosition()
   TestItem* item = new TestItem( mLayout );
   mLayout->setUnits( QgsLayoutUnits::Millimeters );
   item->attemptMove( QgsLayoutPoint( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  item->attemptResize( QgsLayoutSize( 2.0, 4.0, QgsLayoutUnits::Centimeters ) );
 
-  // position x
+  //position x
   item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+7" ) ) );
   item->refreshDataDefinedProperty( QgsLayoutObject::PositionX );
   QCOMPARE( item->positionWithUnits().x(), 11.0 );
@@ -618,13 +651,207 @@ void TestQgsLayoutItem::dataDefinedPosition()
   QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
   QCOMPARE( item->pos().x(), 120.0 ); //mm
   QCOMPARE( item->pos().y(), 60.0 ); //mm
+  //restriction only for x position
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, NULL );
+  item->attemptMove( QgsLayoutPoint( 6.0, 1.5, QgsLayoutUnits::Centimeters ) );
+  QCOMPARE( item->positionWithUnits().x(), 12.0 );
+  QCOMPARE( item->positionWithUnits().y(), 1.5 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 120.0 ); //mm
+  QCOMPARE( item->pos().y(), 15.0 ); //mm
+  //restriction only for y position
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, NULL );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  item->attemptMove( QgsLayoutPoint( 7.0, 1.5, QgsLayoutUnits::Centimeters ) );
+  QCOMPARE( item->positionWithUnits().x(), 7.0 );
+  QCOMPARE( item->positionWithUnits().y(), 6.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 70.0 ); //mm
+  QCOMPARE( item->pos().y(), 60.0 ); //mm
 
   //check change of units should apply to data defined position
-
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  //first set to same as existing position, but with different units
+  item->attemptMove( QgsLayoutPoint( 120.0, 60.0, QgsLayoutUnits::Millimeters ) );
+  //data defined position should utilise new units
+  QCOMPARE( item->positionWithUnits().x(), 12.0 ); //mm
+  QCOMPARE( item->positionWithUnits().y(), 6.0 ); //mm
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Millimeters );
+  QCOMPARE( item->pos().x(), 12.0 ); //mm
+  QCOMPARE( item->pos().y(), 6.0 ); //mm
 
   //test that data defined position applies to item's reference point
+  item->attemptMove( QgsLayoutPoint( 12.0, 6.0, QgsLayoutUnits::Centimeters ) );
+  item->setReferencePoint( QgsLayoutItem::LowerRight );
+  QCOMPARE( item->positionWithUnits().x(), 12.0 ); //cm
+  QCOMPARE( item->positionWithUnits().y(), 6.0 ); //cm
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 100.0 ); //mm
+  QCOMPARE( item->pos().y(), 20.0 ); //mm
 
+  //also check setting data defined position AFTER setting reference point
+  item->setPos( 0, 0 );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "6+10" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+6" ) ) );
+  item->refreshItemPosition();
+  QCOMPARE( item->positionWithUnits().x(), 16.0 ); //cm
+  QCOMPARE( item->positionWithUnits().y(), 8.0 ); //cm
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 140.0 ); //mm
+  QCOMPARE( item->pos().y(), 40.0 ); //mm
+
+  delete item;
 }
+
+void TestQgsLayoutItem::dataDefinedSize()
+{
+  //test setting data defined size
+  TestItem* item = new TestItem( mLayout );
+  mLayout->setUnits( QgsLayoutUnits::Millimeters );
+  item->attemptMove( QgsLayoutPoint( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  item->attemptResize( QgsLayoutSize( 2.0, 4.0, QgsLayoutUnits::Centimeters ) );
+
+  //width
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "4+7" ) ) );
+  item->refreshDataDefinedProperty( QgsLayoutObject::ItemWidth );
+  QCOMPARE( item->sizeWithUnits().width(), 11.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->rect().width(), 110.0 ); //mm
+
+  //height
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "2+3" ) ) );
+  item->refreshDataDefinedProperty( QgsLayoutObject::ItemHeight );
+  QCOMPARE( item->sizeWithUnits().height(), 5.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->rect().height(), 50.0 ); //mm
+
+  //refreshSize should also respect data defined size
+  item->setRect( 0.0, 0.0, 9.0, 8.0 );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  item->refreshItemSize();
+  QCOMPARE( item->sizeWithUnits().width(), 12.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 6.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->rect().width(), 120.0 ); //mm
+  QCOMPARE( item->rect().height(), 60.0 ); //mm
+
+  //also check that data defined size overrides when attempting to resize
+  item->attemptResize( QgsLayoutSize( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  QCOMPARE( item->sizeWithUnits().width(), 12.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 6.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->rect().width(), 120.0 ); //mm
+  QCOMPARE( item->rect().height(), 60.0 ); //mm
+  //restriction only for width
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, NULL );
+  item->attemptResize( QgsLayoutSize( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  QCOMPARE( item->sizeWithUnits().width(), 12.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 1.5 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->rect().width(), 120.0 ); //mm
+  QCOMPARE( item->rect().height(), 15.0 ); //mm
+  //restriction only for y position
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, NULL );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  item->attemptResize( QgsLayoutSize( 7.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  QCOMPARE( item->sizeWithUnits().width(), 7.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 6.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->rect().width(), 70.0 ); //mm
+  QCOMPARE( item->rect().height(), 60.0 ); //mm
+
+  //check change of units should apply to data defined size
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  //first set to same as existing size, but with different units
+  item->attemptResize( QgsLayoutSize( 120.0, 60.0, QgsLayoutUnits::Millimeters ) );
+  //data defined size should utilise new units
+  QCOMPARE( item->sizeWithUnits().width(), 12.0 ); //mm
+  QCOMPARE( item->sizeWithUnits().height(), 6.0 ); //mm
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Millimeters );
+  QCOMPARE( item->rect().width(), 12.0 ); //mm
+  QCOMPARE( item->rect().height(), 6.0 ); //mm
+
+  //test that data defined size applies to item's reference point
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, NULL );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, NULL );
+  item->attemptResize( QgsLayoutSize( 10.0, 5.0, QgsLayoutUnits::Millimeters ) );
+  item->attemptMove( QgsLayoutPoint( 20.0, 10.0, QgsLayoutUnits::Millimeters ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "5" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "6" ) ) );
+  item->setReferencePoint( QgsLayoutItem::LowerRight );
+  item->refreshItemSize();
+  QCOMPARE( item->pos().x(), 25.0 ); //mm
+  QCOMPARE( item->pos().y(), 9.0 ); //mm
+
+  //test that data defined size applied after setting item's reference point respects reference
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, NULL );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, NULL );
+  item->setReferencePoint( QgsLayoutItem::UpperLeft );
+  item->attemptResize( QgsLayoutSize( 10.0, 5.0, QgsLayoutUnits::Millimeters ) );
+  item->attemptMove( QgsLayoutPoint( 20.0, 10.0, QgsLayoutUnits::Millimeters ) );
+  item->setReferencePoint( QgsLayoutItem::LowerRight );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "7" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "9" ) ) );
+  item->refreshItemSize();
+  QCOMPARE( item->pos().x(), 23.0 ); //mm
+  QCOMPARE( item->pos().y(), 6.0 ); //mm
+
+  delete item;
+}
+
+void TestQgsLayoutItem::combinedDataDefinedPositionAndSize()
+{
+  //test setting data defined size
+  TestItem* item = new TestItem( mLayout );
+  mLayout->setUnits( QgsLayoutUnits::Millimeters );
+  item->attemptMove( QgsLayoutPoint( 6.0, 1.50, QgsLayoutUnits::Centimeters ) );
+  item->attemptResize( QgsLayoutSize( 2.0, 4.0, QgsLayoutUnits::Centimeters ) );
+
+  //test item with all of data defined x, y, width, height set
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+7" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+3" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "4+9" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  item->refreshDataDefinedProperty( QgsLayoutObject::AllProperties );
+  QCOMPARE( item->positionWithUnits().x(), 11.0 );
+  QCOMPARE( item->positionWithUnits().y(), 5.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->sizeWithUnits().width(), 13.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 6.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 110.0 ); //mm
+  QCOMPARE( item->pos().y(), 50.0 ); //mm
+  QCOMPARE( item->rect().width(), 130.0 ); //mm
+  QCOMPARE( item->rect().height(), 60.0 ); //mm
+
+  //also try with reference point set
+  item->setReferencePoint( QgsLayoutItem::Middle );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionX, new QgsDataDefined( true, true, QString( "4+8" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::PositionY, new QgsDataDefined( true, true, QString( "2+4" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemWidth, new QgsDataDefined( true, true, QString( "3+7" ) ) );
+  item->setDataDefinedProperty( QgsLayoutObject::ItemHeight, new QgsDataDefined( true, true, QString( "1+3" ) ) );
+  item->refreshDataDefinedProperty( QgsLayoutObject::AllProperties );
+  QCOMPARE( item->positionWithUnits().x(), 12.0 );
+  QCOMPARE( item->positionWithUnits().y(), 6.0 );
+  QCOMPARE( item->positionWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->sizeWithUnits().width(), 10.0 );
+  QCOMPARE( item->sizeWithUnits().height(), 4.0 );
+  QCOMPARE( item->sizeWithUnits().units(), QgsLayoutUnits::Centimeters );
+  QCOMPARE( item->pos().x(), 70.0 ); //mm
+  QCOMPARE( item->pos().y(), 40.0 ); //mm
+  QCOMPARE( item->rect().width(), 100.0 ); //mm
+  QCOMPARE( item->rect().height(), 40.0 ); //mm
+
+  delete item;
+}
+
+//TODO rotation
+
 
 bool TestQgsLayoutItem::renderCheck( QString testName, QImage &image, int mismatchCount )
 {
