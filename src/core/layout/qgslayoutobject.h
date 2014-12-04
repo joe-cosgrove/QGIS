@@ -159,11 +159,24 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * value will be returned. If the data defined property can be successfully calculated,
      * then the calculated value will be returned.
      * @param originalValue original value of property
-     * @property data defined property to apply
+     * @param property data defined property to apply
      * @returns either the calculated data defined value or the original value, depending on
      * the success of evaluating the data defined property.
     */
     double applyDataDefinedProperty( const double originalValue, const DataDefinedProperty property );
+
+    /**Returns a double value after a data defined property override has been applied.
+     * If the data defined property is not set or not active, then the original
+     * value will be returned. If the data defined property can be successfully calculated,
+     * then the calculated value will be returned. If the evaluated property is null,
+     * then the value of valueIfNull will be returned.
+     * @param originalValue original value of property
+     * @param property data defined property to apply
+     * @param valueIfNull value to returned if evaluated property is null
+     * @returns either the calculated data defined value, null value, or the original value, depending on
+     * the success of evaluating the data defined property.
+    */
+    double applyDataDefinedProperty( const double originalValue, const DataDefinedProperty property, const double valueIfNull );
 
   signals:
     /**Emitted when the object changes. Signifies that the widgets must update their

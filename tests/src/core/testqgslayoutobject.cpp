@@ -288,14 +288,29 @@ void TestQgsLayoutObject::applyDoubleDD()
   //bad properties
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::NoProperty ), 20.0 );
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::AllProperties ), 20.0 );
+  QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::AllProperties, -99.0 ), 20.0 );
   //not set property
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::BlendMode ), 20.0 );
+  QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::BlendMode, -99.0 ), 20.0 );
   //not double
   object->setDataDefinedProperty( QgsLayoutObject::Transparency, new QgsDataDefined( true, true, QString( "'a'" ) ) );
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::Transparency ), 20.0 );
-  //null
-  object->setDataDefinedProperty( QgsLayoutObject::Transparency, new QgsDataDefined( true, true, QString( "'' || ''" ) ) );
+  QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::Transparency, -99.0 ), -99.0 );
+
+  //null (have to create a feature to test)
+  QgsVectorLayer* layer = new QgsVectorLayer( "Point?field=col1:integer", "A", "memory", false );
+  mLayout->context()->setLayer( layer );
+  QgsFeature testFeature;
+  testFeature.initAttributes( 1 );
+  QVariant null( QVariant::Double );
+  testFeature.setAttribute( 0, null );
+  mLayout->context()->setFeature( &testFeature );
+
+  //test with expression using feature
+  dd = new QgsDataDefined( true, false, QString(), QString( "col1" ) );
+  object->setDataDefinedProperty( QgsLayoutObject::Transparency, dd );
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::Transparency ), 20.0 );
+  QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::Transparency, -99.0 ), -99.0 );
 }
 
 #if 0

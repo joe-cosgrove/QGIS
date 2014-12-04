@@ -17,6 +17,8 @@
 #include "qgslayoutitem.h"
 #include "qgslayout.h"
 #include "qgslayoutcontext.h"
+#include "qgslayoututils.h"
+#include "qgis.h"
 #include <QPainter>
 
 QgsLayoutItem::QgsLayoutItem( QgsLayout *layout )
@@ -82,8 +84,7 @@ void QgsLayoutItem::setReferencePoint( const QgsLayoutItem::ReferencePoint &refe
   mReferencePoint = reference;
 
   //also need to adjust stored position
-  QPointF positionReferencePointLayoutUnits = adjustPointForReferencePosition( pos(), QSizeF( -rect().width(), -rect().height() ) );
-  mItemPosition = mLayout->convertFromLayoutUnits( positionReferencePointLayoutUnits, mItemPosition.units() );
+  updateStoredItemPosition();
   refreshItemPosition();
 }
 
@@ -124,9 +125,9 @@ void QgsLayoutItem::attemptMove( const QgsLayoutPoint& targetPoint )
 
   QgsLayoutPoint evaluatedPoint = applyDataDefinedPosition( targetPoint );
   QPointF evaluatedPointLayoutUnits = mLayout->convertToLayoutUnits( evaluatedPoint );
-  QPointF topLeftPointLayoutUnits = adjustPointForReferencePosition( evaluatedPointLayoutUnits, rect().size() );
+  QPointF topLeftPointLayoutUnits = adjustPointForReferencePosition( evaluatedPointLayoutUnits, rect().size(), mReferencePoint );
 
-  if ( topLeftPointLayoutUnits == pos() && targetPoint.units() == mItemPosition.units() )
+  if ( topLeftPointLayoutUnits == scenePos() && targetPoint.units() == mItemPosition.units() )
   {
     //TODO - add test for second condition
     return;
@@ -134,8 +135,20 @@ void QgsLayoutItem::attemptMove( const QgsLayoutPoint& targetPoint )
 
   QgsLayoutPoint referencePointTargetUnits = mLayout->convertFromLayoutUnits( evaluatedPointLayoutUnits, targetPoint.units() );
   mItemPosition = referencePointTargetUnits;
+  setScenePos( topLeftPointLayoutUnits );
+}
 
-  setPos( topLeftPointLayoutUnits );
+void QgsLayoutItem::setScenePos( const QPointF &destinationPos )
+{
+  //since setPos does not account for item rotation, use difference between
+  //current scenePos (which DOES account for rotation) and destination pos
+  //to calculate how much the item needs to move
+  setPos( pos() + ( destinationPos - scenePos() ) );
+}
+
+double QgsLayoutItem::itemRotation() const
+{
+  return rotation();
 }
 
 QgsLayoutPoint QgsLayoutItem::applyDataDefinedPosition( const QgsLayoutPoint& position )
@@ -162,6 +175,17 @@ QgsLayoutSize QgsLayoutItem::applyDataDefinedSize( const QgsLayoutSize &size )
   return QgsLayoutSize( evaluatedWidth, evaluatedHeight, size.units() );
 }
 
+double QgsLayoutItem::applyDataDefinedRotation( const double rotation )
+{
+  if ( !mLayout )
+  {
+    return rotation;
+  }
+
+  double evaluatedRotation = applyDataDefinedProperty( rotation, QgsLayoutObject::ItemRotation, 0.0 );
+  return evaluatedRotation;
+}
+
 void QgsLayoutItem::refreshDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property )
 {
   //update data defined properties and update item to match
@@ -177,32 +201,87 @@ void QgsLayoutItem::refreshDataDefinedProperty( const QgsLayoutObject::DataDefin
   {
     refreshItemPosition();
   }
+  if ( property == QgsLayoutObject::ItemRotation || property == QgsLayoutObject::AllProperties )
+  {
+    refreshItemRotation();
+  }
 }
 
-QPointF QgsLayoutItem::adjustPointForReferencePosition( const QPointF& position, const QSizeF& size )
+void QgsLayoutItem::setItemRotation( const double angle )
 {
-  switch ( mReferencePoint )
+  QPointF itemCenter = positionAtReferencePoint( QgsLayoutItem::Middle );
+  double rotationRequired = angle - itemRotation();
+  rotateItem( rotationRequired, itemCenter );
+}
+
+void QgsLayoutItem::updateStoredItemPosition()
+{
+  QPointF layoutPosReferencePoint = positionAtReferencePoint( mReferencePoint );
+  mItemPosition = mLayout->convertFromLayoutUnits( layoutPosReferencePoint, mItemPosition.units() );
+}
+
+void QgsLayoutItem::rotateItem( const double angle, const QPointF &transformOrigin )
+{
+  double evaluatedAngle = angle + rotation();
+  evaluatedAngle = QgsLayoutUtils::normalizedAngle( evaluatedAngle, true );
+  evaluatedAngle = applyDataDefinedRotation( evaluatedAngle );
+
+  QPointF itemTransformOrigin = mapFromScene( transformOrigin );
+  setTransformOriginPoint( itemTransformOrigin );
+  setRotation( evaluatedAngle );
+
+  //TODO - remember that double spin box for rotation should have limits of -100000, 100000
+  //as this function will automatically adjust value to valid ranges
+
+  //adjust stored position of item to match scene pos of reference point
+  updateStoredItemPosition();
+
+
+  //TODO
+//  emit itemRotationChanged( rotation );
+
+  //TODO
+  //update bounds of scene, since rotation may affect this
+  //mLayout->updateBounds();
+}
+
+QPointF QgsLayoutItem::itemPositionAtReferencePoint( const ReferencePoint reference, const QSizeF& size ) const
+{
+  switch ( reference )
   {
     case UpperMiddle:
-      return QPointF( position.x() - size.width() / 2.0, position.y() );
+      return QPointF( size.width() / 2.0, 0 );
     case UpperRight:
-      return QPointF( position.x() - size.width(), position.y() );
+      return QPointF( size.width(), 0 );
     case MiddleLeft:
-      return QPointF( position.x(), position.y() - size.height() / 2.0 );
+      return QPointF( 0, size.height() / 2.0 );
     case Middle:
-      return QPointF( position.x() - size.width() / 2.0, position.y() - size.height() / 2.0 );
+      return QPointF( size.width() / 2.0, size.height() / 2.0 );
     case MiddleRight:
-      return QPointF( position.x() - size.width(), position.y() - size.height() / 2.0 );
+      return QPointF( size.width(), size.height() / 2.0 );
     case LowerLeft:
-      return QPointF( position.x(), position.y() - size.height() );
+      return QPointF( 0, size.height() );
     case LowerMiddle:
-      return QPointF( position.x() - size.width() / 2.0, position.y() - size.height() );
+      return QPointF( size.width() / 2.0, size.height() );
     case LowerRight:
-      return QPointF( position.x() - size.width() , position.y() - size.height() );
+      return QPointF( size.width(), size.height() );
     case UpperLeft:
     default:
-      return position;
+      return QPointF( 0, 0 );
   }
+}
+
+QPointF QgsLayoutItem::adjustPointForReferencePosition( const QPointF& position, const QSizeF& size, const ReferencePoint &reference ) const
+{
+  QPointF itemPosition = mapFromScene( position ); //need to map from scene to handle item rotation
+  QPointF adjustedPointInsideItem = itemPosition - itemPositionAtReferencePoint( reference, size );
+  return mapToScene( adjustedPointInsideItem );
+}
+
+QPointF QgsLayoutItem::positionAtReferencePoint( const QgsLayoutItem::ReferencePoint &reference ) const
+{
+  QPointF pointWithinItem = itemPositionAtReferencePoint( reference, rect().size() );
+  return mapToScene( pointWithinItem );
 }
 
 QSizeF QgsLayoutItem::applyMinimumSize( const QSizeF& targetSize )
@@ -278,6 +357,11 @@ void QgsLayoutItem::refreshItemSize()
 void QgsLayoutItem::refreshItemPosition()
 {
   attemptMove( mItemPosition );
+}
+
+void QgsLayoutItem::refreshItemRotation()
+{
+  setItemRotation( itemRotation() );
 }
 
 void QgsLayoutItem::preparePainter( QPainter *painter )

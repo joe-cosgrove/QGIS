@@ -39,6 +39,7 @@ class CORE_EXPORT QgsLayoutUtils
      * clockwise from pointing vertical upward
      * @param arrowHeadWidth size of arrow head
     */
+    //TODO
     static void drawArrowHead( QPainter* p, const double x, const double y, const double angle, const double arrowHeadWidth );
 
     /**Calculates the angle of the line from p1 to p2 (counter clockwise,
@@ -47,6 +48,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @param p2 end point of line
      * @returns angle in degrees, clockwise from south
     */
+    //TODO
     static double angle( const QPointF& p1, const QPointF& p2 );
 
     /**Rotates a point / vector around the origin.
@@ -54,19 +56,23 @@ class CORE_EXPORT QgsLayoutUtils
      * @param x in/out: x coordinate before / after the rotation
      * @param y in/out: y cooreinate before / after the rotation
     */
+    //TODO
     static void rotate( const double angle, double& x, double& y );
 
-    /**Ensures that an angle is in the range 0 <= angle < 360
+    /**Ensures that an angle is in the range -360 < angle < 360
      * @param angle angle in degrees
-     * @returns equivalent angle within the range [0, 360)
+     * @param allowNegative set to true to allow angles between (-360,0). If false,
+     * angles are converted to positive angles in the range [0, 360).
+     * @returns equivalent angle within the range
      * @see snappedAngle
     */
-    static double normalizedAngle( const double angle );
+    static double normalizedAngle( const double angle, const bool allowNegative = false );
 
     /**Snaps an angle to its closest 45 degree angle
      * @param angle angle in degrees
      * @returns angle snapped to 0, 45/90/135/180/225/270 or 315 degrees
     */
+    //TODO
     static double snappedAngle( const double angle );
 
     /**Calculates the largest scaled version of originalRect which fits within boundsRect, when it is rotated by
@@ -76,18 +82,21 @@ class CORE_EXPORT QgsLayoutUtils
      * @param rotation the rotation in degrees to be applied to the rectangle
      * @returns largest scaled version of the rectangle possible
     */
+    //TODO
     static QRectF largestRotatedRectWithinBounds( const QRectF originalRect, const QRectF boundsRect, const double rotation );
 
     /**Returns the size in mm corresponding to a font point size
      * @param pointSize font size in points
      * @see mmToPoints
     */
+    //TODO
     static double pointsToMM( const double pointSize );
 
     /**Returns the size in mm corresponding to a font point size
      * @param mmSize font size in mm
      * @see pointsToMM
     */
+    //TODO
     static double mmToPoints( const double mmSize );
 
     /**Resizes a QRectF relative to a resized bounding rectangle.
@@ -97,6 +106,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @param boundsBefore QRectF of bounds before resize
      * @param boundsAfter QRectF of bounds after resize
     */
+    //TODO
     static void relativeResizeRect( QRectF &rectToResize, const QRectF &boundsBefore, const QRectF &boundsAfter );
 
     /**Returns a scaled position given a before and after range
@@ -107,6 +117,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @param afterMax maximum value in after range
      * @returns position scaled to range specified by afterMin and afterMax
     */
+    //TODO
     static double relativePosition( const double position, const double beforeMin, const double beforeMax, const double afterMin, const double afterMax );
 
     /**Reads all data defined properties from xml
@@ -117,6 +128,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @see readDataDefinedProperty
      * @see writeDataDefinedPropertyMap
     */
+    //TODO
     static void readDataDefinedPropertyMap( const QDomElement &itemElem,
                                             QMap< QgsLayoutObject::DataDefinedProperty, QString >* dataDefinedNames,
                                             QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties
@@ -129,6 +141,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @note this method was added in version 2.5
      * @see readDataDefinedPropertyMap
     */
+    //TODO
     static void readDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const QDomElement &ddElem,
                                          QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties );
 
@@ -140,6 +153,8 @@ class CORE_EXPORT QgsLayoutUtils
      * @note this method was added in version 2.5
      * @see readDataDefinedPropertyMap
     */
+
+    //TODO
     static void writeDataDefinedPropertyMap( QDomElement &itemElem, QDomDocument &doc,
         const QMap< QgsLayoutObject::DataDefinedProperty, QString >* dataDefinedNames,
         const QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties );
@@ -150,6 +165,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @returns font with size set in pixels
      * @note added in version 2.5
     */
+    //TODO
     static QFont scaledFontPixelSize( const QFont& font );
 
     /**Calculate font ascent in millimeters, including workarounds for QT font rendering issues
@@ -161,6 +177,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @see fontHeightCharacterMM
      * @see textWidthMM
      */
+    //TODO
     static double fontAscentMM( const QFont& font );
 
     /**Calculate font descent in millimeters, including workarounds for QT font rendering issues
@@ -172,6 +189,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @see fontHeightCharacterMM
      * @see textWidthMM
      */
+    //TODO
     static double fontDescentMM( const QFont& font );
 
     /**Calculate font height in millimeters, including workarounds for QT font rendering issues
@@ -184,6 +202,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @see fontHeightCharacterMM
      * @see textWidthMM
      */
+    //TODO
     static double fontHeightMM( const QFont& font );
 
     /**Calculate font height in millimeters of a single character, including workarounds for QT font
@@ -197,6 +216,8 @@ class CORE_EXPORT QgsLayoutUtils
      * @see fontHeightMM
      * @see textWidthMM
      */
+
+    //TODO
     static double fontHeightCharacterMM( const QFont& font, const QChar& character );
 
     /**Calculate font width in millimeters for a string, including workarounds for QT font
@@ -210,6 +231,8 @@ class CORE_EXPORT QgsLayoutUtils
      * @see fontHeightMM
      * @see fontHeightCharacterMM
      */
+
+    //TODO
     static double textWidthMM( const QFont& font, const QString& text );
 
     /**Draws text on a painter at a specific position, taking care of layout specific issues (calculation to pixel,
@@ -221,6 +244,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @param color color to draw text
      * @note added in version 2.5
      */
+    //TODO
     static void drawText( QPainter* painter, const QPointF& pos, const QString& text, const QFont& font, const QColor& color = QColor() );
 
     /**Draws text on a painter within a rectangle, taking care of layout specific issues (calculation to pixel,
@@ -235,6 +259,7 @@ class CORE_EXPORT QgsLayoutUtils
      * @param flags allows for passing Qt::TextFlags to control appearance of rendered text
      * @note added in version 2.5
      */
+    //TODO
     static void drawText( QPainter* painter, const QRectF& rect, const QString& text, const QFont& font, const QColor& color = QColor(), const Qt::AlignmentFlag halignment = Qt::AlignLeft, const Qt::AlignmentFlag valignment = Qt::AlignTop, const int flags = Qt::TextWordWrap );
 
 };

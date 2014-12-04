@@ -91,14 +91,14 @@ void QgsLayoutUtils::rotate( const double angle, double &x, double &y )
   y = yRot;
 }
 
-double QgsLayoutUtils::normalizedAngle( const double angle )
+double QgsLayoutUtils::normalizedAngle( const double angle, const bool allowNegative )
 {
   double clippedAngle = angle;
   if ( clippedAngle >= 360.0 || clippedAngle <= -360.0 )
   {
     clippedAngle = fmod( clippedAngle, 360.0 );
   }
-  if ( clippedAngle < 0.0 )
+  if ( !allowNegative && clippedAngle < 0.0 )
   {
     clippedAngle += 360.0;
   }

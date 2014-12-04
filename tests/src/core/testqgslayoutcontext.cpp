@@ -124,6 +124,10 @@ void TestQgsLayoutContext::feature()
   QVERIFY( context.feature() != testFeature2 );
   delete testFeature2; //deleting original feature
   QCOMPARE( context.feature()->attribute( 0 ), QVariant( "Test2" ) );
+
+  //setting null feature should also emit featureChanged
+  context.setFeature( 0 );
+  QCOMPARE( spyFeatureChanged.count(), 3 );
 }
 
 void TestQgsLayoutContext::layer()

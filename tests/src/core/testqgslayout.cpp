@@ -99,6 +99,8 @@ void TestQgsLayout::dpi()
   QSignalSpy spyDpiChanged( &layout, SIGNAL( dpiChanged( const double ) ) );
   layout.setDpi( 100.0 );
   QVERIFY( spyDpiChanged.count() == 1 );
+  layout.setDpi( 100.0 ); //should not emit a signal, as no change
+  QVERIFY( spyDpiChanged.count() == 1 );
 }
 
 void TestQgsLayout::units()

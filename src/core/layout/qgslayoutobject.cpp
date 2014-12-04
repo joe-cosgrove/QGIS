@@ -176,14 +176,28 @@ bool QgsLayoutObject::evaluateDataDefinedProperty( const DataDefinedProperty pro
 
 double QgsLayoutObject::applyDataDefinedProperty( const double originalValue, const QgsLayoutObject::DataDefinedProperty property )
 {
+  return applyDataDefinedProperty( originalValue, property, originalValue );
+}
+
+double QgsLayoutObject::applyDataDefinedProperty( const double originalValue, const QgsLayoutObject::DataDefinedProperty property, const double valueIfNull )
+{
   QVariant evaluatedValue;
   if ( evaluateDataDefinedProperty( property, evaluatedValue ) )
   {
+    if ( evaluatedValue.isNull() )
+    {
+      return valueIfNull;
+    }
+
     bool ok;
     double convertedEvaluatedValue = evaluatedValue.toDouble( &ok );
-    if ( ok && !evaluatedValue.isNull() )
+    if ( ok )
     {
       return convertedEvaluatedValue;
+    }
+    else
+    {
+      return valueIfNull;
     }
   }
   return originalValue;
