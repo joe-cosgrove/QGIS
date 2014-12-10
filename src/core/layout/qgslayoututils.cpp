@@ -258,6 +258,7 @@ double QgsLayoutUtils::relativePosition( const double position, const double bef
   return m * position + c;
 }
 
+#if 0
 void QgsLayoutUtils::readDataDefinedPropertyMap( const QDomElement &itemElem, QMap<QgsLayoutObject::DataDefinedProperty, QString> *dataDefinedNames, QMap<QgsLayoutObject::DataDefinedProperty, QgsDataDefined *> *dataDefinedProperties )
 {
   QMap<QgsLayoutObject::DataDefinedProperty, QString>::const_iterator i = dataDefinedNames->constBegin();
@@ -272,99 +273,7 @@ void QgsLayoutUtils::readDataDefinedPropertyMap( const QDomElement &itemElem, QM
     }
   }
 }
-
-void QgsLayoutUtils::readDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const QDomElement &ddElem, QMap<QgsLayoutObject::DataDefinedProperty, QgsDataDefined *> *dataDefinedProperties )
-{
-  if ( property == QgsLayoutObject::AllProperties || property == QgsLayoutObject::NoProperty )
-  {
-    //invalid property
-    return;
-  }
-
-  QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >::const_iterator it = dataDefinedProperties->constFind( property );
-
-  QgsDataDefined* dd = 0;
-  if ( it != dataDefinedProperties->constEnd() )
-  {
-    dd = it.value();
-  }
-  else
-  {
-    //QgsDataDefined for property doesn't currently exist, need to add new
-    dd = new QgsDataDefined();
-    dataDefinedProperties->insert( property, dd );
-  }
-
-  //set values for QgsDataDefined
-  QString active = ddElem.attribute( "active" );
-  if ( active.compare( "true", Qt::CaseInsensitive ) == 0 )
-  {
-    dd->setActive( true );
-  }
-  else
-  {
-    dd->setActive( false );
-  }
-  QString useExpr = ddElem.attribute( "useExpr" );
-  if ( useExpr.compare( "true", Qt::CaseInsensitive ) == 0 )
-  {
-    dd->setUseExpression( true );
-  }
-  else
-  {
-    dd->setUseExpression( false );
-  }
-  dd->setField( ddElem.attribute( "field" ) );
-  dd->setExpressionString( ddElem.attribute( "expr" ) );
-}
-
-void QgsLayoutUtils::writeDataDefinedPropertyMap( QDomElement &itemElem, QDomDocument &doc, const QMap<QgsLayoutObject::DataDefinedProperty, QString> *dataDefinedNames, const QMap<QgsLayoutObject::DataDefinedProperty, QgsDataDefined *> *dataDefinedProperties )
-{
-  QMap<QgsLayoutObject::DataDefinedProperty, QString >::const_iterator i = dataDefinedNames->constBegin();
-  for ( ; i != dataDefinedNames->constEnd(); ++i )
-  {
-    QString newElemName = i.value();
-
-    QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >::const_iterator it = dataDefinedProperties->find( i.key() );
-    if ( it != dataDefinedProperties->constEnd() )
-    {
-      QgsDataDefined* dd = it.value();
-      if ( dd )
-      {
-        bool active = dd->isActive();
-        bool useExpr = dd->useExpression();
-        QString expr = dd->expressionString();
-        QString field = dd->field();
-
-        bool defaultVals = ( !active && !useExpr && expr.isEmpty() && field.isEmpty() );
-
-        if ( !defaultVals )
-        {
-          QDomElement ddElem = doc.createElement( newElemName );
-          if ( active )
-          {
-            ddElem.setAttribute( "active", "true" );
-          }
-          else
-          {
-            ddElem.setAttribute( "active", "false" );
-          }
-          if ( useExpr )
-          {
-            ddElem.setAttribute( "useExpr", "true" );
-          }
-          else
-          {
-            ddElem.setAttribute( "useExpr", "false" );
-          }
-          ddElem.setAttribute( "expr", expr );
-          ddElem.setAttribute( "field", field );
-          itemElem.appendChild( ddElem );
-        }
-      }
-    }
-  }
-}
+#endif
 
 QFont QgsLayoutUtils::scaledFontPixelSize( const QFont &font )
 {

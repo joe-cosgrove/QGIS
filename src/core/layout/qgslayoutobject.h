@@ -97,19 +97,20 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     const QgsLayout* layout() const { return mLayout; }
     QgsLayout* layout() { return mLayout; }
 
-    /**Stores item state in DOM element
-     * @param elem is DOM element corresponding to item tag
-     * @param doc is the DOM document
+    /**Stores object properties within an XML DOM element.
+     * @param parentElement is the parent DOM element to store the object's properties in
+     * @param document DOM document
+     * @see readObjectXML
      */
     //TODO
-    virtual bool writeXML( QDomElement& elem, QDomDocument & doc ) const;
+    bool writeObjectXML( QDomElement& parentElement, QDomDocument& document ) const;
 
     /**Sets item state from DOM element
      * @param itemElem is DOM node corresponding to item tag
      * @param doc is DOM document
      */
     //TODO
-    virtual bool readXML( const QDomElement& itemElem, const QDomDocument& doc );
+    bool readObjectXML( const QDomElement& itemElem, const QDomDocument& doc );
 
     /**Returns a reference to the data defined settings for one of the item's data defined properties.
      * @param property data defined property to return
@@ -177,6 +178,26 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * the success of evaluating the data defined property.
     */
     double applyDataDefinedProperty( const double originalValue, const DataDefinedProperty property, const double valueIfNull );
+
+    /**Writes data defined properties to xml
+     * @param element DOM element in which to store data defined properties
+     * @param document DOM document
+     * @param dataDefinedNames map of data defined property to name used within xml
+     * @see readDataDefinedPropertyMap
+    */
+
+    //TODO
+    void writeDataDefinedPropertyMap( QDomElement &element, QDomDocument &document,
+                                      const QMap< QgsLayoutObject::DataDefinedProperty, QString >* dataDefinedNames ) const;
+
+    /**Reads a single data defined property from xml DOM element
+     * @param property data defined property to read
+     * @param element dom element containing settings for data defined property
+     * @returns true if property was successfully read from xml
+     * @see readDataDefinedPropertyMap
+    */
+    bool readDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const QDomElement &element );
+
 
   signals:
     /**Emitted when the object changes. Signifies that the widgets must update their

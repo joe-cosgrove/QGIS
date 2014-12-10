@@ -38,6 +38,7 @@ class TestQgsLayoutObject: public QObject
     void evaluateDDProperty(); //test evaluating data defined properties
     void applyDoubleDD(); //test applyDataDefinedProperty for doubles
     //  void writeRetrieveDDProperty(); //test writing and retrieving dd properties from xml
+    void readDDProperty();
 
   private:
     QgsLayout* mLayout;
@@ -311,6 +312,62 @@ void TestQgsLayoutObject::applyDoubleDD()
   object->setDataDefinedProperty( QgsLayoutObject::Transparency, dd );
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::Transparency ), 20.0 );
   QCOMPARE( object->applyDataDefinedProperty( 20.0, QgsLayoutObject::Transparency, -99.0 ), -99.0 );
+}
+
+void TestQgsLayoutObject::readDDProperty()
+{
+  QgsLayoutObject* object = new QgsLayoutObject( mLayout );
+
+  //create a test dom element
+  QDomImplementation DomImplementation;
+  QDomDocumentType documentType =
+    DomImplementation.createDocumentType(
+      "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
+  QDomDocument doc( documentType );
+  QDomElement rootNode = doc.createElement( "qgis" );
+  QDomElement itemElem = doc.createElement( "item" );
+
+  //dd element
+  QDomElement ddElem = doc.createElement( "dataDefinedProperty" );
+  ddElem.setAttribute( "active", "true" );
+  ddElem.setAttribute( "useExpr", "true" );
+  ddElem.setAttribute( "expr", "test expression" );
+  ddElem.setAttribute( "field", "test field" );
+  itemElem.appendChild( ddElem );
+  rootNode.appendChild( itemElem );
+
+  //try reading dd elements
+
+  //bad data defined properties - should not be read into dataDefinedProperties map
+  QVERIFY( !object->readDataDefinedProperty( QgsLayoutObject::NoProperty, ddElem ) );
+  QVERIFY( !object->readDataDefinedProperty( QgsLayoutObject::AllProperties, ddElem ) );
+  //bad element
+  QDomElement badElem;
+  QVERIFY( !object->readDataDefinedProperty( QgsLayoutObject::Transparency, badElem ) );
+
+  //read into valid property
+#if 0
+  QgsComposerUtils::readDataDefinedProperty( QgsComposerObject::TestProperty, ddElem, &dataDefinedProperties );
+  QCOMPARE( dataDefinedProperties.count(), 1 );
+  QVERIFY(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->isActive() );
+  QVERIFY(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->useExpression() );
+  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->expressionString(), QString( "test expression" ) );
+  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->field(), QString( "test field" ) );
+
+  //reading false parameters
+  QDomElement ddElem2 = doc.createElement( "dataDefinedProperty2" );
+  ddElem2.setAttribute( "active", "false" );
+  ddElem2.setAttribute( "useExpr", "false" );
+  itemElem.appendChild( ddElem2 );
+  QgsComposerUtils::readDataDefinedProperty( QgsComposerObject::TestProperty, ddElem2, &dataDefinedProperties );
+  QCOMPARE( dataDefinedProperties.count(), 1 );
+  QVERIFY( !( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->isActive() );
+  QVERIFY( !( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->useExpression() );
+  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->expressionString(), QString() );
+  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->field(), QString() );
+
+  delete object;
+#endif
 }
 
 #if 0

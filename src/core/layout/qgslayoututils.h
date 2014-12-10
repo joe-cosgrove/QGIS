@@ -145,20 +145,6 @@ class CORE_EXPORT QgsLayoutUtils
     static void readDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const QDomElement &ddElem,
                                          QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties );
 
-    /**Writes data defined properties to xml
-     * @param itemElem DOM element in which to store data defined properties
-     * @param doc DOM document
-     * @param dataDefinedNames map of data defined property to name used within xml
-     * @param dataDefinedProperties map of data defined properties to QgsDataDefined for storing in xml
-     * @note this method was added in version 2.5
-     * @see readDataDefinedPropertyMap
-    */
-
-    //TODO
-    static void writeDataDefinedPropertyMap( QDomElement &itemElem, QDomDocument &doc,
-        const QMap< QgsLayoutObject::DataDefinedProperty, QString >* dataDefinedNames,
-        const QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties );
-
     /**Returns a font where size is set in pixels and the size has been upscaled with FONT_WORKAROUND_SCALE
      * to workaround QT font rendering bugs
      * @param font source font with size set in points
