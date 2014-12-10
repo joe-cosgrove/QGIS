@@ -19,10 +19,18 @@ ENDIF()
 SET (CTEST_BUILD_CONFIGURATION "Debug")
 
 #flags for coverage
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" )
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage")
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage")
-SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKED_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" )
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKED_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'-fprofile-arcs -ftest-coverage --coverage" FORCE)
+
+SET(CMAKE_CXX_FLAGS_COVERAGE "-g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_C_FLAGS_COVERAGE "-g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_EXE_LINKER_FLAGS_COVERAGE "-Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_SHARED_LINKER_FLAGS_COVERAGE "-Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
+SET(CMAKE_MODULE_LINKER_FLAGS_COVERAGE "-Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'-fprofile-arcs -ftest-coverage --coverage" FORCE)
+
 SET(COVERAGE_EXTRA_FLAGS "-l -p") #enable duplicate file names
  
 SET (INITIAL_CACHE "
