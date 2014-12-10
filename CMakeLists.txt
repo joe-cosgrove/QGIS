@@ -406,13 +406,14 @@ IF(MSVC)
 ENDIF(MSVC)
 
 IF(ENABLE_COVERAGE)
-  INCLUDE("cmake/modules/coverage/CodeCoverage.cmake")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
-  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
-  SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
-  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage")
-  SETUP_TARGET_FOR_COVERAGE(qgis_coverage ctest coverage)
+  #INCLUDE("cmake/modules/coverage/CodeCoverage.cmake")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'")
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'")
+  SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage --coverage -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'")
+  SET(COVERAGE_EXTRA_FLAGS "-l -p") #enable duplicate file names
+  #SETUP_TARGET_FOR_COVERAGE(qgis_coverage ctest coverage)
 ENDIF(ENABLE_COVERAGE)
 
 #############################################################

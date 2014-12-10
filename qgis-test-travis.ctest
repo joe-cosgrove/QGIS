@@ -1,5 +1,9 @@
 SET (CTEST_SOURCE_DIRECTORY $ENV{TRAVIS_BUILD_DIR})
 SET (CTEST_BINARY_DIRECTORY "$ENV{TRAVIS_BUILD_DIR}/build")
+
+#SET (CTEST_SOURCE_DIRECTORY ../QGIS)
+#SET (CTEST_BINARY_DIRECTORY ../build-QGIS-Desktop-Default)
+
 #SET (CTEST_SOURCE_DIRECTORY /usr/src/QGIS)
 #SET (CTEST_BINARY_DIRECTORY /usr/src/qgis-build)
 
@@ -17,28 +21,16 @@ ELSE()
   SET (CTEST_BUILD_NAME "PR: $ENV{TRAVIS_PULL_REQUEST} / $ENV{TRAVIS_BRANCH} ($ENV{TRAVIS_COMMIT})")
 ENDIF()
 SET (CTEST_BUILD_CONFIGURATION "Debug")
+SET (CMAKE_BUILD_TYPE "Debug")
 
-#flags for coverage
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKED_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'-fprofile-arcs -ftest-coverage --coverage" FORCE)
-
-SET(CMAKE_CXX_FLAGS "-g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_C_FLAGS "-g -O0 -Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_EXE_LINKER_FLAGS "-Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_SHARED_LINKER_FLAGS "-Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*' --coverage -fprofile-arcs -ftest-coverage" FORCE)
-SET(CMAKE_MODULE_LINKER_FLAGS "-Xclang -coverage-cfg-checksum -Xclang -coverage-version='406*'-fprofile-arcs -ftest-coverage --coverage" FORCE)
-
-SET(COVERAGE_EXTRA_FLAGS "-l -p") #enable duplicate file names
- 
 SET (INITIAL_CACHE "
 BUILDNAME:STRING=${CTEST_BUILD_NAME}
 SITE:STRING=${CTEST_SITE}
 CTEST_USE_LAUNCHERS:BOOL=ON
 ")
 
+SET(COVERAGE_EXTRA_FLAGS "-l -p") #enable duplicate file names
+ 
 SET (CTEST_NOTES_FILES
 ${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}
 ${CTEST_BINARY_DIRECTORY}/CMakeCache.txt
@@ -59,6 +51,6 @@ IF(NOT ${TESTRES} EQUAL 0)
   MESSAGE( FATAL_ERROR "Test failed." )
 ENDIF(NOT ${TESTRES} EQUAL 0)
 
-ctest_submit (RETRY_COUNT 3 RETRY_DELAY 30)
+#ctest_submit (RETRY_COUNT 3 RETRY_DELAY 30)
 
 
