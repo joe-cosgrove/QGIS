@@ -67,25 +67,35 @@ bool QgsLayoutObject::writeObjectXML( QDomElement &parentElement, QDomDocument &
     return false;
   }
 
-  //data defined properties
-  //QgsLayoutUtils::writeDataDefinedPropertyMap( parentElement, document, &mDataDefinedNames, &mDataDefinedProperties );
+  //create object element
+  QDomElement objectElement = document.createElement( "LayoutObject" );
 
+  //data defined properties
+  writeDataDefinedPropertyMap( objectElement, document );
+
+  parentElement.appendChild( objectElement );
   return true;
 }
 
-/*bool QgsLayoutObject::readXML( const QDomElement &itemElem, const QDomDocument &doc )
+bool QgsLayoutObject::readObjectXML( const QDomElement& parentElement, const QDomDocument& document )
 {
-  Q_UNUSED( doc );
-  if ( itemElem.isNull() )
+  Q_UNUSED( document );
+  if ( parentElement.isNull() )
   {
     return false;
   }
 
-  //data defined properties
-  QgsLayoutUtils::readDataDefinedPropertyMap( itemElem, &mDataDefinedNames, &mDataDefinedProperties );
+  QDomNodeList objectNodeList = parentElement.elementsByTagName( "LayoutObject" );
+  if ( objectNodeList.size() < 1 )
+  {
+    return false;
+  }
+  QDomElement objectElement = objectNodeList.at( 0 ).toElement();
 
+  //data defined properties
+  readDataDefinedPropertyMap( objectElement );
   return true;
-}*/
+}
 
 bool QgsLayoutObject::propertyIsValid( const QgsLayoutObject::DataDefinedProperty property ) const
 {
@@ -203,22 +213,31 @@ double QgsLayoutObject::applyDataDefinedProperty( const double originalValue, co
   return originalValue;
 }
 
-void QgsLayoutObject::writeDataDefinedPropertyMap( QDomElement &element, QDomDocument &document, const QMap<QgsLayoutObject::DataDefinedProperty, QString> *dataDefinedNames ) const
+void QgsLayoutObject::writeDataDefinedPropertyMap( QDomElement &element, QDomDocument &document ) const
 {
-  QMap<QgsLayoutObject::DataDefinedProperty, QString >::const_iterator i = dataDefinedNames->constBegin();
-  for ( ; i != dataDefinedNames->constEnd(); ++i )
+  QMap<QgsLayoutObject::DataDefinedProperty, QString >::const_iterator i = mDataDefinedNames.constBegin();
+  for ( ; i != mDataDefinedNames.constEnd(); ++i )
   {
-    QString newElemName = i.value();
-
-    QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >::const_iterator it = mDataDefinedProperties.find( i.key() );
-    if ( it != mDataDefinedProperties.constEnd() )
+    QString name = i.value();
+    QgsDataDefined* dd = dataDefinedProperty( i.key() );
+    if ( dd && !dd->hasDefaultValues() )
     {
-      QgsDataDefined* dd = it.value();
-      if ( dd && !dd->hasDefaultValues() )
-      {
-        QDomElement ddElem = dd->toXmlElement( document, newElemName );
-        element.appendChild( ddElem );
-      }
+      element.appendChild( dd->toXmlElement( document, name ) );
+    }
+  }
+}
+
+void QgsLayoutObject::readDataDefinedPropertyMap( const QDomElement &element )
+{
+  QMap<QgsLayoutObject::DataDefinedProperty, QString>::const_iterator i = mDataDefinedNames.constBegin();
+  for ( ; i != mDataDefinedNames.constEnd(); ++i )
+  {
+    QString elemName = i.value();
+    QDomNodeList ddNodeList = element.elementsByTagName( elemName );
+    if ( ddNodeList.size() > 0 )
+    {
+      QDomElement ddElem = ddNodeList.at( 0 ).toElement();
+      readDataDefinedProperty( i.key(), ddElem );
     }
   }
 }

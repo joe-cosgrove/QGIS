@@ -33,12 +33,12 @@ class TestQgsLayoutObject: public QObject
     void cleanup();// will be called after every testfunction.
     void creation(); //test creation of QgsLayoutObject
     void layout(); //test fetching layout from QgsLayoutObject
-//    void writeReadXml(); //test writing object to xml and reading back from it
+    void writeReadXml(); //test writing object to xml and reading back from it
     void setRetrieveDDProperty(); //test setting and retreiving a data defined property
     void evaluateDDProperty(); //test evaluating data defined properties
     void applyDoubleDD(); //test applyDataDefinedProperty for doubles
-    //  void writeRetrieveDDProperty(); //test writing and retrieving dd properties from xml
-    void readDDProperty();
+    void readDDProperty(); //test reading data defined property from xml
+    void writeRetrieveDDProperties(); //test writing and retrieving dd properties from xml
 
   private:
     QgsLayout* mLayout;
@@ -95,44 +95,46 @@ void TestQgsLayoutObject::layout()
   delete object;
 }
 
-#if 0
 void TestQgsLayoutObject::writeReadXml()
 {
-  QgsComposerObject* object = new QgsComposerObject( mComposition );
+  QgsLayoutObject* object = new QgsLayoutObject( mLayout );
   QDomImplementation DomImplementation;
   QDomDocumentType documentType =
     DomImplementation.createDocumentType(
       "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
   QDomDocument doc( documentType );
 
-  //test writing with no node
+  //test writing with no parent node
   QDomElement rootNode = doc.createElement( "qgis" );
   QDomElement noNode;
-  QCOMPARE( object->writeXML( noNode, doc ), false );
+  QCOMPARE( object->writeObjectXML( noNode, doc ), false );
 
   //test writing with node
-  QDomElement composerObjectElem = doc.createElement( "ComposerObject" );
-  rootNode.appendChild( composerObjectElem );
-  QVERIFY( object->writeXML( composerObjectElem, doc ) );
+  QDomElement layoutObjectElem = doc.createElement( "item" );
+  rootNode.appendChild( layoutObjectElem );
+  QVERIFY( object->writeObjectXML( layoutObjectElem, doc ) );
 
   //check if object node was written
-  QDomNodeList evalNodeList = rootNode.elementsByTagName( "ComposerObject" );
+  QDomNodeList evalNodeList = rootNode.elementsByTagName( "LayoutObject" );
   QCOMPARE( evalNodeList.count(), 1 );
 
   //test reading node
-  QgsComposerObject* readObject = new QgsComposerObject( mComposition );
+  QgsLayoutObject* readObject = new QgsLayoutObject( mLayout );
 
   //test reading with no node
-  QCOMPARE( readObject->readXML( noNode, doc ), false );
+  QCOMPARE( readObject->readObjectXML( noNode, doc ), false );
+
+  //test node with no layout object child
+  QDomElement badLayoutObjectElem = doc.createElement( "item" );
+  rootNode.appendChild( badLayoutObjectElem );
+  QCOMPARE( readObject->readObjectXML( badLayoutObjectElem, doc ), false );
 
   //test reading node
-  QVERIFY( readObject->readXML( composerObjectElem, doc ) );
+  QVERIFY( readObject->readObjectXML( layoutObjectElem, doc ) );
 
   delete object;
   delete readObject;
 }
-#endif
-
 
 void TestQgsLayoutObject::setRetrieveDDProperty()
 {
@@ -324,17 +326,14 @@ void TestQgsLayoutObject::readDDProperty()
     DomImplementation.createDocumentType(
       "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
   QDomDocument doc( documentType );
-  QDomElement rootNode = doc.createElement( "qgis" );
-  QDomElement itemElem = doc.createElement( "item" );
 
   //dd element
-  QDomElement ddElem = doc.createElement( "dataDefinedProperty" );
-  ddElem.setAttribute( "active", "true" );
-  ddElem.setAttribute( "useExpr", "true" );
-  ddElem.setAttribute( "expr", "test expression" );
-  ddElem.setAttribute( "field", "test field" );
-  itemElem.appendChild( ddElem );
-  rootNode.appendChild( itemElem );
+  QgsDataDefined dd;
+  dd.setActive( true );
+  dd.setUseExpression( true );
+  dd.setExpressionString( QString( "test expression" ) );
+  dd.setField( QString( "test field" ) );
+  QDomElement ddElem = dd.toXmlElement( doc, "ddelem" );
 
   //try reading dd elements
 
@@ -344,38 +343,37 @@ void TestQgsLayoutObject::readDDProperty()
   //bad element
   QDomElement badElem;
   QVERIFY( !object->readDataDefinedProperty( QgsLayoutObject::Transparency, badElem ) );
+  QVERIFY( !object->dataDefinedProperty( QgsLayoutObject::Transparency ) );
 
-  //read into valid property
-#if 0
-  QgsComposerUtils::readDataDefinedProperty( QgsComposerObject::TestProperty, ddElem, &dataDefinedProperties );
-  QCOMPARE( dataDefinedProperties.count(), 1 );
-  QVERIFY(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->isActive() );
-  QVERIFY(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->useExpression() );
-  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->expressionString(), QString( "test expression" ) );
-  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->field(), QString( "test field" ) );
+  //read into valid property, not already set
+  QVERIFY( object->readDataDefinedProperty( QgsLayoutObject::Transparency, ddElem ) );
+  //check result
+  QCOMPARE( *( object->dataDefinedProperty( QgsLayoutObject::Transparency ) ), dd );
 
-  //reading false parameters
-  QDomElement ddElem2 = doc.createElement( "dataDefinedProperty2" );
-  ddElem2.setAttribute( "active", "false" );
-  ddElem2.setAttribute( "useExpr", "false" );
-  itemElem.appendChild( ddElem2 );
-  QgsComposerUtils::readDataDefinedProperty( QgsComposerObject::TestProperty, ddElem2, &dataDefinedProperties );
-  QCOMPARE( dataDefinedProperties.count(), 1 );
-  QVERIFY( !( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->isActive() );
-  QVERIFY( !( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->useExpression() );
-  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->expressionString(), QString() );
-  QCOMPARE(( dataDefinedProperties.value( QgsComposerObject::TestProperty ) )->field(), QString() );
+  //test reading into already set property
+  QgsDataDefined dd2;
+  dd2.setActive( false );
+  dd2.setUseExpression( false );
+  dd2.setExpressionString( QString( "test expression2" ) );
+  dd2.setField( QString( "test field2" ) );
+  QDomElement dd2Elem = dd2.toXmlElement( doc, "dd2elem" );
+
+  QVERIFY( object->readDataDefinedProperty( QgsLayoutObject::Transparency, dd2Elem ) );
+  //check result
+  QCOMPARE( *( object->dataDefinedProperty( QgsLayoutObject::Transparency ) ), dd2 );
 
   delete object;
-#endif
 }
 
-#if 0
-void TestQgsLayoutObject::writeRetrieveDDProperty()
+void TestQgsLayoutObject::writeRetrieveDDProperties()
 {
-  QgsComposerObject* object = new QgsComposerObject( mComposition );
-  object->setDataDefinedProperty( QgsComposerObject::TestProperty, true, true, QString( "10 + 40" ), QString() );
-  object->prepareDataDefinedExpressions();
+  QgsLayoutObject* object = new QgsLayoutObject( mLayout );
+  QgsDataDefined* ddBefore = new QgsDataDefined();
+  ddBefore->setActive( true );
+  ddBefore->setUseExpression( true );
+  ddBefore->setExpressionString( QString( "10+40" ) );
+  ddBefore->setField( QString( "field" ) );
+  object->setDataDefinedProperty( QgsLayoutObject::TestProperty, ddBefore );
 
   //test writing object with dd settings
   QDomImplementation DomImplementation;
@@ -384,37 +382,35 @@ void TestQgsLayoutObject::writeRetrieveDDProperty()
       "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
   QDomDocument doc( documentType );
   QDomElement rootNode = doc.createElement( "qgis" );
-  QDomElement composerObjectElem = doc.createElement( "ComposerObject" );
-  rootNode.appendChild( composerObjectElem );
-  QVERIFY( object->writeXML( composerObjectElem, doc ) );
+  QDomElement itemElem = doc.createElement( "item" );
+  rootNode.appendChild( itemElem );
+  QVERIFY( object->writeObjectXML( itemElem, doc ) );
 
   //check if object node was written
-  QDomNodeList evalNodeList = rootNode.elementsByTagName( "ComposerObject" );
+  QDomNodeList evalNodeList = itemElem.elementsByTagName( "LayoutObject" );
   QCOMPARE( evalNodeList.count(), 1 );
 
   //test reading node containing dd settings
-  QgsComposerObject* readObject = new QgsComposerObject( mComposition );
-  QVERIFY( readObject->readXML( composerObjectElem, doc ) );
+  QgsLayoutObject* readObject = new QgsLayoutObject( mLayout );
+  QVERIFY( readObject->readObjectXML( itemElem, doc ) );
 
-  QVariant result;
   //test getting not set dd from restored object
-  QgsDataDefined* dd = readObject->dataDefinedProperty( QgsComposerObject::BlendMode );
-  QVERIFY( !dd );
+  QVERIFY( !readObject->dataDefinedProperty( QgsLayoutObject::BlendMode ) );
 
   //test getting good property
-  dd = readObject->dataDefinedProperty( QgsComposerObject::TestProperty );
-  QVERIFY( dd );
-  QVERIFY( dd->isActive() );
-  QVERIFY( dd->useExpression() );
+  QgsDataDefined* ddAfter = readObject->dataDefinedProperty( QgsLayoutObject::TestProperty );
+  QVERIFY( ddAfter );
+  QCOMPARE( *ddAfter, *ddBefore );
   //evaluating restored dd property
-  QVERIFY( readObject->dataDefinedEvaluate( QgsComposerObject::TestProperty, result ) );
+  QVariant result;
+  QVERIFY( readObject->evaluateDataDefinedProperty( QgsLayoutObject::TestProperty, result ) );
   QCOMPARE( result.toInt(), 50 );
 
   delete object;
   delete readObject;
-}
 
-#endif
+  //HERE - haven't run test
+}
 
 QTEST_MAIN( TestQgsLayoutObject )
 #include "testqgslayoutobject.moc"

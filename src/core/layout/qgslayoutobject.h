@@ -106,11 +106,12 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     bool writeObjectXML( QDomElement& parentElement, QDomDocument& document ) const;
 
     /**Sets item state from DOM element
-     * @param itemElem is DOM node corresponding to item tag
-     * @param doc is DOM document
+     * @param parentElement is the parent DOM element for the object
+     * @param document DOM document
+     * @see writeObjectXML
      */
     //TODO
-    bool readObjectXML( const QDomElement& itemElem, const QDomDocument& doc );
+    bool readObjectXML( const QDomElement& parentElement, const QDomDocument& document );
 
     /**Returns a reference to the data defined settings for one of the item's data defined properties.
      * @param property data defined property to return
@@ -136,7 +137,6 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * @param property data defined property to refresh. If property is set to
      * QgsLayoutObject::AllProperties then all data defined properties for the item will be
      * refreshed.
-     * @note this method was added in version 2.5
     */
     //TODO
     virtual void refreshDataDefinedProperty( const DataDefinedProperty property = AllProperties );
@@ -146,7 +146,7 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     QgsLayout* mLayout;
 
     /**Map of data defined properties for the item to string name to use when exporting item to xml*/
-    QMap< DataDefinedProperty, QString > mDataDefinedNames;
+    QMap< QgsLayoutObject::DataDefinedProperty, QString > mDataDefinedNames;
 
     /**Evaluate a data defined property and return the calculated value
      * @param property data defined property to evaluate
@@ -182,13 +182,11 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     /**Writes data defined properties to xml
      * @param element DOM element in which to store data defined properties
      * @param document DOM document
-     * @param dataDefinedNames map of data defined property to name used within xml
      * @see readDataDefinedPropertyMap
     */
 
     //TODO
-    void writeDataDefinedPropertyMap( QDomElement &element, QDomDocument &document,
-                                      const QMap< QgsLayoutObject::DataDefinedProperty, QString >* dataDefinedNames ) const;
+    void writeDataDefinedPropertyMap( QDomElement &element, QDomDocument &document ) const;
 
     /**Reads a single data defined property from xml DOM element
      * @param property data defined property to read
@@ -198,6 +196,13 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     */
     bool readDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const QDomElement &element );
 
+    /**Reads all data defined properties from xml
+     * @param element DOM element containing data defined properties
+     * @see readDataDefinedProperty
+     * @see writeDataDefinedPropertyMap
+    */
+    //TODO
+    void readDataDefinedPropertyMap( const QDomElement &element );
 
   signals:
     /**Emitted when the object changes. Signifies that the widgets must update their

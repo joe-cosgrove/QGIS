@@ -120,31 +120,6 @@ class CORE_EXPORT QgsLayoutUtils
     //TODO
     static double relativePosition( const double position, const double beforeMin, const double beforeMax, const double afterMin, const double afterMax );
 
-    /**Reads all data defined properties from xml
-     * @param itemElem dom element containing data defined properties
-     * @param dataDefinedNames map of data defined property to name used within xml
-     * @param dataDefinedProperties map of data defined properties to QgsDataDefined in which to store properties from xml
-     * @note this method was added in version 2.5
-     * @see readDataDefinedProperty
-     * @see writeDataDefinedPropertyMap
-    */
-    //TODO
-    static void readDataDefinedPropertyMap( const QDomElement &itemElem,
-                                            QMap< QgsLayoutObject::DataDefinedProperty, QString >* dataDefinedNames,
-                                            QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties
-                                          );
-
-    /**Reads a single data defined property from xml DOM element
-     * @param property data defined property to read
-     * @param ddElem dom element containing settings for data defined property
-     * @param dataDefinedProperties map of data defined properties to QgsDataDefined in which to store properties from xml
-     * @note this method was added in version 2.5
-     * @see readDataDefinedPropertyMap
-    */
-    //TODO
-    static void readDataDefinedProperty( const QgsLayoutObject::DataDefinedProperty property, const QDomElement &ddElem,
-                                         QMap< QgsLayoutObject::DataDefinedProperty, QgsDataDefined* >* dataDefinedProperties );
-
     /**Returns a font where size is set in pixels and the size has been upscaled with FONT_WORKAROUND_SCALE
      * to workaround QT font rendering bugs
      * @param font source font with size set in points

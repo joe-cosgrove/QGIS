@@ -258,23 +258,6 @@ double QgsLayoutUtils::relativePosition( const double position, const double bef
   return m * position + c;
 }
 
-#if 0
-void QgsLayoutUtils::readDataDefinedPropertyMap( const QDomElement &itemElem, QMap<QgsLayoutObject::DataDefinedProperty, QString> *dataDefinedNames, QMap<QgsLayoutObject::DataDefinedProperty, QgsDataDefined *> *dataDefinedProperties )
-{
-  QMap<QgsLayoutObject::DataDefinedProperty, QString>::const_iterator i = dataDefinedNames->constBegin();
-  for ( ; i != dataDefinedNames->constEnd(); ++i )
-  {
-    QString elemName = i.value();
-    QDomNodeList ddNodeList = itemElem.elementsByTagName( elemName );
-    if ( ddNodeList.size() > 0 )
-    {
-      QDomElement ddElem = ddNodeList.at( 0 ).toElement();
-      readDataDefinedProperty( i.key(), ddElem, dataDefinedProperties );
-    }
-  }
-}
-#endif
-
 QFont QgsLayoutUtils::scaledFontPixelSize( const QFont &font )
 {
   //upscale using FONT_WORKAROUND_SCALE
