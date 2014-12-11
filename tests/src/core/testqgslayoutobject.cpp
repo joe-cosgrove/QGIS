@@ -229,7 +229,7 @@ void TestQgsLayoutObject::evaluateDDProperty()
   QVERIFY( !result.isValid() );
 
   //test with bad expression
-  dd = new QgsDataDefined( true, true, QString( "a' + ." ), QString() );
+  dd = new QgsDataDefined( true, true, QString( "-null" ), QString() );
   result.clear();
   object->setDataDefinedProperty( QgsLayoutObject::Transparency, dd );
   QVERIFY( !object->evaluateDataDefinedProperty( QgsLayoutObject::Transparency, result ) );
