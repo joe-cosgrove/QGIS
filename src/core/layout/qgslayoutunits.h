@@ -18,6 +18,8 @@
 #ifndef QGSLAYOUTUNITS_H
 #define QGSLAYOUTUNITS_H
 
+#include <QString>
+
 /**\ingroup Layout
  * \class QgsLayoutUnits
  * \brief
@@ -54,6 +56,19 @@ class CORE_EXPORT QgsLayoutUnits
     */
     static UnitType unitType( const Units units );
 
+    /**Encodes a unit type to a string
+     * @param units unit type to encode
+     * @returns encoded string
+     * @see decodeUnits
+    */
+    static QString encodeUnits( const QgsLayoutUnits::Units units );
+
+    /**Decodes a unit type from a string
+     * @param string string to decode
+     * @returns decoded units
+     * @see encodeUnits
+    */
+    static QgsLayoutUnits::Units decodeUnits( const QString &string );
 };
 
 #endif // QGSLAYOUTUNITS_H

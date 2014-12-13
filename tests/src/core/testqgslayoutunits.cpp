@@ -34,6 +34,9 @@ class TestQgsLayoutUnits : public QObject
     void init();// will be called before each testfunction is executed.
     void cleanup();// will be called after every testfunction.
 
+    //QgsLayoutUnits
+    void encodeDecode(); //test encoding and decoding layout units
+
     //QgsLayoutMeasurement
     void create(); //test creating new measurement
     void gettersSetters(); //test getting/setting properties
@@ -100,6 +103,18 @@ void TestQgsLayoutUnits::init()
 void TestQgsLayoutUnits::cleanup()
 {
 
+}
+
+void TestQgsLayoutUnits::encodeDecode()
+{
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Millimeters ) ) , QgsLayoutUnits::Millimeters );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Centimeters ) ) , QgsLayoutUnits::Centimeters );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Meters ) ) , QgsLayoutUnits::Meters );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Inches ) ) , QgsLayoutUnits::Inches );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Feet ) ) , QgsLayoutUnits::Feet );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Points ) ) , QgsLayoutUnits::Points );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Picas ) ) , QgsLayoutUnits::Picas );
+  QCOMPARE( QgsLayoutUnits::decodeUnits( QgsLayoutUnits::encodeUnits( QgsLayoutUnits::Pixels ) ) , QgsLayoutUnits::Pixels );
 }
 
 void TestQgsLayoutUnits::create()
