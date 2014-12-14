@@ -100,18 +100,18 @@ class CORE_EXPORT QgsLayoutObject: public QObject
     /**Stores object properties within an XML DOM element.
      * @param parentElement is the parent DOM element to store the object's properties in
      * @param document DOM document
-     * @see readObjectXML
+     * @returns true if write was successful
+     * @see readObjectPropertiesFromElement
      */
-    //TODO
-    bool writeObjectXML( QDomElement& parentElement, QDomDocument& document ) const;
+    bool writeObjectPropertiesToElement( QDomElement& parentElement, QDomDocument& document ) const;
 
-    /**Sets item state from DOM element
+    /**Sets object properties from a DOM element
      * @param parentElement is the parent DOM element for the object
      * @param document DOM document
-     * @see writeObjectXML
+     * @returns true if read was successful
+     * @see writeObjectPropertiesToElement
      */
-    //TODO
-    bool readObjectXML( const QDomElement& parentElement, const QDomDocument& document );
+    bool readObjectPropertiesFromElement( const QDomElement& parentElement, const QDomDocument& document );
 
     /**Returns a reference to the data defined settings for one of the item's data defined properties.
      * @param property data defined property to return
@@ -184,8 +184,6 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * @param document DOM document
      * @see readDataDefinedPropertyMap
     */
-
-    //TODO
     void writeDataDefinedPropertyMap( QDomElement &element, QDomDocument &document ) const;
 
     /**Reads a single data defined property from xml DOM element
@@ -201,7 +199,6 @@ class CORE_EXPORT QgsLayoutObject: public QObject
      * @see readDataDefinedProperty
      * @see writeDataDefinedPropertyMap
     */
-    //TODO
     void readDataDefinedPropertyMap( const QDomElement &element );
 
   signals:

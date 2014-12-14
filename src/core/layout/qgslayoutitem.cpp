@@ -284,6 +284,114 @@ QPointF QgsLayoutItem::positionAtReferencePoint( const QgsLayoutItem::ReferenceP
   return mapToScene( pointWithinItem );
 }
 
+QDomElement QgsLayoutItem::toXmlElement( QDomDocument &document ) const
+{
+  QDomElement element = document.createElement( "LayoutItem" );
+  element.setAttribute( "type", stringType() );
+
+  writePropertiesToElement( element, document );
+
+  return element;
+}
+
+bool QgsLayoutItem::readXMLElement( const QDomElement &element, const QDomDocument &document )
+{
+  if ( element.nodeName() != QString( "LayoutItem" ) || element.attribute( "type" ) != stringType() )
+  {
+    return false;
+  }
+
+  return readPropertiesFromElement( element, document );
+}
+
+bool QgsLayoutItem::writePropertiesToElement( QDomElement& element, QDomDocument& document ) const
+{
+  element.setAttribute( "refeferencePoint", QString::number(( int ) mReferencePoint ) );
+  element.setAttribute( "position", mItemPosition.encodePoint() );
+  element.setAttribute( "size", mItemSize.encodeSize() );
+  element.setAttribute( "rotation", QString::number( rotation() ) );
+
+  //TODO
+  /*
+
+  composerItemElem.setAttribute( "zValue", QString::number( zValue() ) );
+
+  composerItemElem.setAttribute( "uuid", mUuid );
+  composerItemElem.setAttribute( "id", mId );
+  composerItemElem.setAttribute( "visibility", isVisible() );
+  //position lock for mouse moves/resizes
+  if ( mItemPositionLocked )
+  {
+    composerItemElem.setAttribute( "positionLock", "true" );
+  }
+  else
+  {
+    composerItemElem.setAttribute( "positionLock", "false" );
+  }
+  */
+
+  //blend mode
+//  composerItemElem.setAttribute( "blendMode", QgsMapRenderer::getBlendModeEnum( mBlendMode ) );
+
+  //transparency
+//  composerItemElem.setAttribute( "transparency", QString::number( mTransparency ) );
+
+//  composerItemElem.setAttribute( "excludeFromExports", mExcludeFromExports );
+
+  writeObjectPropertiesToElement( element, document );
+  return true;
+}
+
+bool QgsLayoutItem::readPropertiesFromElement( const QDomElement &element, const QDomDocument &document )
+{
+  readObjectPropertiesFromElement( element, document );
+
+  mReferencePoint = ( ReferencePoint )element.attribute( "refeferencePoint" ).toInt();
+  attemptMove( QgsLayoutPoint::decodePoint( element.attribute( "position" ) ) );
+  attemptResize( QgsLayoutSize::decodeSize( element.attribute( "size" ) ) );
+  setItemRotation( element.attribute( "rotation", "0" ).toDouble() );
+
+  //TODO
+  /*
+
+  //uuid
+  mUuid = itemElem.attribute( "uuid", QUuid::createUuid().toString() );
+
+  // temporary for groups imported from templates
+  mTemplateUuid = itemElem.attribute( "templateUuid" );
+
+  //id
+  QString id = itemElem.attribute( "id", "" );
+  setId( id );
+
+  //position lock for mouse moves/resizes
+  QString positionLock = itemElem.attribute( "positionLock" );
+  if ( positionLock.compare( "true", Qt::CaseInsensitive ) == 0 )
+  {
+    setPositionLock( true );
+  }
+  else
+  {
+    setPositionLock( false );
+  }
+
+  //visibility
+  setVisibility( itemElem.attribute( "visibility", "1" ) != "0" );
+
+  setZValue( itemElem.attribute( "zValue" ).toDouble() );
+
+  //blend mode
+  setBlendMode( QgsMapRenderer::getCompositionMode(( QgsMapRenderer::BlendMode ) itemElem.attribute( "blendMode", "0" ).toUInt() ) );
+
+  //transparency
+  setTransparency( itemElem.attribute( "transparency", "0" ).toInt() );
+
+  mExcludeFromExports = itemElem.attribute( "excludeFromExports", "0" ).toInt();
+  mEvaluatedExcludeFromExports = mExcludeFromExports;
+  */
+  return true;
+}
+
 QSizeF QgsLayoutItem::applyMinimumSize( const QSizeF& targetSize )
 {
   if ( !mLayout || minimumSize().isEmpty() )
@@ -386,4 +494,3 @@ bool QgsLayoutItem::shouldDrawDebugRect() const
 {
   return mLayout && mLayout->context()->testFlag( QgsLayoutContext::Debug );
 }
-

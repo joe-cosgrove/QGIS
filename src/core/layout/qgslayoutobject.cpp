@@ -60,7 +60,7 @@ QgsLayoutObject::~QgsLayoutObject()
   qDeleteAll( mDataDefinedProperties );
 }
 
-bool QgsLayoutObject::writeObjectXML( QDomElement &parentElement, QDomDocument &document ) const
+bool QgsLayoutObject::writeObjectPropertiesToElement( QDomElement &parentElement, QDomDocument &document ) const
 {
   if ( parentElement.isNull() )
   {
@@ -77,7 +77,7 @@ bool QgsLayoutObject::writeObjectXML( QDomElement &parentElement, QDomDocument &
   return true;
 }
 
-bool QgsLayoutObject::readObjectXML( const QDomElement& parentElement, const QDomDocument& document )
+bool QgsLayoutObject::readObjectPropertiesFromElement( const QDomElement& parentElement, const QDomDocument& document )
 {
   Q_UNUSED( document );
   if ( parentElement.isNull() )

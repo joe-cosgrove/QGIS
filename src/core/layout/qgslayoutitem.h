@@ -54,8 +54,17 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
 
     virtual ~QgsLayoutItem();
 
-    /**Return correct graphics item type*/
+    /**Return correct graphics item type
+     * @see stringType
+    */
     virtual int type() const = 0;
+
+    /**Return item type as a string. This string must be a unique, single word, character
+     * only representation of the item type, eg "LayoutScaleBar"
+     * @returns string representation of item type
+     * @see type
+    */
+    virtual QString stringType() const = 0;
 
     /**Draws item's contents on a specified painter
      */
@@ -173,7 +182,12 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      * @see itemRotation
     */
     //TODO
-    virtual void rotateItem(const double angle, const QPointF& transformOrigin );
+    virtual void rotateItem( const double angle, const QPointF& transformOrigin );
+
+    QDomElement toXmlElement( QDomDocument& document ) const;
+
+    //element is LayoutItem element
+    virtual bool readXMLElement( const QDomElement& element, const QDomDocument& document );
 
   protected:
 
@@ -236,6 +250,24 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
      */
     QPointF positionAtReferencePoint( const ReferencePoint& reference ) const;
 
+    /**Stores item state within an XML DOM element.
+     * @param element is the DOM element to store the item's properties in
+     * @param document DOM document
+     * @see toXmlElement
+     * @see readPropertiesFromElement
+     * @note derived classes must call this base implementation when overriding this method
+     */
+    virtual bool writePropertiesToElement( QDomElement& element, QDomDocument& document ) const;
+
+    /**Sets item state from a DOM element.
+     * @param element is the DOM element for the item
+     * @param document DOM document
+     * @see writePropertiesToElement
+     * @see readXMLElement
+     * @note derived classes must call this base implementation when overriding this method
+     */
+    virtual bool readPropertiesFromElement( const QDomElement& element, const QDomDocument& document );
+
   private slots:
 
     /**Updates an item's size after the layout's dpi changes. This is required
@@ -253,7 +285,6 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
 
     QgsLayoutSize mItemSize;
     QgsLayoutPoint mItemPosition;
-    double mItemRotation;
 
     void initConnectionsToLayout();
 

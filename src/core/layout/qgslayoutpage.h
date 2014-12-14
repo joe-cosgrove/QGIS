@@ -41,6 +41,8 @@ class CORE_EXPORT QgsLayoutPage : public QgsLayoutItem
     /**Return correct graphics item type*/
     virtual int type() const { return QgsLayoutItemRegistry::LayoutPage; }
 
+    virtual QString stringType() const { return QString( "layoutPage" ); }
+
     void draw( QPainter* painter, const QStyleOptionGraphicsItem* itemStyle, QWidget* pWidget );
 
     /**Decodes a string representing a page orientation

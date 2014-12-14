@@ -107,12 +107,12 @@ void TestQgsLayoutObject::writeReadXml()
   //test writing with no parent node
   QDomElement rootNode = doc.createElement( "qgis" );
   QDomElement noNode;
-  QCOMPARE( object->writeObjectXML( noNode, doc ), false );
+  QCOMPARE( object->writeObjectPropertiesToElement( noNode, doc ), false );
 
   //test writing with node
   QDomElement layoutObjectElem = doc.createElement( "item" );
   rootNode.appendChild( layoutObjectElem );
-  QVERIFY( object->writeObjectXML( layoutObjectElem, doc ) );
+  QVERIFY( object->writeObjectPropertiesToElement( layoutObjectElem, doc ) );
 
   //check if object node was written
   QDomNodeList evalNodeList = rootNode.elementsByTagName( "LayoutObject" );
@@ -122,15 +122,15 @@ void TestQgsLayoutObject::writeReadXml()
   QgsLayoutObject* readObject = new QgsLayoutObject( mLayout );
 
   //test reading with no node
-  QCOMPARE( readObject->readObjectXML( noNode, doc ), false );
+  QCOMPARE( readObject->readObjectPropertiesFromElement( noNode, doc ), false );
 
   //test node with no layout object child
   QDomElement badLayoutObjectElem = doc.createElement( "item" );
   rootNode.appendChild( badLayoutObjectElem );
-  QCOMPARE( readObject->readObjectXML( badLayoutObjectElem, doc ), false );
+  QCOMPARE( readObject->readObjectPropertiesFromElement( badLayoutObjectElem, doc ), false );
 
   //test reading node
-  QVERIFY( readObject->readObjectXML( layoutObjectElem, doc ) );
+  QVERIFY( readObject->readObjectPropertiesFromElement( layoutObjectElem, doc ) );
 
   delete object;
   delete readObject;
@@ -384,7 +384,7 @@ void TestQgsLayoutObject::writeRetrieveDDProperties()
   QDomElement rootNode = doc.createElement( "qgis" );
   QDomElement itemElem = doc.createElement( "item" );
   rootNode.appendChild( itemElem );
-  QVERIFY( object->writeObjectXML( itemElem, doc ) );
+  QVERIFY( object->writeObjectPropertiesToElement( itemElem, doc ) );
 
   //check if object node was written
   QDomNodeList evalNodeList = itemElem.elementsByTagName( "LayoutObject" );
@@ -392,7 +392,7 @@ void TestQgsLayoutObject::writeRetrieveDDProperties()
 
   //test reading node containing dd settings
   QgsLayoutObject* readObject = new QgsLayoutObject( mLayout );
-  QVERIFY( readObject->readObjectXML( itemElem, doc ) );
+  QVERIFY( readObject->readObjectPropertiesFromElement( itemElem, doc ) );
 
   //test getting not set dd from restored object
   QVERIFY( !readObject->dataDefinedProperty( QgsLayoutObject::BlendMode ) );

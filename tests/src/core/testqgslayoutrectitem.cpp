@@ -45,6 +45,7 @@ class TestQgsLayoutRectItem: public QObject
 
         //implement pure virtual methods
         int type() const { return QgsLayoutItemRegistry::LayoutItem + 101; }
+        QString stringType() const { return QString( "testItem" ); }
         void draw( QPainter* painter, const QStyleOptionGraphicsItem* itemStyle, QWidget* pWidget )
         {
           Q_UNUSED( itemStyle );

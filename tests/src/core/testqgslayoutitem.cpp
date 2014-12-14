@@ -53,6 +53,9 @@ class TestQgsLayoutItem: public QObject
     void dataDefinedSize();
     void combinedDataDefinedPositionAndSize();
     void rotation();
+    void writeXml();
+    void readXml();
+    void writeReadXmlProperties();
 
   private:
 
@@ -66,6 +69,7 @@ class TestQgsLayoutItem: public QObject
 
         //implement pure virtual methods
         int type() const { return QgsLayoutItemRegistry::LayoutItem + 101; }
+        QString stringType() const { return QString( "testItem" ); }
         void draw( QPainter* painter, const QStyleOptionGraphicsItem* itemStyle, QWidget* pWidget )
         {
           Q_UNUSED( itemStyle );
@@ -76,6 +80,12 @@ class TestQgsLayoutItem: public QObject
           painter->setBrush( QColor( 255, 100, 100, 200 ) );
           painter->drawRect( rect() );
           painter->restore();
+        }
+
+        virtual bool writePropertiesToElement( QDomElement& element, QDomDocument& document ) const
+        {
+          element.setAttribute( QString( "testAttribute" ), QString( "testValue" ) );
+          return QgsLayoutItem::writePropertiesToElement( element, document );;
         }
     };
 
@@ -129,6 +139,8 @@ class TestQgsLayoutItem: public QObject
     QgsLayout* mLayout;
     QString mReport;
 
+    //creates a copy of a layout item by first saving to xml and then restoring
+    QgsLayoutItem* createCopyViaXml( QgsLayoutItem* original );
     bool renderCheck( QString testName, QImage &image, int mismatchCount );
 
 };
@@ -1030,6 +1042,96 @@ void TestQgsLayoutItem::rotation()
 //restoring item from xml respects rotation/position
 //rotate item around layout point
 
+
+void TestQgsLayoutItem::writeXml()
+{
+  QDomImplementation DomImplementation;
+  QDomDocumentType documentType =
+    DomImplementation.createDocumentType(
+      "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
+  QDomDocument doc( documentType );
+
+  TestItem* item = new TestItem( mLayout );
+  QDomElement element = item->toXmlElement( doc );
+
+  QCOMPARE( element.nodeName(), QString( "LayoutItem" ) );
+  QCOMPARE( element.attribute( "type", "" ), item->stringType() );
+  QCOMPARE( element.attribute( "testAttribute", "" ), QString( "testValue" ) );
+
+  //check that element has an object node
+  QDomNodeList objectNodeList = element.elementsByTagName( "LayoutObject" );
+  QCOMPARE( objectNodeList.count(), 1 );
+
+  delete item;
+}
+
+void TestQgsLayoutItem::readXml()
+{
+  QDomImplementation DomImplementation;
+  QDomDocumentType documentType =
+    DomImplementation.createDocumentType(
+      "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
+  QDomDocument doc( documentType );
+
+  TestItem* item = new TestItem( mLayout );
+
+  //try reading bad elements
+  QDomElement badElement = doc.createElement( "bad" );
+  QDomElement noNode;
+  QVERIFY( !item->readXMLElement( badElement, doc ) );
+  QVERIFY( !item->readXMLElement( noNode, doc ) );
+
+  //element with wrong type
+  QDomElement wrongType = doc.createElement( "LayoutItem" );
+  wrongType.setAttribute( QString( "type" ), "bad" );
+  QVERIFY( !item->readXMLElement( wrongType, doc ) );
+
+  //try good element
+  QDomElement goodElement = doc.createElement( "LayoutItem" );
+  goodElement.setAttribute( QString( "type" ), "testItem" );
+  QVERIFY( item->readXMLElement( goodElement, doc ) );
+  delete item;
+}
+
+void TestQgsLayoutItem::writeReadXmlProperties()
+{
+  TestItem* original = new TestItem( mLayout );
+
+  QgsDataDefined* ddOrig = new QgsDataDefined( true, true, "50" );
+  original->setDataDefinedProperty( QgsLayoutItem::Transparency, ddOrig );
+  original->setReferencePoint( QgsLayoutItem::Middle );
+  original->attemptResize( QgsLayoutSize( 6, 8, QgsLayoutUnits::Centimeters ) );
+  original->attemptMove( QgsLayoutPoint( 0.05, 0.09, QgsLayoutUnits::Meters ) );
+  original->setItemRotation( 45.0 );
+
+  QgsLayoutItem* copy = createCopyViaXml( original );
+
+  QCOMPARE( original->dataDefinedProperty( QgsLayoutItem::Transparency ), ddOrig );
+  QCOMPARE( original->referencePoint(), copy->referencePoint() );
+  QCOMPARE( original->sizeWithUnits(), copy->sizeWithUnits() );
+  QCOMPARE( original->positionWithUnits(), copy->positionWithUnits() );
+  QCOMPARE( original->itemRotation(), copy->itemRotation() );
+
+  delete copy;
+  delete original;
+}
+
+QgsLayoutItem *TestQgsLayoutItem::createCopyViaXml( QgsLayoutItem *original )
+{
+  //save original item to xml
+  QDomImplementation DomImplementation;
+  QDomDocumentType documentType =
+    DomImplementation.createDocumentType(
+      "qgis", "http://mrcc.com/qgis.dtd", "SYSTEM" );
+  QDomDocument doc( documentType );
+  QDomElement element = original->toXmlElement( doc );
+
+  //create new item and restore settings from xml
+  TestItem* copy = new TestItem( mLayout );
+  copy->readXMLElement( element, doc );
+
+  return copy;
+}
 
 bool TestQgsLayoutItem::renderCheck( QString testName, QImage &image, int mismatchCount )
 {
