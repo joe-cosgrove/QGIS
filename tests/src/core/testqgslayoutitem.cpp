@@ -34,6 +34,8 @@ class TestQgsLayoutItem: public QObject
     void init();// will be called before each testfunction is executed.
     void cleanup();// will be called after every testfunction.
     void creation(); //test creation of QgsLayoutItem
+    void uuid();
+    void id();
     void shouldDrawDebug();
     void shouldDrawAntialiased();
     void preparePainter();
@@ -180,6 +182,21 @@ void TestQgsLayoutItem::creation()
   TestItem* item = new TestItem( mLayout );
   QVERIFY( item );
   delete item;
+}
+
+void TestQgsLayoutItem::uuid()
+{
+  //basic test of uuid
+  TestItem item( mLayout );
+  TestItem item2( mLayout );
+  QVERIFY( item.uuid() != item2.uuid() );
+}
+
+void TestQgsLayoutItem::id()
+{
+  TestItem item( mLayout );
+  item.setId( QString( "test" ) );
+  QCOMPARE( item.id(), QString( "test" ) );
 }
 
 void TestQgsLayoutItem::shouldDrawDebug()
@@ -1098,19 +1115,23 @@ void TestQgsLayoutItem::writeReadXmlProperties()
   TestItem* original = new TestItem( mLayout );
 
   QgsDataDefined* ddOrig = new QgsDataDefined( true, true, "50" );
-  original->setDataDefinedProperty( QgsLayoutItem::Transparency, ddOrig );
+  original->setDataDefinedProperty( QgsLayoutItem::TestProperty, ddOrig );
   original->setReferencePoint( QgsLayoutItem::Middle );
   original->attemptResize( QgsLayoutSize( 6, 8, QgsLayoutUnits::Centimeters ) );
   original->attemptMove( QgsLayoutPoint( 0.05, 0.09, QgsLayoutUnits::Meters ) );
   original->setItemRotation( 45.0 );
+  original->setId( QString( "test" ) );
 
   QgsLayoutItem* copy = createCopyViaXml( original );
 
-  QCOMPARE( original->dataDefinedProperty( QgsLayoutItem::Transparency ), ddOrig );
-  QCOMPARE( original->referencePoint(), copy->referencePoint() );
-  QCOMPARE( original->sizeWithUnits(), copy->sizeWithUnits() );
-  QCOMPARE( original->positionWithUnits(), copy->positionWithUnits() );
-  QCOMPARE( original->itemRotation(), copy->itemRotation() );
+  QCOMPARE( copy->uuid(), original->uuid() );
+  QCOMPARE( copy->id(), original->id() );
+  QgsDataDefined* ddResult = copy->dataDefinedProperty( QgsLayoutItem::TestProperty );
+  QCOMPARE( *ddResult, *ddOrig );
+  QCOMPARE( copy->referencePoint(), original->referencePoint() );
+  QCOMPARE( copy->sizeWithUnits(), original->sizeWithUnits() );
+  QCOMPARE( copy->positionWithUnits(), original->positionWithUnits() );
+  QCOMPARE( copy->itemRotation(), original->itemRotation() );
 
   delete copy;
   delete original;

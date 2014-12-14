@@ -66,6 +66,31 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
     */
     virtual QString stringType() const = 0;
 
+    /**Get item identification string. This is a unique random string set for the item
+     * upon creation.
+     * @returns unique item identification string
+     * @note there is not setter since one can't manually set the uuid
+     * @see id
+     * @see setId
+    */
+    QString uuid() const { return mUuid; }
+
+    /**Get item's id name. This is not necessarily unique, and duplicate id names may exist
+     * for a composition.
+     * @returns item id name
+     * @see setId
+     * @see uuid
+     */
+    QString id() const { return mId; }
+
+    /**Set item's id name. This is not necessarily unique, and duplicate id names may exist
+     * for a composition.
+     * @param id new id name for item
+     * @see id
+     * @see uuid
+     */
+    virtual void setId( const QString& id );
+
     /**Draws item's contents on a specified painter
      */
     virtual void draw( QPainter* painter, const QStyleOptionGraphicsItem* itemStyle, QWidget* pWidget ) = 0;
@@ -278,6 +303,11 @@ class CORE_EXPORT QgsLayoutItem : public QgsLayoutObject, public QGraphicsRectIt
     void layoutDpiChanged( const double dpi );
 
   private:
+
+    //id (not unique)
+    QString mId;
+    //unique id
+    QString mUuid;
 
     ReferencePoint mReferencePoint;
     QgsLayoutSize mFixedSize;

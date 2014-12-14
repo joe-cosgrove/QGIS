@@ -20,10 +20,12 @@
 #include "qgslayoututils.h"
 #include "qgis.h"
 #include <QPainter>
+#include <QUuid>
 
 QgsLayoutItem::QgsLayoutItem( QgsLayout *layout )
     : QgsLayoutObject( layout )
     , QGraphicsRectItem( 0 )
+    , mUuid( QUuid::createUuid().toString() )
     , mReferencePoint( UpperLeft )
 {
   setCacheMode( QGraphicsItem::DeviceCoordinateCache );
@@ -39,6 +41,27 @@ QgsLayoutItem::QgsLayoutItem( QgsLayout *layout )
 QgsLayoutItem::~QgsLayoutItem()
 {
 
+}
+
+void QgsLayoutItem::setId( const QString &id )
+{
+  if ( id == mId )
+  {
+    return;
+  }
+
+  mId = id;
+  setToolTip( id );
+
+  //TODO
+  /*
+  //inform model that id data has changed
+  if ( mComposition )
+  {
+    mComposition->itemsModel()->updateItemDisplayName( this );
+  }
+
+  emit itemChanged();*/
 }
 
 void QgsLayoutItem::initConnectionsToLayout()
@@ -306,6 +329,8 @@ bool QgsLayoutItem::readXMLElement( const QDomElement &element, const QDomDocume
 
 bool QgsLayoutItem::writePropertiesToElement( QDomElement& element, QDomDocument& document ) const
 {
+  element.setAttribute( "uuid", mUuid );
+  element.setAttribute( "id", mId );
   element.setAttribute( "refeferencePoint", QString::number(( int ) mReferencePoint ) );
   element.setAttribute( "position", mItemPosition.encodePoint() );
   element.setAttribute( "size", mItemSize.encodeSize() );
@@ -315,9 +340,6 @@ bool QgsLayoutItem::writePropertiesToElement( QDomElement& element, QDomDocument
   /*
 
   composerItemElem.setAttribute( "zValue", QString::number( zValue() ) );
-
-  composerItemElem.setAttribute( "uuid", mUuid );
-  composerItemElem.setAttribute( "id", mId );
   composerItemElem.setAttribute( "visibility", isVisible() );
   //position lock for mouse moves/resizes
   if ( mItemPositionLocked )
@@ -346,6 +368,8 @@ bool QgsLayoutItem::readPropertiesFromElement( const QDomElement &element, const
 {
   readObjectPropertiesFromElement( element, document );
 
+  mUuid = element.attribute( "uuid", QUuid::createUuid().toString() );
+  setId( element.attribute( "id" ) );
   mReferencePoint = ( ReferencePoint )element.attribute( "refeferencePoint" ).toInt();
   attemptMove( QgsLayoutPoint::decodePoint( element.attribute( "position" ) ) );
   attemptResize( QgsLayoutSize::decodeSize( element.attribute( "size" ) ) );
@@ -353,16 +377,8 @@ bool QgsLayoutItem::readPropertiesFromElement( const QDomElement &element, const
 
   //TODO
   /*
-
-  //uuid
-  mUuid = itemElem.attribute( "uuid", QUuid::createUuid().toString() );
-
   // temporary for groups imported from templates
   mTemplateUuid = itemElem.attribute( "templateUuid" );
-
-  //id
-  QString id = itemElem.attribute( "id", "" );
-  setId( id );
 
   //position lock for mouse moves/resizes
   QString positionLock = itemElem.attribute( "positionLock" );
