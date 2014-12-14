@@ -17,6 +17,8 @@
 
 #include "qgslayoutmeasurement.h"
 
+#include <QStringList>
+
 QgsLayoutMeasurement::QgsLayoutMeasurement( const double length, const QgsLayoutUnits::Units units )
     : mLength( length )
     , mUnits( units )
@@ -25,6 +27,21 @@ QgsLayoutMeasurement::QgsLayoutMeasurement( const double length, const QgsLayout
 
 QgsLayoutMeasurement::~QgsLayoutMeasurement()
 {
+}
+
+QString QgsLayoutMeasurement::encodeMeasurement() const
+{
+  return QString( "%1,%2" ).arg( mLength ).arg( QgsLayoutUnits::encodeUnits( mUnits ) );
+}
+
+QgsLayoutMeasurement QgsLayoutMeasurement::decodeMeasurement( const QString &string )
+{
+  QStringList parts = string.split( ',' );
+  if ( parts.count() != 2 )
+  {
+    return QgsLayoutMeasurement( 0 );
+  }
+  return QgsLayoutMeasurement( parts[0].toDouble(), QgsLayoutUnits::decodeUnits( parts[1] ) );
 }
 
 bool QgsLayoutMeasurement::operator==( const QgsLayoutMeasurement &other ) const

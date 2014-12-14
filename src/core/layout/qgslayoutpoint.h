@@ -114,6 +114,19 @@ class CORE_EXPORT QgsLayoutPoint
     */
     QPointF toQPointF() const;
 
+    /**Encodes the layout point to a string
+     * @returns point encoded as string
+     * @see decodePoint
+    */
+    QString encodePoint() const;
+
+    /**Decodes a point from a string
+     * @param string string to decode
+     * @returns string decoded as point
+     * @see encodePoint
+    */
+    static QgsLayoutPoint decodePoint( const QString &string );
+
     bool operator==( const QgsLayoutPoint &other ) const;
     bool operator!=( const QgsLayoutPoint &other ) const;
     QgsLayoutPoint operator*( const double v ) const;

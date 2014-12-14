@@ -115,6 +115,19 @@ class CORE_EXPORT QgsLayoutSize
     */
     QSizeF toQSizeF() const;
 
+    /**Encodes the layout size to a string
+     * @returns size encoded as string
+     * @see decodeSize
+    */
+    QString encodeSize() const;
+
+    /**Decodes a size from a string
+     * @param string string to decode
+     * @returns string decoded as size
+     * @see encodeSize
+    */
+    static QgsLayoutSize decodeSize( const QString &string );
+
     bool operator==( const QgsLayoutSize &other ) const;
     bool operator!=( const QgsLayoutSize &other ) const;
     QgsLayoutSize operator*( const double v ) const;

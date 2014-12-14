@@ -45,6 +45,7 @@ class TestQgsLayoutUnits : public QObject
     void assignment(); //test measurement assignment
     void operators(); //test measurement operators
     void unitTypes(); //test unit types
+    void measurementEncodeDecode(); //test encoding and decoding measurement
 
     //QgsLayoutSize
     void createSize(); //test creating new layout size
@@ -55,6 +56,7 @@ class TestQgsLayoutUnits : public QObject
     void sizeOperators(); //test size operators
     void isEmpty(); //test isEmpty method
     void toQSizeF(); //test conversion to QSizeF
+    void sizeEncodeDecode(); //test encoding and decoding size
 
     //QgsLayoutPoint
     void createPoint(); //test creating new layout point
@@ -65,6 +67,7 @@ class TestQgsLayoutUnits : public QObject
     void pointOperators(); //test point operators
     void isNull(); //test isEmpty method
     void toQPointF(); //test conversion to QPointF
+    void pointEncodeDecode(); //test encoding and decoding point
 
     void converterCreate(); //test creating new converter
     void converterCopy(); //test creating new converter using copy constructor
@@ -226,6 +229,17 @@ void TestQgsLayoutUnits::unitTypes()
   QCOMPARE( QgsLayoutUnits::unitType( QgsLayoutUnits::Pixels ), QgsLayoutUnits::Screen );
 }
 
+void TestQgsLayoutUnits::measurementEncodeDecode()
+{
+  QgsLayoutMeasurement original( 6.0, QgsLayoutUnits::Pixels );
+  QgsLayoutMeasurement result = QgsLayoutMeasurement::decodeMeasurement( original.encodeMeasurement() );
+  QCOMPARE( original, result );
+
+  //test with bad string
+  result = QgsLayoutMeasurement::decodeMeasurement( QString( "1" ) );
+  QCOMPARE( result, QgsLayoutMeasurement( 0 ) );
+}
+
 void TestQgsLayoutUnits::createSize()
 {
   QgsLayoutSize defaultUnits( 5.0, 6.0 );
@@ -349,6 +363,17 @@ void TestQgsLayoutUnits::toQSizeF()
   QCOMPARE( converted.height(), size.height() );
 }
 
+void TestQgsLayoutUnits::sizeEncodeDecode()
+{
+  QgsLayoutSize original( 6.0, 12.0, QgsLayoutUnits::Points );
+  QgsLayoutSize result = QgsLayoutSize::decodeSize( original.encodeSize() );
+  QCOMPARE( original, result );
+
+  //test with bad string
+  result = QgsLayoutSize::decodeSize( QString( "1,2" ) );
+  QCOMPARE( result, QgsLayoutSize() );
+}
+
 void TestQgsLayoutUnits::createPoint()
 {
   QgsLayoutPoint defaultUnits( 5.0, 6.0 );
@@ -470,6 +495,17 @@ void TestQgsLayoutUnits::toQPointF()
   QPointF converted = point.toQPointF();
   QCOMPARE( converted.x(), point.x() );
   QCOMPARE( converted.y(), point.y() );
+}
+
+void TestQgsLayoutUnits::pointEncodeDecode()
+{
+  QgsLayoutPoint original( 6.0, 12.0, QgsLayoutUnits::Inches );
+  QgsLayoutPoint result = QgsLayoutPoint::decodePoint( original.encodePoint() );
+  QCOMPARE( original, result );
+
+  //test with bad string
+  result = QgsLayoutPoint::decodePoint( QString( "1,2" ) );
+  QCOMPARE( result, QgsLayoutPoint() );
 }
 
 void TestQgsLayoutUnits::converterCreate()

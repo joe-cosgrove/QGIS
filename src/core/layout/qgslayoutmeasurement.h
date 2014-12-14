@@ -64,6 +64,19 @@ class CORE_EXPORT QgsLayoutMeasurement
     */
     void setUnits( const QgsLayoutUnits::Units units ) { mUnits = units; }
 
+    /**Encodes the layout measurement to a string
+     * @returns measurement encoded as string
+     * @see decodeMeasurement
+    */
+    QString encodeMeasurement() const;
+
+    /**Decodes a measurement from a string
+     * @param string string to decode
+     * @returns string decoded as measurement
+     * @see encodeMeasurement
+    */
+    static QgsLayoutMeasurement decodeMeasurement( const QString &string );
+
     bool operator==( const QgsLayoutMeasurement &other ) const;
     bool operator!=( const QgsLayoutMeasurement &other ) const;
     QgsLayoutMeasurement operator+( const double v ) const;

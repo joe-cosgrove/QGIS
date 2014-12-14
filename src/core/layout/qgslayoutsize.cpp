@@ -17,6 +17,7 @@
 
 #include "qgslayoutsize.h"
 #include "qgis.h"
+#include <QStringList>
 
 QgsLayoutSize::QgsLayoutSize( const double width, const double height, const QgsLayoutUnits::Units units )
     : mWidth( width )
@@ -45,6 +46,22 @@ bool QgsLayoutSize::isEmpty() const
 QSizeF QgsLayoutSize::toQSizeF() const
 {
   return QSizeF( mWidth, mHeight );
+}
+
+QString QgsLayoutSize::encodeSize() const
+{
+  return QString( "%1,%2,%3" ).arg( mWidth ).arg( mHeight ).arg( QgsLayoutUnits::encodeUnits( mUnits ) );
+}
+
+QgsLayoutSize QgsLayoutSize::decodeSize( const QString &string )
+{
+  QStringList parts = string.split( ',' );
+  if ( parts.count() != 3 )
+  {
+    return QgsLayoutSize();
+  }
+  return QgsLayoutSize( parts[0].toDouble(), parts[1].toDouble(), QgsLayoutUnits::decodeUnits( parts[2] ) );
+
 }
 
 bool QgsLayoutSize::operator==( const QgsLayoutSize &other ) const

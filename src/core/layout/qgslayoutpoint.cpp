@@ -18,6 +18,8 @@
 #include "qgslayoutpoint.h"
 #include "qgis.h"
 
+#include <QStringList>
+
 QgsLayoutPoint::QgsLayoutPoint( const double x, const double y, const QgsLayoutUnits::Units units )
     : mX( x )
     , mY( y )
@@ -47,6 +49,21 @@ bool QgsLayoutPoint::isNull() const
 QPointF QgsLayoutPoint::toQPointF() const
 {
   return QPointF( mX, mY );
+}
+
+QString QgsLayoutPoint::encodePoint() const
+{
+  return QString( "%1,%2,%3" ).arg( mX ).arg( mY ).arg( QgsLayoutUnits::encodeUnits( mUnits ) );
+}
+
+QgsLayoutPoint QgsLayoutPoint::decodePoint( const QString &string )
+{
+  QStringList parts = string.split( ',' );
+  if ( parts.count() != 3 )
+  {
+    return QgsLayoutPoint();
+  }
+  return QgsLayoutPoint( parts[0].toDouble(), parts[1].toDouble(), QgsLayoutUnits::decodeUnits( parts[2] ) );
 }
 
 bool QgsLayoutPoint::operator==( const QgsLayoutPoint &other ) const
