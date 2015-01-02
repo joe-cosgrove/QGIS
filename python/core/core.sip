@@ -166,6 +166,8 @@
 %Include diagram/qgspiediagram.sip
 %Include diagram/qgstextdiagram.sip
 
+%Include effects/qgsimageoperation.sip
+
 %Include gps/qgsgpsconnection.sip
 %Include gps/qgsgpsconnectionregistry.sip
 %Include gps/qgsgpsdconnection.sip

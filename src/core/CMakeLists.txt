@@ -46,6 +46,8 @@ SET(QGIS_CORE_SRCS
   diagram/qgspiediagram.cpp
   diagram/qgstextdiagram.cpp
   diagram/qgshistogramdiagram.cpp
+  
+  effects/qgsimageoperation.cpp
 
   layertree/qgslayertreegroup.cpp
   layertree/qgslayertreelayer.cpp
@@ -558,6 +560,8 @@ SET(QGIS_CORE_HDRS
   diagram/qgspiediagram.h
   diagram/qgstextdiagram.h
   diagram/qgshistogramdiagram.h
+  
+  effects/qgsimageoperation.h
 
   composer/qgslegendmodel.h
   composer/qgscomposerlegenditem.h
@@ -673,6 +677,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
   composer
   dxf
+  effects
   layertree
   pal
   raster
