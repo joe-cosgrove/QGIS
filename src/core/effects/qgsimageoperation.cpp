@@ -112,23 +112,23 @@ void QgsImageOperation::convertToGrayscale( QImage &image, const GrayscaleMode m
   runPixelOperation( image, operation );
 }
 
-//todo - try keeping a qcolor in block for operations
 QRgb QgsImageOperation::grayscaleLightnessOp( const QRgb &rgb )
 {
-  QColor source = QColor( rgb );
-  int hue;
-  int saturation;
-  int lightness;
-  source.getHsl( &hue, &saturation, &lightness );
-  QColor result = QColor::fromHsl( hue, 0, lightness, qAlpha( rgb ) );
-  return result.rgba();
+  int red = qRed( rgb );
+  int green = qGreen( rgb );
+  int blue = qBlue( rgb );
+
+  int min = qMin( qMin( red, green ), blue );
+  int max = qMax( qMax( red, green ), blue );
+
+  int lightness = qMin(( min + max ) / 2, 255 );
+  return qRgba( lightness, lightness, lightness, qAlpha( rgb ) );
 }
 
 QRgb QgsImageOperation::grayscaleLuminosityOp( const QRgb &rgb )
 {
   int luminosity = 0.21 * qRed( rgb ) + 0.72 * qGreen( rgb ) + 0.07 * qBlue( rgb );
-  QColor result = QColor( luminosity, luminosity, luminosity, qAlpha( rgb ) );
-  return result.rgba();
+  return qRgba( luminosity, luminosity, luminosity, qAlpha( rgb ) );
 }
 
 QRgb QgsImageOperation::grayscaleAverageOp( const QRgb &rgb )
