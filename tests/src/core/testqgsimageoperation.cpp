@@ -29,12 +29,19 @@ class TestQgsImageOperation : public QObject
     void cleanupTestCase();// will be called after the last testfunction was executed.
     void init();// will be called before each testfunction is executed.
     void cleanup();// will be called after every testfunction.
+    void smallImageOp(); //test operation on small image (single threaded op)
 
+    //grayscale
     void grayscaleLightness();
     void grayscaleLuminosity();
     void grayscaleAverage();
 
-    void smallImageOp(); //test operation on small image (single threaded op)
+    //brightness/contrast
+    void brightnessContrastNoChange();
+    void increaseBrightness();
+    void decreaseBrightness();
+    void increaseContrast();
+    void decreaseContrast();
 
   private:
 
@@ -106,6 +113,51 @@ void TestQgsImageOperation::grayscaleAverage()
   QgsImageOperation::convertToGrayscale( image, QgsImageOperation::GrayscaleAverage );
 
   bool result = imageCheck( QString( "imageop_grayaverage" ), image, 0 );
+  QVERIFY( result );
+}
+
+void TestQgsImageOperation::brightnessContrastNoChange()
+{
+  QImage image( mSampleImage );
+  QgsImageOperation::adjustBrightnessContrast( image, 0, 1.0 );
+
+  bool result = imageCheck( QString( "imageop_bcnochange" ), image, 0 );
+  QVERIFY( result );
+}
+
+void TestQgsImageOperation::increaseBrightness()
+{
+  QImage image( mSampleImage );
+  QgsImageOperation::adjustBrightnessContrast( image, 50, 1.0 );
+
+  bool result = imageCheck( QString( "imageop_increasebright" ), image, 0 );
+  QVERIFY( result );
+}
+
+void TestQgsImageOperation::decreaseBrightness()
+{
+  QImage image( mSampleImage );
+  QgsImageOperation::adjustBrightnessContrast( image, -50, 1.0 );
+
+  bool result = imageCheck( QString( "imageop_decreasebright" ), image, 0 );
+  QVERIFY( result );
+}
+
+void TestQgsImageOperation::increaseContrast()
+{
+  QImage image( mSampleImage );
+  QgsImageOperation::adjustBrightnessContrast( image, 0, 30.0 );
+
+  bool result = imageCheck( QString( "imageop_increasecontrast" ), image, 0 );
+  QVERIFY( result );
+}
+
+void TestQgsImageOperation::decreaseContrast()
+{
+  QImage image( mSampleImage );
+  QgsImageOperation::adjustBrightnessContrast( image, 0, 0.1 );
+
+  bool result = imageCheck( QString( "imageop_decreasecontrast" ), image, 0 );
   QVERIFY( result );
 }
 
