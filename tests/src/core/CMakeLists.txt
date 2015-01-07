@@ -23,6 +23,7 @@ INCLUDE_DIRECTORIES(SYSTEM
   ${GEOS_INCLUDE_DIR}
   ${QCA_INCLUDE_DIR}
   ${SQLITE3_INCLUDE_DIR}
+  /usr/include/gperftools
   )
 
 #############################################################
@@ -77,7 +78,9 @@ MACRO (ADD_QGIS_TEST testname testsrc)
     ${PROJ_LIBRARY}
     ${GEOS_LIBRARY}
     ${GDAL_LIBRARY}
-    qgis_core)
+    qgis_core
+    profiler
+    )
   ADD_TEST(qgis_${testname} ${CMAKE_CURRENT_BINARY_DIR}/../../../output/bin/qgis_${testname} -maxwarnings 10000)
 ENDMACRO (ADD_QGIS_TEST)
 
@@ -192,5 +195,6 @@ ADD_QGIS_TEST(vectorlayercachetest testqgsvectorlayercache.cpp )
 ADD_QGIS_TEST(vectorlayerjoinbuffer testqgsvectorlayerjoinbuffer.cpp )
 ADD_QGIS_TEST(vectorlayertest testqgsvectorlayer.cpp)
 ADD_QGIS_TEST(ziplayertest testziplayer.cpp)
+ADD_QGIS_TEST(speedtest qgsspeedtest.cpp)
 
 ADD_DEPENDENCIES(qgis_coordinatereferencesystemtest synccrsdb)
