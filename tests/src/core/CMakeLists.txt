@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
   ${GDAL_INCLUDE_DIR}
   ${PROJ_INCLUDE_DIR}
   ${GEOS_INCLUDE_DIR}
+  /usr/include/gperftools
   )
 
 #############################################################
@@ -65,7 +66,9 @@ MACRO (ADD_QGIS_TEST testname testsrc)
     ${PROJ_LIBRARY}
     ${GEOS_LIBRARY}
     ${GDAL_LIBRARY}
-    qgis_core)
+    qgis_core
+    profiler
+    )
   ADD_TEST(qgis_${testname} ${CMAKE_CURRENT_BINARY_DIR}/../../../output/bin/qgis_${testname})
   #SET_TARGET_PROPERTIES(qgis_${testname} PROPERTIES
   #  INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${QGIS_LIB_DIR}
@@ -74,7 +77,7 @@ ENDMACRO (ADD_QGIS_TEST)
 
 #############################################################
 # Tests:
-
+ADD_QGIS_TEST(speedtest qgsspeedtest.cpp)
 ADD_QGIS_TEST(clippertest testqgsclipper.cpp)
 ADD_QGIS_TEST(distanceareatest testqgsdistancearea.cpp)
 ADD_QGIS_TEST(applicationtest testqgsapplication.cpp)
