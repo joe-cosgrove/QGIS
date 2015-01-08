@@ -553,7 +553,6 @@ QString QgsGradientFillSymbolLayerV2::layerType() const
 
 void QgsGradientFillSymbolLayerV2::applyDataDefinedSymbology( QgsSymbolV2RenderContext& context, const QPolygonF& points )
 {
-
   if ( mDataDefinedProperties.isEmpty() && !mReferencePoint1IsCentroid && !mReferencePoint2IsCentroid )
   {
     //shortcut

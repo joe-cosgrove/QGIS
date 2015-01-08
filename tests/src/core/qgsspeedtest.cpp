@@ -11,22 +11,25 @@
 #include <qgsvectorlayer.h>
 #include <qgsvectordataprovider.h>
 #include <qgsvectorfilewriter.h>
-#include <qgsimageoperation.h>
+#include <qgsrendererv2.h>
+#include <qgsmarkersymbollayerv2.h>
+#include <qgsfillsymbollayerv2.h>
+#include <qgssinglesymbolrendererv2.h>
 #include <QImage>
 
 int main( int argc, char *argv[] )
 {
   QApplication a( argc, argv );
 
-#if 0
-  //QgsApplication::init();
-  //QgsApplication::initQgis();
+
+  QgsApplication::init();
+  QgsApplication::initQgis();
 
   //QgsVectorLayer* vl = new QgsVectorLayer("Linestring", "x", "memory");
 
-  //QgsVectorLayer* vl = new QgsVectorLayer("Polygon", "x", "memory");
+  QgsVectorLayer* vl = new QgsVectorLayer( "Polygon", "x", "memory" );
 
-  QgsVectorLayer* vl = new QgsVectorLayer( "Point", "x", "memory" );
+  //QgsVectorLayer* vl = new QgsVectorLayer( "Point", "x", "memory" );
 
   Q_ASSERT( vl->isValid() );
 
@@ -35,13 +38,13 @@ int main( int argc, char *argv[] )
   {
     QgsFeature f;
     QgsPolyline pl;
-    QgsPoint pBase( i % 1000, i / 1000 );
-    pl << pBase << pBase + QgsVector( 10, 0 ) << pBase + QgsVector( 10, 10 ) << pBase + QgsVector( 0, 10 );
+    QgsPoint pBase( i % 512, rand() % 512 + 1 );
+    pl << pBase << pBase + QgsVector( 30, 0 ) << pBase + QgsVector( 30, 30 ) << pBase + QgsVector( 0, 30 );
     QgsPolygon pg;
     pg << pl;
-    //f.setGeometry(QgsGeometry::fromPolygon(pg));
+    f.setGeometry( QgsGeometry::fromPolygon( pg ) );
     //f.setGeometry(QgsGeometry::fromPolyline(pl));
-    f.setGeometry( QgsGeometry::fromPoint( QgsPoint( i % 1000, i / 1000 ) ) );
+    //f.setGeometry( QgsGeometry::fromPoint( QgsPoint( i % 512, rand() % 512 + 1 ) ) );
     fl << f;
   }
   vl->dataProvider()->addFeatures( fl );
@@ -56,6 +59,15 @@ int main( int argc, char *argv[] )
   Q_ASSERT(vl2->isValid());*/
 
   QgsMapLayerRegistry::instance()->addMapLayer( vl );
+  QgsSymbolV2* symbol = QgsSymbolV2::defaultSymbol( vl->geometryType() );
+
+
+  //QgsSymbolLayerV2* layer = new QgsFontMarkerSymbolLayerV2();
+  QgsSymbolLayerV2* layer = new QgsLinePatternFillSymbolLayer();
+
+  symbol->changeSymbolLayer( 0, layer );
+  QgsSingleSymbolRendererV2* renderer = new QgsSingleSymbolRendererV2( symbol );
+  vl->setRendererV2( renderer );
   //QgsMapLayerRegistry::instance()->addMapLayer(vl2);
 
   QgsMapSettings ms;
@@ -64,44 +76,35 @@ int main( int argc, char *argv[] )
   ms.setOutputSize( QSize( 512, 512 ) );
 
   QgsMapRendererSequentialJob job( ms );
-#endif
-
-
-
 
 
 
   QTime t;
 
-  QImage image( QString( TEST_DATA_DIR ) + QDir::separator() +  "sample_image.png" );
-
   ProfilerStart( "/tmp/speedtest.prof" );
 
   int total = 0;
-  int cnt = 2000;
+  int cnt = 1;
   for ( int i = 0; i < cnt; i++ )
   {
-    QImage newIm( image );
-
     t.start();
 
-
-    QgsImageOperation::adjustBrightnessContrast( newIm, 200, 1.0 );
+    job.start();
+    job.waitForFinished();
 
     int tt = t.elapsed();
     total += tt;
 
     qDebug( "ttttt %d ms", tt );
-    //newIm.save( "/tmp/profile.png");
   }
 
   ProfilerStop();
 
   qDebug( "AVG %d", total / cnt );
 
-  //job.renderedImage().save("/tmp/profile.png");
+  job.renderedImage().save( "/tmp/profile.png" );
 
-// QgsApplication::exitQgis();
+  QgsApplication::exitQgis();
 
   return 0;
 }
