@@ -35,6 +35,7 @@ class CORE_EXPORT QgsVectorColorRampV2
     virtual double value( int index ) const = 0;
 
     virtual QColor color( double value ) const = 0;
+    virtual QRgb rgb( const double value ) const { return color( value ).rgba(); }
 
     virtual QString type() const = 0;
 
@@ -71,6 +72,7 @@ class CORE_EXPORT QgsVectorGradientColorRampV2 : public QgsVectorColorRampV2
     virtual double value( int index ) const;
 
     virtual QColor color( double value ) const;
+    virtual QRgb rgb( const double value ) const;
 
     virtual QString type() const { return "gradient"; }
 

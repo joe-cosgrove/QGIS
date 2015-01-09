@@ -3409,17 +3409,16 @@ void QgsSymbolLayerV2Utils::blurImageInPlace( QImage& image, const QRect& rect, 
 
 void QgsSymbolLayerV2Utils::premultiplyColor( QColor &rgb, int alpha )
 {
-  int r = 0, g = 0, b = 0;
-  double alphaFactor = 1.0;
-
   if ( alpha != 255 && alpha > 0 )
   {
     // Semi-transparent pixel. We need to adjust the colors for ARGB32_Premultiplied images
     // where color values have to be premultiplied by alpha
 
+    int r, g, b;
     rgb.getRgb( &r, &g, &b );
 
-    alphaFactor = alpha / 255.;
+    double alphaFactor = alpha / 255.;
+
     r *= alphaFactor;
     g *= alphaFactor;
     b *= alphaFactor;
@@ -3428,6 +3427,29 @@ void QgsSymbolLayerV2Utils::premultiplyColor( QColor &rgb, int alpha )
   else if ( alpha == 0 )
   {
     rgb.setRgb( 0, 0, 0, 0 );
+  }
+}
+
+void QgsSymbolLayerV2Utils::premultiplyRgb( QRgb &rgb, const int alpha )
+{
+  if ( alpha == 255 )
+  {
+    //no change
+    return;
+  }
+  else if ( alpha == 0 )
+  {
+    rgb = qRgba( 0, 0, 0, 0 );
+  }
+  else
+  {
+    // Semi-transparent pixel. We need to adjust the colors for ARGB32_Premultiplied images
+    // where color values have to be premultiplied by alpha
+    double alphaFactor = alpha / 255.;
+    int r = qRed( rgb ) * alphaFactor;
+    int g = qGreen( rgb ) * alphaFactor;
+    int b = qBlue( rgb ) * alphaFactor;
+    rgb = qRgba( r, g, b, alpha );
   }
 }
 

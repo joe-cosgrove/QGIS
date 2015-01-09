@@ -343,6 +343,8 @@ class CORE_EXPORT QgsSymbolLayerV2Utils
      */
     static void premultiplyColor( QColor& rgb, int alpha );
 
+    static void premultiplyRgb( QRgb& rgb, const int alpha );
+
     /**Sorts the passed list in requested order*/
     static void sortVariantList( QList<QVariant>& list, Qt::SortOrder order );
     /**Returns a point on the line from startPoint to directionPoint that is a certain distance away from the starting point*/

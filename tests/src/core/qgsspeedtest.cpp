@@ -34,7 +34,7 @@ int main( int argc, char *argv[] )
   Q_ASSERT( vl->isValid() );
 
   QgsFeatureList fl;
-  for ( int i = 0; i < 1000000; ++i )
+  for ( int i = 0; i < 100000; ++i )
   {
     QgsFeature f;
     QgsPolyline pl;
@@ -63,7 +63,7 @@ int main( int argc, char *argv[] )
 
 
   //QgsSymbolLayerV2* layer = new QgsFontMarkerSymbolLayerV2();
-  QgsSymbolLayerV2* layer = new QgsLinePatternFillSymbolLayer();
+  QgsSymbolLayerV2* layer = new QgsShapeburstFillSymbolLayerV2();
 
   symbol->changeSymbolLayer( 0, layer );
   QgsSingleSymbolRendererV2* renderer = new QgsSingleSymbolRendererV2( symbol );
@@ -84,7 +84,7 @@ int main( int argc, char *argv[] )
   ProfilerStart( "/tmp/speedtest.prof" );
 
   int total = 0;
-  int cnt = 1;
+  int cnt = 4;
   for ( int i = 0; i < cnt; i++ )
   {
     t.start();

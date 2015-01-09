@@ -28,15 +28,32 @@
 
 //////////////
 
-static QColor _interpolate( QColor c1, QColor c2, double value )
+static QColor _interpolate( const QColor& c1, const QColor& c2, const double value )
 {
-  if ( qIsNaN( value ) ) value = 1;
+  if ( qIsNaN( value ) )
+  {
+    return c2;
+  }
   int r = ( int )( c1.red() + value * ( c2.red() - c1.red() ) );
   int g = ( int )( c1.green() + value * ( c2.green() - c1.green() ) );
   int b = ( int )( c1.blue() + value * ( c2.blue() - c1.blue() ) );
   int a = ( int )( c1.alpha() + value * ( c2.alpha() - c1.alpha() ) );
 
   return QColor::fromRgb( r, g, b, a );
+}
+
+static QRgb _interpolateRgba( const QColor& c1, const QColor& c2, const double value )
+{
+  if ( qIsNaN( value ) )
+  {
+    return c2.rgba();
+  }
+  int r = ( int )( c1.red() + value * ( c2.red() - c1.red() ) );
+  int g = ( int )( c1.green() + value * ( c2.green() - c1.green() ) );
+  int b = ( int )( c1.blue() + value * ( c2.blue() - c1.blue() ) );
+  int a = ( int )( c1.alpha() + value * ( c2.alpha() - c1.alpha() ) );
+
+  return qRgba( r, g, b, a );
 }
 
 //////////////
@@ -144,6 +161,43 @@ QColor QgsVectorGradientColorRampV2::color( double value ) const
     upper = 1;
     c2 = mColor2;
     return upper == lower ? c1 : _interpolate( c1, c2, ( value - lower ) / ( upper - lower ) );
+  }
+}
+
+QRgb QgsVectorGradientColorRampV2::rgb( const double value ) const
+{
+  if ( mStops.isEmpty() )
+  {
+    if ( mDiscrete )
+      return mColor1.rgba();
+    return _interpolateRgba( mColor1, mColor2, value );
+  }
+  else
+  {
+    double lower = 0, upper = 0;
+    QColor c1 = mColor1, c2;
+    for ( QgsGradientStopsList::const_iterator it = mStops.begin(); it != mStops.end(); ++it )
+    {
+      if ( it->offset > value )
+      {
+        if ( mDiscrete )
+          return c1.rgba();
+
+        upper = it->offset;
+        c2 = it->color;
+
+        return upper == lower ? c1.rgba() : _interpolateRgba( c1, c2, ( value - lower ) / ( upper - lower ) );
+      }
+      lower = it->offset;
+      c1 = it->color;
+    }
+
+    if ( mDiscrete )
+      return c1.rgba();
+
+    upper = 1;
+    c2 = mColor2;
+    return upper == lower ? c1.rgba() : _interpolateRgba( c1, c2, ( value - lower ) / ( upper - lower ) );
   }
 }
 

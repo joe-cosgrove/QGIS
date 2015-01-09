@@ -1367,13 +1367,19 @@ void QgsShapeburstFillSymbolLayerV2::dtArrayToQImage( double * array, QImage *im
   //find maximum distance value
   double maxDistanceValue;
 
+  int width = im->width();
+  int height = im->height();
+
   if ( useWholeShape )
   {
     //no max distance specified in symbol properties, so calculate from maximum value in distance transform results
     double dtMaxValue = array[0];
-    for ( int i = 1; i < ( im->width() * im->height() ); ++i )
+    for ( int i = 1; i < ( width * height ); ++i )
     {
-      dtMaxValue = qMax( dtMaxValue, array[i] );
+      if ( array[i] > dtMaxValue )
+      {
+        dtMaxValue = array[i];
+      }
     }
 
     //values in distance transform are squared
@@ -1389,12 +1395,14 @@ void QgsShapeburstFillSymbolLayerV2::dtArrayToQImage( double * array, QImage *im
   int idx = 0;
   double squaredVal = 0;
   double pixVal = 0;
-  QColor pixColor;
 
-  for ( int heightIndex = 0; heightIndex < im->height(); ++heightIndex )
+  QRgb pixRgb;
+  bool layerHasAlpha = layerAlpha < 1.0;
+
+  for ( int heightIndex = 0; heightIndex < height; ++heightIndex )
   {
     QRgb* scanLine = ( QRgb* )im->scanLine( heightIndex );
-    for ( int widthIndex = 0; widthIndex < im->width(); ++widthIndex )
+    for ( int widthIndex = 0; widthIndex < width; ++widthIndex )
     {
       //result of distance transform
       squaredVal = array[idx];
@@ -1403,14 +1411,18 @@ void QgsShapeburstFillSymbolLayerV2::dtArrayToQImage( double * array, QImage *im
       pixVal = squaredVal > 0 ? qMin(( sqrt( squaredVal ) / maxDistanceValue ), 1.0 ) : 0;
 
       //convert value to color from ramp
-      pixColor = ramp->color( pixVal );
+      pixRgb = ramp->rgb( pixVal );
 
-      //apply layer's transparency to alpha value
-      double alpha = pixColor.alpha() * layerAlpha;
+      int pixAlpha = qAlpha( pixRgb );
+      if (( layerHasAlpha ) || ( pixAlpha != 255 ) )
+      {
+        //apply layer's transparency to alpha value
+        double alpha = pixAlpha * layerAlpha;
+        //premultiply ramp color since we are storing this in a ARGB32_Premultiplied QImage
+        QgsSymbolLayerV2Utils::premultiplyRgb( pixRgb, alpha );
+      }
+      scanLine[widthIndex] = pixRgb;
 
-      //premultiply ramp color since we are storing this in a ARGB32_Premultiplied QImage
-      QgsSymbolLayerV2Utils::premultiplyColor( pixColor, alpha );
-      scanLine[widthIndex] = pixColor.rgba();
       idx++;
     }
   }
