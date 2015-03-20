@@ -398,6 +398,10 @@ class CORE_EXPORT QgsPalLayerSettings
 
     double maxCurvedCharAngleIn; // maximum angle between inside curved label characters (defaults to 20.0, range 20.0 to 60.0)
     double maxCurvedCharAngleOut; // maximum angle between outside curved label characters (defaults to -20.0, range -20.0 to -95.0)
+    bool lineSimplify; //true if line feature's geometry should be simplified
+    double lineSimplifyTolerance; //simplify tolerance for line label features (in mm)
+    bool lineSmooth; //true if line feature's geometry should be smoothed
+    double lineSmoothTightness; //smoothing tightness for line label features (in mm)
 
     int priority; // 0 = low, 10 = high
 
