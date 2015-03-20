@@ -180,6 +180,11 @@ QgsPalLayerSettings::QgsPalLayerSettings()
   preserveRotation = true;
   maxCurvedCharAngleIn = 20.0;
   maxCurvedCharAngleOut = -20.0;
+  lineSimplify = true;
+  lineSimplifyTolerance = 2.0;
+  lineSmooth = false;
+  lineSmoothTightness = 0.1;
+
   priority = 5;
   repeatDistance = 0;
   repeatDistanceUnit = MM;
@@ -388,6 +393,11 @@ QgsPalLayerSettings::QgsPalLayerSettings( const QgsPalLayerSettings& s )
   preserveRotation = s.preserveRotation;
   maxCurvedCharAngleIn = s.maxCurvedCharAngleIn;
   maxCurvedCharAngleOut = s.maxCurvedCharAngleOut;
+  lineSimplify = s.lineSimplify;
+  lineSimplifyTolerance = s.lineSimplifyTolerance;
+  lineSmooth = s.lineSmooth;
+  lineSmoothTightness = s.lineSmoothTightness;
+
   priority = s.priority;
   repeatDistance = s.repeatDistance;
   repeatDistanceUnit = s.repeatDistanceUnit;
@@ -872,6 +882,11 @@ void QgsPalLayerSettings::readFromLayer( QgsVectorLayer* layer )
   preserveRotation = layer->customProperty( "labeling/preserveRotation", QVariant( true ) ).toBool();
   maxCurvedCharAngleIn = layer->customProperty( "labeling/maxCurvedCharAngleIn", QVariant( 20.0 ) ).toDouble();
   maxCurvedCharAngleOut = layer->customProperty( "labeling/maxCurvedCharAngleOut", QVariant( -20.0 ) ).toDouble();
+  lineSimplify = layer->customProperty( "labeling/lineSimplify", QVariant( true ) ).toBool();
+  lineSimplifyTolerance = layer->customProperty( "labeling/lineSimplifyTolerance", QVariant( 2.0 ) ).toDouble();
+  lineSmooth = layer->customProperty( "labeling/lineSmooth", QVariant( false ) ).toBool();
+  lineSmoothTightness = layer->customProperty( "labeling/lineSmoothTightness", QVariant( 0.10 ) ).toDouble();
+
   priority = layer->customProperty( "labeling/priority" ).toInt();
   repeatDistance = layer->customProperty( "labeling/repeatDistance", 0.0 ).toDouble();
   repeatDistanceUnit = ( SizeUnit ) layer->customProperty( "labeling/repeatDistanceUnit", QVariant( MM ) ).toUInt();
@@ -1043,6 +1058,10 @@ void QgsPalLayerSettings::writeToLayer( QgsVectorLayer* layer )
   layer->setCustomProperty( "labeling/preserveRotation", preserveRotation );
   layer->setCustomProperty( "labeling/maxCurvedCharAngleIn", maxCurvedCharAngleIn );
   layer->setCustomProperty( "labeling/maxCurvedCharAngleOut", maxCurvedCharAngleOut );
+  layer->setCustomProperty( "labeling/lineSimplify", lineSimplify );
+  layer->setCustomProperty( "labeling/lineSimplifyTolerance", lineSimplifyTolerance );
+  layer->setCustomProperty( "labeling/lineSmooth", lineSmooth );
+  layer->setCustomProperty( "labeling/lineSmoothTightness", lineSmoothTightness );
   layer->setCustomProperty( "labeling/priority", priority );
   layer->setCustomProperty( "labeling/repeatDistance", repeatDistance );
   layer->setCustomProperty( "labeling/repeatDistanceUnit", repeatDistanceUnit );
@@ -1761,6 +1780,31 @@ void QgsPalLayerSettings::registerFeature( QgsFeature& f, const QgsRenderContext
   {
     doClip = true;
   }
+
+/*//simplify
+  if ( lineSimplify && ( placement == QgsPalLayerSettings::Curved || placement == QgsPalLayerSettings::Line )
+       && geom->type() == QGis::Line )
+  {
+    double simplifyTolerance = lineSimplifyTolerance * context.mapToPixel().mapUnitsPerPixel() * context.scaleFactor();
+    QgsGeometry* simplifiedGeom = geom->simplify( simplifyTolerance );
+    if ( simplifiedGeom )
+    {
+      geom = simplifiedGeom;
+      clonedGeometry.reset( geom );
+    }
+  }
+
+  //smooth
+  if ( lineSmooth && ( placement == QgsPalLayerSettings::Curved || placement == QgsPalLayerSettings::Line )
+       && geom->type() == QGis::Line )
+  {
+    QgsGeometry* smoothedGeom = geom->smooth( 2, lineSmoothTightness );
+    if ( smoothedGeom )
+    {
+      geom = smoothedGeom;
+      clonedGeometry.reset( geom );
+    }
+  }*/
 
   const GEOSGeometry* geos_geom = 0;
   QScopedPointer<QgsGeometry> preparedGeom;

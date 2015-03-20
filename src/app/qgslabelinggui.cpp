@@ -376,6 +376,11 @@ void QgsLabelingGui::init()
   // lyr.maxCurvedCharAngleOut must be negative, but it is shown as positive spinbox in GUI
   mMaxCharAngleOutDSpinBox->setValue( qAbs( lyr.maxCurvedCharAngleOut ) );
 
+  mLineSimplifyCheckBox->setChecked( lyr.lineSimplify );
+  mLineSimplifySlider->setValue( lyr.lineSimplifyTolerance * 10.0 );
+  mLineSmoothCheckBox->setChecked( lyr.lineSmooth );
+  mLineSmoothSlider->setValue( lyr.lineSmoothTightness * 100.0 );
+
   wrapCharacterEdit->setText( lyr.wrapChar );
   mFontLineHeightSpinBox->setValue( lyr.multilineHeight );
   mFontMultiLineAlignComboBox->setCurrentIndex(( unsigned int ) lyr.multilineAlign );
@@ -731,6 +736,11 @@ QgsPalLayerSettings QgsLabelingGui::layerSettings()
   lyr.maxCurvedCharAngleIn = mMaxCharAngleInDSpinBox->value();
   // lyr.maxCurvedCharAngleOut must be negative, but it is shown as positive spinbox in GUI
   lyr.maxCurvedCharAngleOut = -mMaxCharAngleOutDSpinBox->value();
+
+  lyr.lineSimplify = mLineSimplifyCheckBox->isChecked();
+  lyr.lineSimplifyTolerance = mLineSimplifySlider->value() / 10.0;
+  lyr.lineSmooth = mLineSmoothCheckBox->isChecked();
+  lyr.lineSmoothTightness = mLineSmoothSlider->value() / 100.0;
 
   lyr.minFeatureSize = mMinSizeSpinBox->value();
   lyr.limitNumLabels = mLimitLabelChkBox->isChecked();

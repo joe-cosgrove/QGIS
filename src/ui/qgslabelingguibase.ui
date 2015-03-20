@@ -524,7 +524,7 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>566</width>
+                       <width>341</width>
                        <height>388</height>
                       </rect>
                      </property>
@@ -3579,19 +3579,6 @@ font-style: italic;</string>
                                 </sizepolicy>
                                </property>
                                <property name="text">
-                                <string>Curved</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="0" column="0">
-                              <widget class="QRadioButton" name="radLineParallel">
-                               <property name="sizePolicy">
-                                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                                 <horstretch>0</horstretch>
-                                 <verstretch>0</verstretch>
-                                </sizepolicy>
-                               </property>
-                               <property name="text">
                                 <string>Parallel</string>
                                </property>
                                <property name="checked">
@@ -3603,6 +3590,62 @@ font-style: italic;</string>
                               <widget class="QRadioButton" name="radLineHorizontal">
                                <property name="text">
                                 <string>Horizontal</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="2" column="2">
+                              <widget class="QSlider" name="mLineSmoothSlider">
+                               <property name="maximum">
+                                <number>50</number>
+                               </property>
+                               <property name="value">
+                                <number>10</number>
+                               </property>
+                               <property name="orientation">
+                                <enum>Qt::Horizontal</enum>
+                               </property>
+                               <property name="tickPosition">
+                                <enum>QSlider::NoTicks</enum>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="2" column="0">
+                              <widget class="QCheckBox" name="mLineSmoothCheckBox">
+                               <property name="text">
+                                <string>Smooth line</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="0" column="1">
+                              <widget class="QRadioButton" name="radLineCurved">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="text">
+                                <string>Curved</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="0">
+                              <widget class="QCheckBox" name="mLineSimplifyCheckBox">
+                               <property name="text">
+                                <string>Simplify line</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="2">
+                              <widget class="QSlider" name="mLineSimplifySlider">
+                               <property name="maximum">
+                                <number>100</number>
+                               </property>
+                               <property name="value">
+                                <number>20</number>
+                               </property>
+                               <property name="orientation">
+                                <enum>Qt::Horizontal</enum>
                                </property>
                               </widget>
                              </item>
@@ -5559,6 +5602,14 @@ font-style: italic;</string>
    <extends>QToolButton</extends>
    <header>qgscolorbuttonv2.h</header>
    <container>1</container>
+<<<<<<< HEAD
+=======
+  </customwidget>
+  <customwidget>
+   <class>QgsDataDefinedButton</class>
+   <extends>QToolButton</extends>
+   <header>qgsdatadefinedbutton.h</header>
+>>>>>>> Experiments with line smoothing/simplification prior to labeling
   </customwidget>
   <customwidget>
    <class>QgsDoubleSpinBox</class>
