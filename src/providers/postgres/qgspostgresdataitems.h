@@ -70,6 +70,7 @@ class QgsPGConnectionItem : public QgsDataCollectionItem
     void editConnection();
     void deleteConnection();
     void refreshConnection();
+    void createSchema();
 
 };
 

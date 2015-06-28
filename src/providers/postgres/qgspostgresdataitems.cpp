@@ -106,6 +106,10 @@ QList<QAction*> QgsPGConnectionItem::actions()
   connect( actionDelete, SIGNAL( triggered() ), this, SLOT( deleteConnection() ) );
   lst.append( actionDelete );
 
+  QAction* actionCreateSchema = new QAction( tr( "Create Schema..." ), this );
+  connect( actionCreateSchema, SIGNAL( triggered() ), this, SLOT( createSchema() ) );
+  lst.append( actionCreateSchema );
+
   QAction* actionRefresh = new QAction( tr( "Refresh" ), this );
   connect( actionRefresh, SIGNAL( triggered() ), this, SLOT( refreshConnection() ) );
   lst.append( actionRefresh );
@@ -140,7 +144,15 @@ void QgsPGConnectionItem::deleteConnection()
 void QgsPGConnectionItem::refreshConnection()
 {
   // the parent should be updated
-  refresh();
+    refresh();
+}
+
+void QgsPGConnectionItem::createSchema()
+{
+    QgsNewNameDialog dlg;
+    dlg.setWindowTitle( tr( "Create Schema" ) );
+    if ( dlg.exec() != QDialog::Accepted )
+      return;
 }
 
 bool QgsPGConnectionItem::handleDrop( const QMimeData * data, Qt::DropAction )
