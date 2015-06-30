@@ -32,7 +32,7 @@
 
 #include <list>
 #include "pal.h"
-#include "rtree.hpp"
+#include <spatialindex/SpatialIndex.h>
 
 namespace pal
 {
@@ -206,9 +206,9 @@ namespace pal
 
       LabelPosition **labelpositions;
 
-      RTree<LabelPosition*, double, 2, double> *candidates;  // index all candidates
-      RTree<LabelPosition*, double, 2, double> *candidates_sol; // index active candidates
-      RTree<LabelPosition*, double, 2, double> *candidates_subsol; // idem for subparts
+      SpatialIndex::ISpatialIndex* candidates;  // index all candidates
+      SpatialIndex::ISpatialIndex* candidates_sol; // index active candidates
+      SpatialIndex::ISpatialIndex* candidates_subsol; // idem for subparts
 
       //int *feat;        // [nblp]
       int *featStartId; // [nbft]

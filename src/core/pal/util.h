@@ -36,7 +36,6 @@
 #include <geos_c.h>
 
 #include "pal.h"
-#include "rtree.hpp"
 #include "pointset.h"
 
 namespace pal

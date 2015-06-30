@@ -37,8 +37,6 @@
 #include <geos_c.h>
 #include <QLinkedList>
 
-#include "rtree.hpp"
-
 namespace pal
 {
 

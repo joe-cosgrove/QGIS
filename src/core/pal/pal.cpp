@@ -45,7 +45,6 @@
 #include "layer.h"
 #include "palexception.h"
 #include "palstat.h"
-#include "rtree.hpp"
 #include "costcalculator.h"
 #include "feature.h"
 #include "geomfunction.h"
@@ -55,6 +54,8 @@
 #include "util.h"
 
 #include <qgsgeometry.h> // for GEOS context
+
+#include <spatialindex/SpatialIndex.h>
 
 namespace pal
 {
@@ -204,14 +205,101 @@ namespace pal
     Layer *layer;
     double scale;
     QLinkedList<Feats*>* fFeats;
-    RTree<PointSet*, double, 2, double> *obstacles;
-    RTree<LabelPosition*, double, 2, double> *candidates;
+    SpatialIndex::ISpatialIndex *obstacles;
+    SpatialIndex::ISpatialIndex *candidates;
     double priority;
     double bbox_min[2];
     double bbox_max[2];
   } FeatCallBackCtx;
 
+  class FeaturePartVisitor : public SpatialIndex::IVisitor
+  {
+    public:
+      FeaturePartVisitor( FeatCallBackCtx *context )
+        : mContext( context )
+           {}
 
+      void visitNode( const SpatialIndex::INode& n ) override
+        { Q_UNUSED( n ); }
+
+      void visitData( const SpatialIndex::IData& d ) override
+      {
+          d.getIdentifier();
+
+          FeaturePart *ft_ptr = 0;
+          byte* dataBytes = 0;
+          uint32_t size = sizeof(ft_ptr);
+          d.getData( size, &dataBytes );
+          ft_ptr = reinterpret_cast<FeaturePart*>( dataBytes );
+         // delete dataBytes;
+
+          // all feature which are obstacle will be inserted into obstacles
+          double amin[2], amax[2];
+          if ( mContext->layer->obstacle )
+          {
+            ft_ptr->getBoundingBox( amin, amax );
+            //context->obstacles->Insert( amin, amax, ft_ptr );
+          }
+
+          // first do some checks whether to extract candidates or not
+
+          // feature has to be labeled?
+          if ( !mContext->layer->toLabel )
+            return;
+
+          // are we in a valid scale range for the layer?
+          if ( !mContext->layer->isScaleValid( mContext->scale ) )
+            return;
+
+          // is the feature well defined?  TODO Check epsilon
+          if ( ft_ptr->getLabelWidth() < 0.0000001 || ft_ptr->getLabelHeight() < 0.0000001 )
+            return;
+
+          // OK, everything's fine, let's process the feature part
+
+          // Holes of the feature are obstacles
+          for ( int i = 0; i < ft_ptr->getNumSelfObstacles(); i++ )
+          {
+            ft_ptr->getSelfObstacle( i )->getBoundingBox( amin, amax );
+            //context->obstacles->Insert( amin, amax, ft_ptr->getSelfObstacle( i ) );
+
+            if ( !ft_ptr->getSelfObstacle( i )->getHoleOf() )
+            {
+              std::cout << "ERROR: SHOULD HAVE A PARENT!!!!!" << std::endl;
+            }
+          }
+
+          // generate candidates for the feature part
+          LabelPosition** lPos = NULL;
+          int nblp = ft_ptr->setPosition( mContext->scale, &lPos, mContext->bbox_min, mContext->bbox_max, ft_ptr, mContext->candidates );
+
+          if ( nblp > 0 )
+          {
+            // valid features are added to fFeats
+            Feats *ft = new Feats();
+            ft->feature = ft_ptr;
+            ft->shape = NULL;
+            ft->nblp = nblp;
+            ft->lPos = lPos;
+            ft->priority = mContext->priority;
+            mContext->fFeats->append( ft );
+          }
+          else
+          {
+            // Others are deleted
+            delete[] lPos;
+          }
+
+          return;
+      }
+
+      void visitData( std::vector<const SpatialIndex::IData*>& v ) override
+        { Q_UNUSED( v ); }
+
+    private:
+      FeatCallBackCtx* mContext;
+
+  };
 
   /*
    * Callback function
@@ -232,7 +320,7 @@ namespace pal
     if ( context->layer->obstacle )
     {
       ft_ptr->getBoundingBox( amin, amax );
-      context->obstacles->Insert( amin, amax, ft_ptr );
+      //context->obstacles->Insert( amin, amax, ft_ptr );
     }
 
     // first do some checks whether to extract candidates or not
@@ -255,7 +343,7 @@ namespace pal
     for ( int i = 0; i < ft_ptr->getNumSelfObstacles(); i++ )
     {
       ft_ptr->getSelfObstacle( i )->getBoundingBox( amin, amax );
-      context->obstacles->Insert( amin, amax, ft_ptr->getSelfObstacle( i ) );
+      //context->obstacles->Insert( amin, amax, ft_ptr->getSelfObstacle( i ) );
 
       if ( !ft_ptr->getSelfObstacle( i )->getHoleOf() )
       {
@@ -292,7 +380,7 @@ namespace pal
 
   typedef struct _filterContext
   {
-    RTree<LabelPosition*, double, 2, double> *cdtsIndex;
+    SpatialIndex::ISpatialIndex *cdtsIndex;
     double scale;
     Pal* pal;
   } FilterContext;
@@ -300,7 +388,7 @@ namespace pal
   bool filteringCallback( PointSet *pset, void *ctx )
   {
 
-    RTree<LabelPosition*, double, 2, double> *cdtsIndex = (( FilterContext* ) ctx )->cdtsIndex;
+    SpatialIndex::ISpatialIndex *cdtsIndex = (( FilterContext* ) ctx )->cdtsIndex;
     double scale = (( FilterContext* ) ctx )->scale;
     Pal* pal = (( FilterContext* )ctx )->pal;
 
@@ -315,7 +403,7 @@ namespace pal
     pruneContext.scale = scale;
     pruneContext.obstacle = pset;
     pruneContext.pal = pal;
-    cdtsIndex->Search( amin, amax, LabelPosition::pruneCallback, ( void* ) &pruneContext );
+    //cdtsIndex->Search( amin, amax, LabelPosition::pruneCallback, ( void* ) &pruneContext );
 
     return true;
   }
@@ -323,7 +411,7 @@ namespace pal
   Problem* Pal::extract( int nbLayers, const QStringList& layersName, double *layersFactor, double lambda_min, double phi_min, double lambda_max, double phi_max, double scale )
   {
     // to store obstacles
-    RTree<PointSet*, double, 2, double> *obstacles = new RTree<PointSet*, double, 2, double>();
+    SpatialIndex::ISpatialIndex *obstacles = 0;//new RTree<PointSet*, double, 2, double>();
 
     Problem *prob = new Problem();
 
@@ -403,7 +491,10 @@ namespace pal
             // lookup for feature (and generates candidates list)
 
             context->layer->mMutex.lock();
-            context->layer->rtree->Search( amin, amax, extractFeatCallback, ( void* ) context );
+
+            FeaturePartVisitor visitor( context );
+
+            context->layer->mRTree->intersectsWithQuery( SpatialIndex::Region( amin, amax, 2 ), visitor );
             context->layer->mMutex.unlock();
 
 #ifdef _VERBOSE_
@@ -466,7 +557,7 @@ namespace pal
     filterCtx.cdtsIndex = prob->candidates;
     filterCtx.scale = prob->scale;
     filterCtx.pal = this;
-    obstacles->Search( amin, amax, filteringCallback, ( void* ) &filterCtx );
+    //obstacles->Search( amin, amax, filteringCallback, ( void* ) &filterCtx );
 
     if ( isCancelled() )
     {
@@ -569,7 +660,7 @@ namespace pal
         lp->getBoundingBox( amin, amax );
 
         // lookup for overlapping candidate
-        prob->candidates->Search( amin, amax, LabelPosition::countOverlapCallback, ( void* ) lp );
+        //prob->candidates->Search( amin, amax, LabelPosition::countOverlapCallback, ( void* ) lp );
 
         nbOverlaps += lp->getNumOverlaps();
 #ifdef _DEBUG_FULL_

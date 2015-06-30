@@ -37,11 +37,10 @@
 #include <QMutex>
 #include <QLinkedList>
 #include <QHash>
+#include <spatialindex/SpatialIndex.h>
 
 namespace pal
 {
-
-  template<class DATATYPE, class ELEMTYPE, int NUMDIMS, class ELEMTYPEREAL, int TMAXNODES, int TMINNODES> class RTree;
 
   class Feature;
   class FeaturePart;
@@ -289,7 +288,8 @@ namespace pal
       UpsideDownLabels upsidedownLabels;
 
       // indexes (spatial and id)
-      RTree<FeaturePart*, double, 2, double, 8, 4> *rtree;
+      SpatialIndex::IStorageManager* mStorage;
+      SpatialIndex::ISpatialIndex* mRTree;
       QHash< QString, Feature*> *hashtable;
 
       QHash< QString, QLinkedList<FeaturePart*>* >* connectedHashtable;
@@ -328,6 +328,8 @@ namespace pal
 
       /** Add newly created feature part into r tree and to the list */
       void addFeaturePart( FeaturePart* fpart, const QString &labelText = QString() );
+
+      friend class FeaturePartVisitor;
   };
 
 } // end namespace pal

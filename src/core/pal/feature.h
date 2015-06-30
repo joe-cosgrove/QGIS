@@ -226,7 +226,7 @@ namespace pal
        * \param candidates index for candidates
        * \return the number of candidates in *lPos
        */
-      int setPosition( double scale, LabelPosition ***lPos, double bbox_min[2], double bbox_max[2], PointSet *mapShape, RTree<LabelPosition*, double, 2, double>*candidates );
+      int setPosition( double scale, LabelPosition ***lPos, double bbox_min[2], double bbox_max[2], PointSet *mapShape, SpatialIndex::ISpatialIndex* candidates );
 
       /**
        * \brief get the unique id of the feature

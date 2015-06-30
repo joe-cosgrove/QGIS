@@ -67,7 +67,7 @@ namespace pal
 
   ////////
 
-  void CostCalculator::setPolygonCandidatesCost( int nblp, LabelPosition **lPos, int max_p, RTree<PointSet*, double, 2, double> *obstacles, double bbx[4], double bby[4] )
+  void CostCalculator::setPolygonCandidatesCost( int nblp, LabelPosition **lPos, int max_p, SpatialIndex::ISpatialIndex* obstacles, double bbx[4], double bby[4] )
   {
     int i;
 
@@ -125,7 +125,7 @@ namespace pal
   }
 
 
-  void CostCalculator::setCandidateCostFromPolygon( LabelPosition* lp, RTree <PointSet*, double, 2, double> *obstacles, double bbx[4], double bby[4] )
+  void CostCalculator::setCandidateCostFromPolygon( LabelPosition* lp, SpatialIndex::ISpatialIndex* obstacles, double bbx[4], double bby[4] )
   {
 
     double amin[2];
@@ -146,14 +146,14 @@ namespace pal
 
     lp->feature->getBoundingBox( amin, amax );
 
-    obstacles->Search( amin, amax, LabelPosition::polygonObstacleCallback, pCost );
+//   obstacles->Search( amin, amax, LabelPosition::polygonObstacleCallback, pCost );
 
     lp->setCost( pCost->getCost() );
 
     delete pCost;
   }
 
-  int CostCalculator::finalizeCandidatesCosts( Feats* feat, int max_p, RTree <PointSet*, double, 2, double> *obstacles, double bbx[4], double bby[4] )
+  int CostCalculator::finalizeCandidatesCosts( Feats* feat, int max_p, SpatialIndex::ISpatialIndex* obstacles, double bbx[4], double bby[4] )
   {
     // If candidates list is smaller than expected
     if ( max_p > feat->nblp )

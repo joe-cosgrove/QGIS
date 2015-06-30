@@ -418,21 +418,21 @@ namespace pal
   }
 
 
-  void LabelPosition::removeFromIndex( RTree<LabelPosition*, double, 2, double> *index )
+  void LabelPosition::removeFromIndex(SpatialIndex::ISpatialIndex *index )
   {
     double amin[2];
     double amax[2];
     getBoundingBox( amin, amax );
-    index->Remove( amin, amax, this );
+   // index->Remove( amin, amax, this );
   }
 
 
-  void LabelPosition::insertIntoIndex( RTree<LabelPosition*, double, 2, double> *index )
+  void LabelPosition::insertIntoIndex(SpatialIndex::ISpatialIndex *index )
   {
     double amin[2];
     double amax[2];
     getBoundingBox( amin, amax );
-    index->Insert( amin, amax, this );
+  //  index->Insert( amin, amax, this );
   }
 
 

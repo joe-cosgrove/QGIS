@@ -44,9 +44,13 @@
 #include "feature.h"
 #include "geomfunction.h"
 #include "util.h"
+#include <spatialindex/SpatialIndex.h>
+
+using namespace SpatialIndex;
 
 namespace pal
 {
+
 
   Layer::Layer( const QString &lyrName, double min_scale, double max_scale, Arrangement arrangement, Units label_unit, double defaultPriority, bool obstacle, bool active, bool toLabel, Pal *pal, bool displayAll )
       : name( lyrName )
@@ -64,8 +68,20 @@ namespace pal
       , mode( LabelPerFeature )
       , mergeLines( false )
       , upsidedownLabels( Upright )
+      , mStorage( 0 )
+      , mRTree( 0 )
   {
-    rtree = new RTree<FeaturePart*, double, 2, double>();
+    // R-Tree parameters
+    double fillFactor = 0.7;
+    unsigned long indexCapacity = 10;
+    unsigned long leafCapacity = 10;
+    unsigned long dimension = 2;
+    RTree::RTreeVariant variant = RTree::RV_RSTAR;
+    SpatialIndex::id_type indexId;
+
+    mStorage = StorageManager::createNewMemoryStorageManager();
+    mRTree = RTree::createNewRTree( *mStorage, fillFactor, indexCapacity, leafCapacity, dimension, variant, indexId );
+
     hashtable = new QHash< QString, Feature*>;
 
     connectedHashtable = new QHash< QString, QLinkedList<FeaturePart*>* >;
@@ -102,7 +118,8 @@ namespace pal
       delete features;
     }
 
-    delete rtree;
+    delete mRTree;
+    delete mStorage;
 
     delete hashtable;
     mMutex.unlock();
@@ -371,7 +388,7 @@ namespace pal
     featureParts->append( fpart );
 
     // add to r-tree for fast spatial access
-    rtree->Insert( bmin, bmax, fpart );
+    mRTree->insertData( sizeof(fpart), (const byte*)fpart, SpatialIndex::Region( bmin, bmax, 2 ), 0 );
 
     // add to hashtable with equally named feature parts
     if ( mergeLines && !labelText.isEmpty() )
@@ -451,7 +468,7 @@ namespace pal
           // remove partCheck from r-tree
           double bmin[2], bmax[2];
           partCheck->getBoundingBox( bmin, bmax );
-          rtree->Remove( bmin, bmax, partCheck );
+ //         rtree->Remove( bmin, bmax, partCheck );
           featureParts->removeOne( partCheck );
 
           otherPart->getBoundingBox( bmin, bmax );
@@ -460,9 +477,9 @@ namespace pal
           if ( otherPart->mergeWithFeaturePart( partCheck ) )
           {
             // reinsert p->item to r-tree (probably not needed)
-            rtree->Remove( bmin, bmax, otherPart );
+            //rtree->Remove( bmin, bmax, otherPart );
             otherPart->getBoundingBox( bmin, bmax );
-            rtree->Insert( bmin, bmax, otherPart );
+            //rtree->Insert( bmin, bmax, otherPart );
           }
         }
       }
@@ -492,7 +509,7 @@ namespace pal
 
         double bmin[2], bmax[2];
         fpart->getBoundingBox( bmin, bmax );
-        rtree->Remove( bmin, bmax, fpart );
+ //       rtree->Remove( bmin, bmax, fpart );
 
         const GEOSCoordSequence *cs = GEOSGeom_getCoordSeq_r( geosctxt, geom );
 
@@ -548,7 +565,7 @@ namespace pal
           FeaturePart* newfpart = new FeaturePart( fpart->getFeature(), newgeom );
           newFeatureParts->append( newfpart );
           newfpart->getBoundingBox( bmin, bmax );
-          rtree->Insert( bmin, bmax, newfpart );
+          //rtree->Insert( bmin, bmax, newfpart );
           part.clear();
           part.push_back( p );
         }
@@ -565,7 +582,7 @@ namespace pal
         FeaturePart* newfpart = new FeaturePart( fpart->getFeature(), newgeom );
         newFeatureParts->append( newfpart );
         newfpart->getBoundingBox( bmin, bmax );
-        rtree->Insert( bmin, bmax, newfpart );
+        //rtree->Insert( bmin, bmax, newfpart );
       }
       else
       {

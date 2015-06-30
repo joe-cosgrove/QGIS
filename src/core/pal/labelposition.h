@@ -33,8 +33,7 @@
 #include <fstream>
 
 #include "pointset.h"
-#include "rtree.hpp"
-
+#include <spatialindex/SpatialIndex.h>
 
 namespace pal
 {
@@ -211,8 +210,8 @@ namespace pal
       void setPartId( int id ) { partId = id; }
 
 
-      void removeFromIndex( RTree<LabelPosition*, double, 2, double> *index );
-      void insertIntoIndex( RTree<LabelPosition*, double, 2, double> *index );
+      void removeFromIndex( SpatialIndex::ISpatialIndex* index );
+      void insertIntoIndex( SpatialIndex::ISpatialIndex* index );
 
       typedef struct
       {

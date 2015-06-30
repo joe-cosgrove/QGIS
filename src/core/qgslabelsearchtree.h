@@ -27,6 +27,8 @@
 #include <labelposition.h>
 #include "qgsrectangle.h"
 
+#include "pal/rtree.hpp"
+
 using namespace pal;
 
 /**A class to query the labeling structure at a given point (small wraper around pal RTree class)*/

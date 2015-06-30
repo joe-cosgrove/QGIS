@@ -1296,9 +1296,9 @@ namespace pal
   }
 #endif
 
-  int FeaturePart::setPosition( double scale, LabelPosition ***lPos,
+  int FeaturePart::setPosition(double scale, LabelPosition ***lPos,
                                 double bbox_min[2], double bbox_max[2],
-                                PointSet *mapShape, RTree<LabelPosition*, double, 2, double> *candidates )
+                                PointSet *mapShape, SpatialIndex::ISpatialIndex *candidates )
   {
     int nbp = 0;
     int i;
