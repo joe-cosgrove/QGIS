@@ -30,18 +30,20 @@ install:
   - tar xf lcov_1.11.orig.tar.gz
   - sudo make -C lcov-1.11/ install
   - gem install coveralls-lcov
+  - cd ${TRAVIS_BUILD_DIR}/build
   - cmake -DWITH_SERVER=ON -DWITH_STAGED_PLUGINS=OFF -DWITH_GRASS=OFF -DENABLE_COVERAGE=ON.. \
           -DSUPPRESS_QT_WARNINGS=ON -DENABLE_MODELTEST=ON -DENABLE_PGTEST=ON
           -DWITH_QWTPOLAR=OFF -DWITH_APIDOC=ON -DWITH_PYSPATIALITE=ON ..
 
 before_script:
+  - cd ${TRAVIS_BUILD_DIR}
   - ./ci/travis/${TRAVIS_OS_NAME}/before_script.sh
 
 script:
   - ./ci/travis/${TRAVIS_OS_NAME}/script.sh
 
 after_success:
-- cd ${TRAVIS_BUILD_DIR}
+- cd ${TRAVIS_BUILD_DIR}/build
 - lcov --directory . --capture --output-file coverage.info # capture coverage info
 - lcov --remove coverage.info 'tests/*' '/usr/*' --output-file coverage.info # filter out system and test code
 - lcov --list coverage.info # debug before upload
