@@ -26,6 +26,7 @@
 #include "qgsmessagelog.h"
 #include "qgsdatadefined.h"
 #include "qgsnetworkcontentfetcher.h"
+#include "qgssymbollayerv2utils.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QFileInfo>
@@ -357,8 +358,10 @@ void QgsComposerPicture::loadRemotePicture( const QString &url )
 
 void QgsComposerPicture::loadLocalPicture( const QString &path )
 {
+  //convert paths to full (may be relative)
+  QString imagePath = QgsSymbolLayerV2Utils::symbolNameToPath( path );
   QFile pic;
-  pic.setFileName( path );
+  pic.setFileName( imagePath );
 
   if ( !pic.exists() )
   {
@@ -791,7 +794,7 @@ bool QgsComposerPicture::readXML( const QDomElement& itemElem, const QDomDocumen
     setDataDefinedProperty( QgsComposerObject::PictureSource, expressionActive, true, sourceExpression, QString() );
   }
 
-  mSourcePath = QgsProject::instance()->readPath( itemElem.attribute( "file" ) );
+  mSourcePath = itemElem.attribute( "file" );
 
   //picture rotation
   if ( itemElem.attribute( "pictureRotation", "0" ).toDouble() != 0 )

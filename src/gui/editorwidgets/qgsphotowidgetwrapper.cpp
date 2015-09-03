@@ -20,6 +20,7 @@
 #include <QSettings>
 
 #include "qgsfilterlineedit.h"
+#include "qgssymbollayerv2utils.h"
 
 QgsPhotoWidgetWrapper::QgsPhotoWidgetWrapper( QgsVectorLayer* vl, int fieldIdx, QWidget* editor, QWidget* parent )
     :  QgsEditorWidgetWrapper( vl, fieldIdx, editor, parent )
@@ -44,14 +45,17 @@ void QgsPhotoWidgetWrapper::selectFileName()
 
 void QgsPhotoWidgetWrapper::loadPixmap( const QString &fileName )
 {
+  //convert file name to a full path (may be relative)
+  QString imagePath = QgsSymbolLayerV2Utils::symbolNameToPath( fileName );
+
 #ifdef WITH_QTWEBKIT
   if ( mWebView )
   {
-    mWebView->setUrl( fileName );
+    mWebView->setUrl( imagePath );
   }
 #endif
 
-  QPixmap pm( fileName );
+  QPixmap pm( imagePath );
   if ( !pm.isNull() && mPhotoLabel )
   {
     QSize size( config( "Width" ).toInt(), config( "Height" ).toInt() );
