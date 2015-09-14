@@ -25,6 +25,62 @@
 #include <QSettings>
 #include <QDesktopServices>
 
+//
+// QgsProjectExplorer
+//
+
+QgsProjectExplorer::QgsProjectExplorer( QWidget *parent )
+    : QWidget( parent )
+{
+  QVBoxLayout* mainLayout = new QVBoxLayout;
+
+  setLayout( mainLayout );
+
+  QHBoxLayout* hlayout = new QHBoxLayout();
+
+  QLabel* recentProjectsTitle = new QLabel( QString( "<h1>%1</h1>" ).arg( tr( "Recent Projects" ) ) );
+  hlayout->addWidget( recentProjectsTitle );
+
+  QPushButton* closeButton = new QPushButton( tr( "Close" ) );
+  hlayout->addWidget( closeButton );
+
+  mainLayout->addLayout( hlayout );
+
+
+  QListView* recentProjectsListView = new QListView();
+  mModel = new QgsWelcomePageItemsModel( this );
+  recentProjectsListView->setModel( mModel );
+  recentProjectsListView->setItemDelegate( new QgsWelcomePageItemDelegate( recentProjectsListView ) );
+
+  mainLayout->addWidget( recentProjectsListView );
+
+  connect( recentProjectsListView, SIGNAL( activated( QModelIndex ) ), this, SLOT( itemActivated( QModelIndex ) ) );
+  connect( closeButton, SIGNAL( clicked() ), this, SIGNAL( closePressed() ) );
+}
+
+QgsProjectExplorer::~QgsProjectExplorer()
+{
+
+}
+
+void QgsProjectExplorer::setRecentProjects( const QList<QgsWelcomePageItemsModel::RecentProjectData> &recentProjects )
+{
+  mModel->setRecentProjects( recentProjects );
+}
+
+void QgsProjectExplorer::itemActivated( const QModelIndex &index )
+{
+  QgisApp::instance()->openProject( mModel->data( index, Qt::ToolTipRole ).toString() );
+
+
+  QgisApp::instance()->fileNew();
+}
+
+
+//
+// QgsWelcomePage
+//
+
 QgsWelcomePage::QgsWelcomePage( QWidget* parent )
     : QTabWidget( parent )
 {
@@ -37,19 +93,8 @@ QgsWelcomePage::QgsWelcomePage( QWidget* parent )
 
   mainLayout->addLayout( layout );
 
-  QWidget* recentProjctsContainer = new QWidget;
-  recentProjctsContainer->setLayout( new QVBoxLayout );
-  QLabel* recentProjectsTitle = new QLabel( QString( "<h1>%1</h1>" ).arg( tr( "Recent Projects" ) ) );
-  recentProjctsContainer->layout()->addWidget( recentProjectsTitle );
-
-  QListView* recentProjectsListView = new QListView();
-  mModel = new QgsWelcomePageItemsModel( recentProjectsListView );
-  recentProjectsListView->setModel( mModel );
-  recentProjectsListView->setItemDelegate( new QgsWelcomePageItemDelegate( recentProjectsListView ) );
-
-  recentProjctsContainer->layout()->addWidget( recentProjectsListView );
-
-  addTab( recentProjctsContainer, "Recent Projects" );
+  mProjectExplorer = new QgsProjectExplorer( this );
+  addTab( mProjectExplorer, "Recent Projects" );
 
   QWidget* whatsNewContainer = new QWidget;
   whatsNewContainer->setLayout( new QVBoxLayout );
@@ -79,7 +124,7 @@ QgsWelcomePage::QgsWelcomePage( QWidget* parent )
   connect( mVersionInfo, SIGNAL( versionInfoAvailable() ), this, SLOT( versionInfoReceived() ) );
   mVersionInfo->checkVersion();
 
-  connect( recentProjectsListView, SIGNAL( activated( QModelIndex ) ), this, SLOT( itemActivated( QModelIndex ) ) );
+  connect( mProjectExplorer, SIGNAL( closePressed() ), this, SLOT( closePressed() ) );
 }
 
 QgsWelcomePage::~QgsWelcomePage()
@@ -89,12 +134,7 @@ QgsWelcomePage::~QgsWelcomePage()
 
 void QgsWelcomePage::setRecentProjects( const QList<QgsWelcomePageItemsModel::RecentProjectData>& recentProjects )
 {
-  mModel->setRecentProjects( recentProjects );
-}
-
-void QgsWelcomePage::itemActivated( const QModelIndex& index )
-{
-  QgisApp::instance()->openProject( mModel->data( index, Qt::ToolTipRole ).toString() );
+  mProjectExplorer->setRecentProjects( recentProjects );
 }
 
 void QgsWelcomePage::versionInfoReceived()
@@ -119,3 +159,9 @@ void QgsWelcomePage::whatsNewLinkClicked( const QUrl& url )
 {
   QDesktopServices::openUrl( url );
 }
+
+void QgsWelcomePage::closePressed()
+{
+  QgisApp::instance()->fileNew();
+}
+

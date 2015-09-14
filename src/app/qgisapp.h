@@ -183,6 +183,9 @@ class APP_EXPORT QgisApp : public QMainWindow, private Ui::MainWindow
       */
     void openProject( const QString & fileName );
 
+    //! Create a new project
+    void fileNew();
+
     void openLayerDefinition( const QString & filename );
     /** Opens a qgis project file
       @returns false if unable to open the project
@@ -885,8 +888,7 @@ class APP_EXPORT QgisApp : public QMainWindow, private Ui::MainWindow
     void saveMapAsImage();
     //! Open a project
     void fileOpen();
-    //! Create a new project
-    void fileNew();
+
     //! Create a new blank project (no template)
     void fileNewBlank();
     //! As above but allows forcing without prompt and forcing blank project

@@ -24,7 +24,34 @@
 
 class QgsVersionInfo;
 
-class QgsWelcomePage : public QTabWidget
+
+class APP_EXPORT QgsProjectExplorer : public QWidget
+{
+    Q_OBJECT
+
+  public:
+    QgsProjectExplorer( QWidget* parent = 0 );
+
+    ~QgsProjectExplorer();
+
+    void setRecentProjects( const QList<QgsWelcomePageItemsModel::RecentProjectData>& recentProjects );
+
+  signals:
+
+    void closePressed();
+
+  private:
+
+    QgsWelcomePageItemsModel* mModel;
+
+  private slots:
+
+    void itemActivated( const QModelIndex& index );
+
+};
+
+
+class APP_EXPORT QgsWelcomePage : public QTabWidget
 {
     Q_OBJECT
 
@@ -36,14 +63,17 @@ class QgsWelcomePage : public QTabWidget
     void setRecentProjects( const QList<QgsWelcomePageItemsModel::RecentProjectData>& recentProjects );
 
   private slots:
-    void itemActivated( const QModelIndex& index );
+
     void versionInfoReceived();
     void whatsNewLinkClicked( const QUrl& url );
+    void closePressed();
 
   private:
-    QgsWelcomePageItemsModel* mModel;
     QLabel* mVersionInformation;
     QgsVersionInfo* mVersionInfo;
+    QgsProjectExplorer* mProjectExplorer;
 };
+
+
 
 #endif // QGSWELCOMEDIALOG_H
