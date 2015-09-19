@@ -47,6 +47,7 @@ QgsPointDisplacementRenderer::QgsPointDisplacementRenderer( const QString& label
     , mCircleWidth( 0.4 )
     , mCircleColor( QColor( 125, 125, 125 ) )
     , mCircleRadiusAddition( 0 )
+    , mMinPointsInRing( 1 )
     , mMaxLabelScaleDenominator( -1 )
     , mSpatialIndex( NULL )
 {
@@ -71,6 +72,7 @@ QgsFeatureRendererV2* QgsPointDisplacementRenderer::clone() const
   r->setLabelColor( mLabelColor );
   r->setPlacement( mPlacement );
   r->setCircleRadiusAddition( mCircleRadiusAddition );
+  r->setMinimumPointsInRing( mMinPointsInRing );
   r->setMaxLabelScaleDenominator( mMaxLabelScaleDenominator );
   r->setTolerance( mTolerance );
   r->setToleranceUnit( mToleranceUnit );
@@ -363,6 +365,7 @@ QgsFeatureRendererV2* QgsPointDisplacementRenderer::create( QDomElement& symbolo
   r->setCircleColor( QgsSymbolLayerV2Utils::decodeColor( symbologyElem.attribute( "circleColor", "" ) ) );
   r->setLabelColor( QgsSymbolLayerV2Utils::decodeColor( symbologyElem.attribute( "labelColor", "" ) ) );
   r->setCircleRadiusAddition( symbologyElem.attribute( "circleRadiusAddition", "0.0" ).toDouble() );
+  r->setMinimumPointsInRing( symbologyElem.attribute( "minPointsInRing", "1" ).toInt() );
   r->setMaxLabelScaleDenominator( symbologyElem.attribute( "maxLabelScaleDenominator", "-1" ).toDouble() );
   r->setTolerance( symbologyElem.attribute( "tolerance", "0.00001" ).toDouble() );
   r->setToleranceUnit( QgsSymbolLayerV2Utils::decodeOutputUnit( symbologyElem.attribute( "toleranceUnit", "MapUnit" ) ) );
@@ -395,6 +398,7 @@ QDomElement QgsPointDisplacementRenderer::save( QDomDocument& doc )
   rendererElement.setAttribute( "circleColor", QgsSymbolLayerV2Utils::encodeColor( mCircleColor ) );
   rendererElement.setAttribute( "labelColor", QgsSymbolLayerV2Utils::encodeColor( mLabelColor ) );
   rendererElement.setAttribute( "circleRadiusAddition", QString::number( mCircleRadiusAddition ) );
+  rendererElement.setAttribute( "minPointsInRing", mMinPointsInRing );
   rendererElement.setAttribute( "placement", ( int )mPlacement );
   rendererElement.setAttribute( "maxLabelScaleDenominator", QString::number( mMaxLabelScaleDenominator ) );
   rendererElement.setAttribute( "tolerance", QString::number( mTolerance ) );
@@ -499,8 +503,8 @@ void QgsPointDisplacementRenderer::calculateSymbolAndLabelPositions( QgsSymbolV2
   {
     case Ring:
     {
-      double minDiameterToFitSymbols = nPosition * symbolDiagonal / ( 2.0 * M_PI );
-      double radius = qMax( symbolDiagonal / 2, minDiameterToFitSymbols ) + circleAdditionPainterUnits;
+      double minRadiusToFitSymbols = nPosition * symbolDiagonal / ( 2.0 * M_PI );
+      double radius = qMax( symbolDiagonal / 2, minRadiusToFitSymbols ) + circleAdditionPainterUnits;
 
       double fullPerimeter = 2 * M_PI;
       double angleStep = fullPerimeter / nPosition;
@@ -525,11 +529,23 @@ void QgsPointDisplacementRenderer::calculateSymbolAndLabelPositions( QgsSymbolV2
 
       int pointsRemaining = nPosition;
       int ringNumber = 1;
-      double firstRingRadius = centerDiagonal / 2.0 + symbolDiagonal / 2.0;
+
+      double firstRingRadius;
+      if ( mMinPointsInRing > 1 )
+      {
+        firstRingRadius = qMax( qMin( mMinPointsInRing, nPosition ) * symbolDiagonal / ( 2.0 * M_PI ),
+                                centerDiagonal / 2.0 + symbolDiagonal / 2.0 );
+      }
+      else
+      {
+        firstRingRadius = centerDiagonal / 2.0 + symbolDiagonal / 2.0;
+      }
       while ( pointsRemaining > 0 )
       {
         double radiusCurrentRing = qMax( firstRingRadius + ( ringNumber - 1 ) * symbolDiagonal + ringNumber * circleAdditionPainterUnits, 0.0 );
-        int maxPointsCurrentRing = qMax( floor( 2 * M_PI * radiusCurrentRing / symbolDiagonal ), 1.0 );
+        int maxPointsCurrentRing = ( ringNumber == 1 && mMinPointsInRing > 1 ?
+                                     qMin( mMinPointsInRing, nPosition ) :
+                                     qMax( floor( 2 * M_PI * radiusCurrentRing / symbolDiagonal ), 1.0 ) );
         int actualPointsCurrentRing = qMin( maxPointsCurrentRing, pointsRemaining );
 
         double angleStep = 2 * M_PI / actualPointsCurrentRing;

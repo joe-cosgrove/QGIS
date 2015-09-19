@@ -50,6 +50,7 @@ class GUI_EXPORT QgsPointDisplacementRendererWidget: public QgsRendererV2Widget,
     void on_mCircleWidthSpinBox_valueChanged( double d );
     void on_mCircleColorButton_colorChanged( const QColor& newColor );
     void on_mDistanceSpinBox_valueChanged( double d );
+    void on_mMinPointsSpinBox_valueChanged( int value );
     void on_mDistanceUnitWidget_changed();
     void on_mLabelColorButton_colorChanged( const QColor& newColor );
     void on_mCircleModificationSpinBox_valueChanged( double d );

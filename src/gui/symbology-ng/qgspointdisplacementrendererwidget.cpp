@@ -112,6 +112,7 @@ QgsPointDisplacementRendererWidget::QgsPointDisplacementRendererWidget( QgsVecto
   mLabelColorButton->setColor( mRenderer->labelColor() );
   mCircleModificationSpinBox->setClearValue( 0.0 );
   mCircleModificationSpinBox->setValue( mRenderer->circleRadiusAddition() );
+  mMinPointsSpinBox->setValue( mRenderer->minimumPointsInRing() );
   mDistanceSpinBox->setValue( mRenderer->tolerance() );
   mDistanceUnitWidget->setUnit( mRenderer->toleranceUnit() );
   mDistanceUnitWidget->setMapUnitScale( mRenderer->toleranceMapUnitScale() );
@@ -295,6 +296,14 @@ void QgsPointDisplacementRendererWidget::on_mDistanceSpinBox_valueChanged( doubl
   }
 }
 
+void QgsPointDisplacementRendererWidget::on_mMinPointsSpinBox_valueChanged( int value )
+{
+  if ( mRenderer )
+  {
+    mRenderer->setMinimumPointsInRing( value );
+  }
+}
+
 void QgsPointDisplacementRendererWidget::on_mDistanceUnitWidget_changed()
 {
   if ( mRenderer )
@@ -341,6 +350,7 @@ void QgsPointDisplacementRendererWidget::blockAllSignals( bool block )
   mRendererComboBox->blockSignals( block );
   mLabelColorButton->blockSignals( block );
   mCircleModificationSpinBox->blockSignals( block );
+  mMinPointsSpinBox->blockSignals( block );
   mScaleDependentLabelsCheckBox->blockSignals( block );
   mMaxScaleDenominatorEdit->blockSignals( block );
   mCenterSymbolPushButton->blockSignals( block );

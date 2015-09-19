@@ -14,7 +14,16 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item row="4" column="0" colspan="2">
@@ -116,43 +125,16 @@
       <string>Displacement rings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="1">
-       <widget class="QgsColorButtonV2" name="mCircleColorButton">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
+      <item row="0" column="1">
+       <widget class="QgsDoubleSpinBox" name="mCircleWidthSpinBox">
+        <property name="suffix">
+         <string> mm</string>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
+        <property name="maximum">
+         <double>9999.000000000000000</double>
         </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="mCircleRadiusLabel">
-        <property name="text">
-         <string>Ring size adjustment</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="mCircleWidthLabel">
-        <property name="text">
-         <string>Outline width</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="mCircleColorLabel">
-        <property name="text">
-         <string>Outline color</string>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
         </property>
        </widget>
       </item>
@@ -172,16 +154,60 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QgsDoubleSpinBox" name="mCircleWidthSpinBox">
-        <property name="suffix">
-         <string> mm</string>
+      <item row="2" column="1">
+       <widget class="QgsColorButtonV2" name="mCircleColorButton">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="mCircleColorLabel">
+        <property name="text">
+         <string>Outline color</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="mCircleWidthLabel">
+        <property name="text">
+         <string>Outline width</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="mCircleRadiusLabel">
+        <property name="text">
+         <string>Ring size adjustment</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QgsSpinBox" name="mMinPointsSpinBox">
+        <property name="minimum">
+         <number>1</number>
         </property>
         <property name="maximum">
-         <double>9999.000000000000000</double>
+         <number>9999</number>
         </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Min points in ring</string>
         </property>
        </widget>
       </item>
@@ -274,6 +300,11 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QgsSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>qgsspinbox.h</header>
+  </customwidget>
+  <customwidget>
    <class>QgsCollapsibleGroupBoxBasic</class>
    <extends>QGroupBox</extends>
    <header location="global">qgscollapsiblegroupbox.h</header>
@@ -290,6 +321,7 @@
   <tabstop>mCircleWidthSpinBox</tabstop>
   <tabstop>mCircleColorButton</tabstop>
   <tabstop>mCircleModificationSpinBox</tabstop>
+  <tabstop>mMinPointsSpinBox</tabstop>
   <tabstop>mLabelFieldComboBox</tabstop>
   <tabstop>mLabelFontButton</tabstop>
   <tabstop>mLabelColorButton</tabstop>

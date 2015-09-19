@@ -106,6 +106,10 @@ class CORE_EXPORT QgsPointDisplacementRenderer: public QgsFeatureRendererV2
     void setCircleRadiusAddition( double d ) { mCircleRadiusAddition = d; }
     double circleRadiusAddition() const { return mCircleRadiusAddition; }
 
+    void setMinimumPointsInRing( int minPoints ) { mMinPointsInRing = minPoints; }
+
+    int minimumPointsInRing() const { return mMinPointsInRing; }
+
     void setMaxLabelScaleDenominator( double d ) { mMaxLabelScaleDenominator = d; }
     double maxLabelScaleDenominator() const { return mMaxLabelScaleDenominator; }
 
@@ -206,6 +210,9 @@ class CORE_EXPORT QgsPointDisplacementRenderer: public QgsFeatureRendererV2
     QColor mCircleColor;
     /** Addition to the default circle radius*/
     double mCircleRadiusAddition;
+
+    int mMinPointsInRing;
+
     /** Is set internally from startRender() depending on scale denominator*/
     bool mDrawLabels;
     /** Maximum scale denominator for label display. Negative number means no scale limitation*/
