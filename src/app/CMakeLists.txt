@@ -42,6 +42,7 @@ SET(QGIS_APP_SRCS
   qgslabelpropertydialog.cpp
   qgslabelengineconfigdialog.cpp
   qgslabelinggui.cpp
+  qgslabelingobstaclewidget.cpp
   qgslabelingwidget.cpp
   qgslabelpreview.cpp
   qgsloadstylefromdbdialog.cpp
@@ -207,6 +208,7 @@ SET (QGIS_APP_MOC_HDRS
   qgslabeldialog.h
   qgslabelengineconfigdialog.h
   qgslabelinggui.h
+  qgslabelingobstaclewidget.h
   qgslabelingwidget.h
   qgslabelpropertydialog.h
   qgsloadstylefromdbdialog.h
