@@ -1,3 +1,5 @@
+export CXX="clang++-3.6"
+
 mkdir build
 cd build
 cmake -DWITH_SERVER=ON -DWITH_STAGED_PLUGINS=OFF -DWITH_GRASS=ON \
