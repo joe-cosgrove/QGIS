@@ -28,6 +28,7 @@ sudo apt-get install --force-yes --no-install-recommends --no-install-suggests \
 #update clang
 sudo apt-get install --force-yes llvm-3.7 llvm-3.7-dev clang-3.7 clang-3.7-dev libstdc++-4.9-dev
 export CXX="clang++-3.7"
+export CC="clang-3.7"
 sudo ln -s /usr/bin/llvm-config-3.7 /usr/local/bin/llvm-config
 sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.7 100
 sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.7 100
