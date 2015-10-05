@@ -1,4 +1,4 @@
-export CXX="clang++-3.6"
+export CXX="clang++-3.7"
 
 mkdir build
 cd build
