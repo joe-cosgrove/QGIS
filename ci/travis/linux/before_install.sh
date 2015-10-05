@@ -1,7 +1,7 @@
 export DEBIAN_FRONTEND=noninteractive
 
 wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6 main' -y
+sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.7 main' -y
 
 sudo add-apt-repository ppa:ubuntugis/ppa -y
 sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y # For postgresql-9.1-postgis-2.1
@@ -26,8 +26,11 @@ sudo apt-get install --force-yes --no-install-recommends --no-install-suggests \
                          postgresql-9.1-postgis-2.1/precise # postgis one from ubuntugis-unstable, not pgdg
 
 #update clang
-sudo apt-get install --force-yes llvm-3.6 llvm-3.6-dev clang-3.6 libstdc++-4.9-dev
-export CXX="clang++-3.6"
+sudo apt-get install --force-yes llvm-3.7 llvm-3.7-dev clang-3.7 clang-3.7-dev libstdc++-4.9-dev
+export CXX="clang++-3.7"
+sudo ln -s /usr/bin/llvm-config-3.7 /usr/local/bin/llvm-config
+sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.7 100
+sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.7 100
 
 cmake --version
 clang --version
