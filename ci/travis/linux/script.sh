@@ -1,1 +1,2 @@
-xvfb-run ctest -V -E 'qgis_openstreetmaptest|qgis_wcsprovidertest' -S ./qgis-test-travis.ctest --output-on-failure
+xvfb-run ctest -V -R 'geometrytest' -S ./qgis-test-travis.ctest --output-on-failure
+
