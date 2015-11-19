@@ -53,13 +53,17 @@ class TestQgsGeometry : public QObject
     void cleanupTestCase();// will be called after the last testfunction was executed.
     void init();// will be called before each testfunction is executed.
     void cleanup();// will be called after every testfunction.
+#if 0
     void copy();
     void assignment();
     void asVariant(); //test conversion to and from a QVariant
     void isEmpty();
     void pointV2(); //test QgsPointV2
     void lineStringV2(); //test QgsLineStringV2
+#endif
     void polygonV2(); //test QgsPolygonV2
+
+#if 0
 
     void fromQgsPoint();
     void fromQPoint();
@@ -69,13 +73,13 @@ class TestQgsGeometry : public QObject
 
     void comparePolylines();
     void comparePolygons();
-
+#endif
     // MK, Disabled 14.11.2014
     // Too unclear what exactly should be tested and which variations are allowed for the line
 #if 0
     void simplifyCheck1();
 #endif
-
+#if 0
     void intersectionCheck1();
     void intersectionCheck2();
     void translateCheck1();
@@ -91,6 +95,8 @@ class TestQgsGeometry : public QObject
 
     void exportToGeoJSON();
 
+#endif
+
   private:
     /** A helper method to do a render check to see if the geometry op is as expected */
     bool renderCheck( const QString& theTestName, const QString& theComment = "", int mismatchCount = 0 );
@@ -103,6 +109,7 @@ class TestQgsGeometry : public QObject
 
     QString elemToString( const QDomElement& elem ) const;
 
+#if 0
     QgsPoint mPoint1;
     QgsPoint mPoint2;
     QgsPoint mPoint3;
@@ -131,15 +138,16 @@ class TestQgsGeometry : public QObject
     QPainter * mpPainter;
     QPen mPen1;
     QPen mPen2;
+#endif
     QString mReport;
 };
 
 TestQgsGeometry::TestQgsGeometry()
-    : mpPolylineGeometryD( nullptr )
+/*    : mpPolylineGeometryD( nullptr )
     , mpPolygonGeometryA( nullptr )
     , mpPolygonGeometryB( nullptr )
     , mpPolygonGeometryC( nullptr )
-    , mpPainter( nullptr )
+    , mpPainter( nullptr )*/
 {
 
 }
@@ -176,6 +184,7 @@ void TestQgsGeometry::cleanupTestCase()
 
 void TestQgsGeometry::init()
 {
+#if 0
   //
   // Reset / reinitialise the geometries before each test is run
   //
@@ -244,18 +253,22 @@ void TestQgsGeometry::init()
   //any test outs will be drawn in pen2
   mpPainter->setPen( mPen2 );
   mpPainter->setBrush( myBrush );
+#endif
 }
 
 void TestQgsGeometry::cleanup()
 {
+#if 0
   // will be called after every testfunction.
   delete mpPolygonGeometryA;
   delete mpPolygonGeometryB;
   delete mpPolygonGeometryC;
   delete mpPolylineGeometryD;
   delete mpPainter;
+#endif
 }
 
+#if 0
 void TestQgsGeometry::copy()
 {
   //create a point geometry
@@ -2096,6 +2109,7 @@ void TestQgsGeometry::lineStringV2()
   QVERIFY( l39.numPoints() == 0 );
 }
 
+#endif
 void TestQgsGeometry::polygonV2()
 {
   //test constructor
@@ -2818,8 +2832,84 @@ void TestQgsGeometry::polygonV2()
   QVERIFY( p20.exteriorRing() );
   p20.deleteVertex( QgsVertexId( 0, 0, 2 ) );
   QVERIFY( !p20.exteriorRing() );
+
+
+
+ //area
+
+
+  //perimeter
+
+  //length
+
+
+
+
+  //point on surface
+
+
+  //centroid
+
+
+
+  //surfaceToPolygon
+
+
+
+  //topolygon
+
+  //transform
+
+
+  //coordinatesequence
+
+
+  //closestsegment
+
+
+
+  //next vertex
+
+
+  //insert vertex
+
+
+  //move vertex
+
+
+  //delete vertex
+
+
+
+  //segmentize
+
+  //vertex angle
+
+
+  //vertex count
+
+
+  //vertex at
+
+
+  //add z value
+
+
+  //add m value
+
+
+  //drop z
+
+
+  //drop m
+
+  //convert to
+
+  //bounding box
 }
 
+
+#if 0
 void TestQgsGeometry::fromQgsPoint()
 {
   QgsPoint point( 1.0, 2.0 );
@@ -3334,6 +3424,9 @@ void TestQgsGeometry::dumpPolyline( QgsPolyline &thePolyline )
   }
   mpPainter->drawPolyline( myPoints );
 }
+
+#endif
+
 
 QString TestQgsGeometry::elemToString( const QDomElement& elem ) const
 {
