@@ -84,6 +84,7 @@ SET(QGIS_CORE_SRCS
   qgscolorschemeregistry.cpp
   qgscontexthelp.cpp
   qgscontexthelp_texts.cpp
+  qgscoordinateformatter.cpp
   qgscoordinatereferencesystem.cpp
   qgscoordinatetransform.cpp
   qgsconditionalstyle.cpp
@@ -556,6 +557,7 @@ SET(QGIS_CORE_HDRS
   qgscontexthelp.h
   qgsconditionalstyle.h
   qgscoordinatereferencesystem.h
+  qgscoordinateformatter.h
   qgscrscache.h
   qgscsexception.h
   qgsdartmeasurement.h

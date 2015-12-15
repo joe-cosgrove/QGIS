@@ -29,6 +29,7 @@
 %Include qgscoordinatereferencesystem.sip
 %Include qgscoordinatetransform.sip
 %Include qgsconditionalstyle.sip
+%Include qgscoordinateformatter.sip
 %Include qgscredentials.sip
 %Include qgscrscache.sip
 %Include qgsdatadefined.sip
