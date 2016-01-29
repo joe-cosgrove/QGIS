@@ -16,5 +16,4 @@ cmake -DWITH_SERVER=ON \
       -DENABLE_COVERAGE=ON \
       -DGRASS_PREFIX7=/usr/lib/grass70 \
       -DGRASS_INCLUDE_DIR7=/usr/lib/grass70/include \
-      -DCXX_EXTRA_FLAGS="$CLANG_WARNINGS" \
       ..
