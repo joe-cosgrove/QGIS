@@ -20,6 +20,8 @@
 #include "qgsrendercontext.h"
 #include "qgslayertreemodellegendnode.h"
 #include "qgsfontutils.h"
+#include "qgssymbollayerv2utils.h"
+#include "qgssymbolv2.h"
 
 #include <QDomElement>
 #include <QPainter>
@@ -608,5 +610,25 @@ QList< QgsLayerTreeModelLegendNode* > QgsSingleCategoryDiagramRenderer::legendIt
 
 QList< QgsLayerTreeModelLegendNode* > QgsLinearlyInterpolatedDiagramRenderer::legendItems( QgsLayerTreeLayer* nodeLayer ) const
 {
-  return mSettings.legendItems( nodeLayer );
+  QList< QgsLayerTreeModelLegendNode* > items = mSettings.legendItems( nodeLayer );
+
+  // add size legend
+  //  QgsLegendSymbolItemV2 title( nullptr, scaleExp.baseExpression(), nullptr );
+  //  lst << title;
+
+  QScopedPointer< QgsMarkerSymbolV2 > baseSymbol( QgsMarkerSymbolV2::createSimple( QgsStringMap() ) );
+
+  Q_FOREACH ( double v, QgsSymbolLayerV2Utils::prettyBreaks( mInterpolationSettings.lowerValue, mInterpolationSettings.upperValue, 4 ) )
+  {
+    //TODO - fix
+    double size = ( v - mInterpolationSettings.lowerValue ) * ( mInterpolationSettings.upperSize.width() - mInterpolationSettings.lowerSize.width() ) / ( mInterpolationSettings.upperValue - mInterpolationSettings.lowerValue )
+                  + mInterpolationSettings.lowerSize.width() - (( mInterpolationSettings.upperSize.width() - mInterpolationSettings.lowerSize.width() ) / ( mInterpolationSettings.upperValue - mInterpolationSettings.lowerValue ) ) * mInterpolationSettings.lowerValue;
+
+    QgsLegendSymbolItemV2 si( baseSymbol.data(), QString::number( v ), nullptr );
+    QgsMarkerSymbolV2 * s = static_cast<QgsMarkerSymbolV2 *>( si.symbol() );
+    s->setSize( size );
+    items << new QgsSymbolV2LegendNode( nodeLayer, si );
+  }
+
+  return items;
 }
