@@ -615,8 +615,9 @@ QList< QgsLayerTreeModelLegendNode* > QgsLinearlyInterpolatedDiagramRenderer::le
   // add size legend
   //  QgsLegendSymbolItemV2 title( nullptr, scaleExp.baseExpression(), nullptr );
   //  lst << title;
-
-  QScopedPointer< QgsMarkerSymbolV2 > baseSymbol( QgsMarkerSymbolV2::createSimple( QgsStringMap() ) );
+QgsStringMap map;
+map.insert("color", "0,0,0,0");
+  QScopedPointer< QgsMarkerSymbolV2 > baseSymbol( QgsMarkerSymbolV2::createSimple( map ) );
 
   Q_FOREACH ( double v, QgsSymbolLayerV2Utils::prettyBreaks( mInterpolationSettings.lowerValue, mInterpolationSettings.upperValue, 4 ) )
   {

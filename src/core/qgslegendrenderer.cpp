@@ -479,14 +479,16 @@ QSizeF QgsLegendRenderer::drawAtom( const Atom& atom, QPainter* painter, QPointF
     {
       if ( !first )
       {
-        point.ry() += mSettings.style( QgsComposerLegendStyle::Symbol ).margin( QgsComposerLegendStyle::Top );
+        if ( false )
+          point.ry() += mSettings.style( QgsComposerLegendStyle::Symbol ).margin( QgsComposerLegendStyle::Top );
       }
 
       Nucleon symbolNucleon = drawSymbolItem( legendNode, painter, point, nucleon.labelXOffset );
       // expand width, it may be wider because of labelXOffset
       size.rwidth() = qMax( symbolNucleon.size.width(), size.width() );
     }
-    point.ry() += nucleon.size.height();
+    if ( false )
+      point.ry() += nucleon.size.height();
     first = false;
   }
   return size;
