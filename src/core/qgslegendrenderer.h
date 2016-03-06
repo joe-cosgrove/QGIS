@@ -126,6 +126,9 @@ class CORE_EXPORT QgsLegendRenderer
 
     Nucleon drawSymbolItem( QgsLayerTreeModelLegendNode* symbolItem, QPainter* painter = nullptr, QPointF point = QPointF(), double labelXOffset = 0 );
 
+
+    Nucleon drawSymbolItem( QgsLayerTreeModelLegendNode* symbolItem, QPainter* painter, const QRectF& rect, double labelXOffset = 0 );
+
     /** Draws a layer item */
     QSizeF drawLayerTitle( QgsLayerTreeLayer* nodeLayer, QPainter* painter = nullptr, QPointF point = QPointF() );
 

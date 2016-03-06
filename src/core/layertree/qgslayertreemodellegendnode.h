@@ -86,6 +86,8 @@ class CORE_EXPORT QgsLayerTreeModelLegendNode : public QObject
       QPainter* painter;
       //! Top-left corner of the legend item
       QPointF point;
+      //! Optional rect for drawing legend item within. Either point or rect should be set, not both
+      QRectF rect;
       //! offset from the left side where label should start
       double labelXOffset;
     };

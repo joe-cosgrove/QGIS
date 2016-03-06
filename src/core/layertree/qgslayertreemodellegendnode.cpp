@@ -373,19 +373,33 @@ QSizeF QgsSymbolV2LegendNode::drawSymbol( const QgsLegendSettings& settings, Ite
     size = QgsSymbolLayerV2Utils::convertToPainterUnits( context, markerSymbol->size(), s->outputUnit(), s->mapUnitScale() ) / context.scaleFactor();
     height = size;
     width = size;
-    if ( width < settings.symbolSize().width() )
+    //TODO - this would need to be disabled for center alignment
+    if ( false )
     {
-      widthOffset = ( settings.symbolSize().width() - width ) / 2.0;
-    }
-    if ( height < settings.symbolSize().height() )
-    {
-      heightOffset = ( settings.symbolSize().height() - height ) / 2.0;
+      if ( width < settings.symbolSize().width() )
+      {
+        widthOffset = ( settings.symbolSize().width() - width ) / 2.0;
+      }
+      if ( height < settings.symbolSize().height() )
+      {
+        heightOffset = ( settings.symbolSize().height() - height ) / 2.0;
+      }
     }
   }
 
   if ( ctx )
   {
     double currentXPosition = ctx->point.x();
+
+    if ( ctx->rect.isValid() )
+    {
+      currentXPosition += 0.5 * ( ctx->rect.width() - width );
+      heightOffset = ( settings.symbolSize().height() - height );
+
+    }
+
+
+
     double currentYCoord = ctx->point.y() + ( itemHeight - settings.symbolSize().height() ) / 2;
     QPainter* p = ctx->painter;
 

@@ -233,7 +233,11 @@ QList<QgsLegendRenderer::Atom> QgsLegendRenderer::createAtomList( QgsLayerTreeGr
             // TODO: for now we keep Symbol and SymbolLabel Top margin in sync
             atom.size.rheight() += mSettings.style( QgsComposerLegendStyle::Symbol ).margin( QgsComposerLegendStyle::Top );
           }
-          atom.size.rheight() += symbolNucleon.size.height();
+          if ( false )
+          {
+            //TODO - this would need to be max height of nested group
+            atom.size.rheight() += symbolNucleon.size.height();
+          }
           atom.nucleons.append( symbolNucleon );
         }
         else
@@ -451,6 +455,7 @@ QSizeF QgsLegendRenderer::drawAtom( const Atom& atom, QPainter* painter, QPointF
   QSizeF size = QSizeF( atom.size );
   Q_FOREACH ( const Nucleon& nucleon, atom.nucleons )
   {
+    bool hasHeight = true;
     if ( QgsLayerTreeGroup* groupItem = qobject_cast<QgsLayerTreeGroup*>( nucleon.item ) )
     {
       QgsComposerLegendStyle::Style s = nodeLegendStyle( groupItem );
@@ -477,17 +482,21 @@ QSizeF QgsLegendRenderer::drawAtom( const Atom& atom, QPainter* painter, QPointF
     }
     else if ( QgsLayerTreeModelLegendNode* legendNode = qobject_cast<QgsLayerTreeModelLegendNode*>( nucleon.item ) )
     {
+      hasHeight = !dynamic_cast< QgsSymbolV2LegendNode* >( legendNode );
       if ( !first )
       {
-        if ( false )
+        if ( hasHeight )
           point.ry() += mSettings.style( QgsComposerLegendStyle::Symbol ).margin( QgsComposerLegendStyle::Top );
       }
 
-      Nucleon symbolNucleon = drawSymbolItem( legendNode, painter, point, nucleon.labelXOffset );
+      //if nested
+      Nucleon symbolNucleon = drawSymbolItem( legendNode, painter, QRectF( point.x(), point.y(), size.width(), size.height() ), nucleon.labelXOffset );
+      //else
+//      Nucleon symbolNucleon = drawSymbolItem( legendNode, painter, point, nucleon.labelXOffset );
       // expand width, it may be wider because of labelXOffset
       size.rwidth() = qMax( symbolNucleon.size.width(), size.width() );
     }
-    if ( false )
+    if ( hasHeight )
       point.ry() += nucleon.size.height();
     first = false;
   }
@@ -500,6 +509,27 @@ QgsLegendRenderer::Nucleon QgsLegendRenderer::drawSymbolItem( QgsLayerTreeModelL
   QgsLayerTreeModelLegendNode::ItemContext ctx;
   ctx.painter = painter;
   ctx.point = point;
+  ctx.labelXOffset = labelXOffset;
+
+  QgsLayerTreeModelLegendNode::ItemMetrics im = symbolItem->draw( mSettings, painter ? &ctx : nullptr );
+
+  Nucleon nucleon;
+  nucleon.item = symbolItem;
+  nucleon.symbolSize = im.symbolSize;
+  nucleon.labelSize = im.labelSize;
+  //QgsDebugMsg( QString( "symbol height = %1 label height = %2").arg( symbolSize.height()).arg( labelSize.height() ));
+  double width = qMax( static_cast< double >( im.symbolSize.width() ), labelXOffset ) + im.labelSize.width();
+  double height = qMax( im.symbolSize.height(), im.labelSize.height() );
+  nucleon.size = QSizeF( width, height );
+  return nucleon;
+}
+
+QgsLegendRenderer::Nucleon QgsLegendRenderer::drawSymbolItem( QgsLayerTreeModelLegendNode* symbolItem, QPainter* painter, const QRectF& rect, double labelXOffset )
+{
+  QgsLayerTreeModelLegendNode::ItemContext ctx;
+  ctx.painter = painter;
+  ctx.point = rect.topLeft();
+  ctx.rect = rect;
   ctx.labelXOffset = labelXOffset;
 
   QgsLayerTreeModelLegendNode::ItemMetrics im = symbolItem->draw( mSettings, painter ? &ctx : nullptr );
