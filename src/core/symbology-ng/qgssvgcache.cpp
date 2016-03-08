@@ -28,11 +28,11 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 #include <QPainter>
 #include <QPicture>
 #include <QSvgRenderer>
-#include <QFileInfo>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
@@ -54,6 +54,7 @@ QgsSvgCacheEntry::QgsSvgCacheEntry()
 QgsSvgCacheEntry::QgsSvgCacheEntry( const QString& f, double s, double ow, double wsf, double rsf, const QColor& fi, const QColor& ou, const QString& lk )
     : file( f )
     , lookupKey( lk.isEmpty() ? f : lk )
+    , fileModified( QFileInfo( f ).lastModified() )
     , size( s )
     , outlineWidth( ow )
     , widthScaleFactor( wsf )
@@ -77,7 +78,7 @@ QgsSvgCacheEntry::~QgsSvgCacheEntry()
 bool QgsSvgCacheEntry::operator==( const QgsSvgCacheEntry& other ) const
 {
   return other.file == file && qgsDoubleNear( other.size, size ) && qgsDoubleNear( other.outlineWidth, outlineWidth ) && qgsDoubleNear( other.widthScaleFactor, widthScaleFactor )
-         && qgsDoubleNear( other.rasterScaleFactor, rasterScaleFactor ) && other.fill == fill && other.outline == outline;
+         && qgsDoubleNear( other.rasterScaleFactor, rasterScaleFactor ) && other.fill == fill && other.outline == outline && other.fileModified == fileModified;
 }
 
 int QgsSvgCacheEntry::dataSize() const
@@ -582,6 +583,7 @@ QgsSvgCacheEntry* QgsSvgCache::cacheEntry( const QString& file, double size, con
   //search entries in mEntryLookup
   QgsSvgCacheEntry* currentEntry = nullptr;
   QList<QgsSvgCacheEntry*> entries = mEntryLookup.values( file );
+  QDateTime modified = QFileInfo( file ).lastModified();
 
   QList<QgsSvgCacheEntry*>::iterator entryIt = entries.begin();
   for ( ; entryIt != entries.end(); ++entryIt )
@@ -589,7 +591,7 @@ QgsSvgCacheEntry* QgsSvgCache::cacheEntry( const QString& file, double size, con
     QgsSvgCacheEntry* cacheEntry = *entryIt;
     if ( qgsDoubleNear( cacheEntry->size, size ) && cacheEntry->fill == fill && cacheEntry->outline == outline &&
          qgsDoubleNear( cacheEntry->outlineWidth, outlineWidth ) && qgsDoubleNear( cacheEntry->widthScaleFactor, widthScaleFactor )
-         && qgsDoubleNear( cacheEntry->rasterScaleFactor, rasterScaleFactor ) )
+         && qgsDoubleNear( cacheEntry->rasterScaleFactor, rasterScaleFactor ) && cacheEntry->fileModified == modified )
     {
       currentEntry = cacheEntry;
       break;

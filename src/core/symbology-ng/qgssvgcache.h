@@ -26,6 +26,7 @@
 #include <QUrl>
 #include <QObject>
 #include <QSizeF>
+#include <QDateTime>
 
 class QDomElement;
 class QImage;
@@ -52,6 +53,10 @@ class CORE_EXPORT QgsSvgCacheEntry
     QString file;
     //! Lookup key used by QgsSvgCache's hashtable (relative or absolute path). Needed for removal from the hashtable
     QString lookupKey;
+
+    //! Timestamp when file was last modified
+    QDateTime fileModified;
+
     double size; //size in pixels (cast to int for QImage)
     double outlineWidth;
     double widthScaleFactor;
