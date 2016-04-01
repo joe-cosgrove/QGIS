@@ -18,6 +18,8 @@ email                : jef at norbit dot de
 
 #include <QThread>
 #include "qgsgeometry.h"
+class QgsSurfaceV2;
+class QgsLineStringV2;
 
 class CORE_EXPORT QgsGeometryValidator : public QThread
 {
@@ -42,17 +44,23 @@ class CORE_EXPORT QgsGeometryValidator : public QThread
 
   private:
     void validatePolyline( int i, QgsPolyline polyline, bool ring = false );
+    void validatePolyline(int i, const QgsLineStringV2* line, bool ring);
     void validatePolygon( int i, const QgsPolygon &polygon );
+    void validatePolygon( int idx, const QgsPolygonV2* polygon );
     void checkRingIntersections( int p0, int i0, const QgsPolyline &ring0, int p1, int i1, const QgsPolyline &ring1 );
-    double distLine2Point( const QgsPoint& p, QgsVector v, const QgsPoint& q );
-    bool intersectLines( const QgsPoint& p, QgsVector v, const QgsPoint& q, QgsVector w, QgsPoint &s );
+    void checkRingIntersections(int p0, int i0, const QgsLineStringV2* ring0, int p1, int i1, const QgsLineStringV2* ring1);
+    double distLine2Point( double px, double py, QgsVector v, const QgsPoint& q );
+    bool intersectLines( double px, double py, QgsVector v, double qx, double qy, QgsVector w, QgsPoint& s );
     bool ringInRing( const QgsPolyline &inside, const QgsPolyline &outside );
+    bool ringInRing( const QgsLineStringV2* inside, const QgsLineStringV2* outside );
     bool pointInRing( const QgsPolyline &ring, const QgsPoint &p );
+    bool pointInRing( const QgsLineStringV2* ring, const QgsPointV2& p );
 
     QgsGeometry mG;
     QList<QgsGeometry::Error> *mErrors;
     bool mStop;
     int mErrorCount;
+
 }; // class QgsGeometryValidator
 
 #endif
