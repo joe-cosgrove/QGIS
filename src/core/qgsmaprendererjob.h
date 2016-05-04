@@ -52,6 +52,7 @@ struct LayerRenderJob
 
 typedef QList<LayerRenderJob> LayerRenderJobs;
 
+typedef QMap< QString, QgsSpatialIndex* > QgsRenderedFeatureIndexes;
 
 /**
  * Abstract base class for map rendering implementations.
@@ -102,6 +103,10 @@ class CORE_EXPORT QgsMapRendererJob : public QObject
 
     //! Get pointer to internal labeling engine (in order to get access to the results)
     virtual QgsLabelingResults* takeLabelingResults() = 0;
+
+    //! Get rendered feature indexes. Ownership will be taken from the render job.
+    //! @note added in QGIS 2.16
+    virtual QgsRenderedFeatureIndexes takeRenderedFeatureIndexes() = 0;
 
     struct Error
     {

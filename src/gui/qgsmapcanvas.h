@@ -33,6 +33,7 @@
 
 #include "qgsmapsettings.h" // TEMPORARY
 #include "qgsprevieweffect.h" //for QgsPreviewEffect::PreviewMode
+#include "qgsmaprendererjob.h"
 
 #ifdef HAVE_TOUCH
 #include <QGestureEvent>
@@ -144,6 +145,10 @@ class GUI_EXPORT QgsMapCanvas : public QGraphicsView
     //! Get access to the labeling results (may be null)
     //! @note added in 2.4
     const QgsLabelingResults* labelingResults() const;
+
+    //! Get access to the rendered feature indexes (may be empty)
+    //! @note added in 2.16
+    const QgsRenderedFeatureIndexes& renderedFeatureIndexes() const;
 
     //! Set whether to cache images of rendered layers
     //! @note added in 2.4
@@ -730,6 +735,9 @@ class GUI_EXPORT QgsMapCanvas : public QGraphicsView
 
     //! Labeling results from the recently rendered map
     QgsLabelingResults* mLabelingResults;
+
+    //! Indexes of rendered features
+    QgsRenderedFeatureIndexes mRenderedFeatureIndexes;
 
     //! Whether layers are rendered sequentially or in parallel
     bool mUseParallelRendering;

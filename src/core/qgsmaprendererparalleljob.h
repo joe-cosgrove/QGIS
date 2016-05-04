@@ -38,6 +38,7 @@ class CORE_EXPORT QgsMapRendererParallelJob : public QgsMapRendererQImageJob
     virtual bool isActive() const override;
 
     virtual QgsLabelingResults* takeLabelingResults() override;
+    virtual QgsRenderedFeatureIndexes takeRenderedFeatureIndexes() override;
 
     // from QgsMapRendererJobWithPreview
     virtual QImage renderedImage() override;
@@ -72,6 +73,7 @@ class CORE_EXPORT QgsMapRendererParallelJob : public QgsMapRendererQImageJob
     QgsRenderContext mLabelingRenderContext;
     QFuture<void> mLabelingFuture;
     QFutureWatcher<void> mLabelingFutureWatcher;
+    QgsRenderedFeatureIndexes mRenderedFeatureIndexes;
 };
 
 

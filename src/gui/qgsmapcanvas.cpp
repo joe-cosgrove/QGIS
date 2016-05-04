@@ -238,6 +238,7 @@ QgsMapCanvas::QgsMapCanvas( QWidget * parent, const char *name )
 
   mSettings.setFlag( QgsMapSettings::DrawEditingInfo );
   mSettings.setFlag( QgsMapSettings::UseRenderingOptimization );
+  mSettings.setFlag( QgsMapSettings::CreateSpatialIndexes );
 
   // class that will sync most of the changes between canvas and (legacy) map renderer
   // it is parented to map canvas, will be deleted automatically
@@ -307,6 +308,7 @@ QgsMapCanvas::~QgsMapCanvas()
   delete mCache;
 
   delete mLabelingResults;
+  qDeleteAll( mRenderedFeatureIndexes );
 
 } // dtor
 
@@ -560,6 +562,11 @@ const QgsLabelingResults *QgsMapCanvas::labelingResults() const
   return mLabelingResults;
 }
 
+const QgsRenderedFeatureIndexes &QgsMapCanvas::renderedFeatureIndexes() const
+{
+  return mRenderedFeatureIndexes;
+}
+
 void QgsMapCanvas::setCachingEnabled( bool enabled )
 {
   if ( enabled == isCachingEnabled() )
@@ -669,6 +676,9 @@ void QgsMapCanvas::refreshMap()
   // from now on we can accept refresh requests again
   mRefreshScheduled = false;
 
+  qDeleteAll( mRenderedFeatureIndexes );
+  mRenderedFeatureIndexes.clear();
+
   //build the expression context
   QgsExpressionContext expressionContext;
   expressionContext << QgsExpressionContextUtils::globalScope()
@@ -725,6 +735,8 @@ void QgsMapCanvas::rendererJobFinished()
     // connected to signal work with correct results
     delete mLabelingResults;
     mLabelingResults = mJob->takeLabelingResults();
+
+    mRenderedFeatureIndexes = mJob->takeRenderedFeatureIndexes();
 
     QImage img = mJob->renderedImage();
 

@@ -33,6 +33,7 @@ class QgsLabelingEngineInterface;
 class QgsLabelingEngineV2;
 class QgsMapSettings;
 class QgsFeatureFilterProvider;
+class QgsSpatialIndex;
 
 
 /** \ingroup core
@@ -219,6 +220,20 @@ class CORE_EXPORT QgsRenderContext
      */
     const QgsFeatureFilterProvider* featureFilterProvider() const { return mFeatureFilterProvider; }
 
+    /** Set a spatial index in which to store the bounds of rendered features.
+     * @param index spatial index for rendered features. Ownership is NOT transferred, and the index
+     * must not be deleted while the render context is in use.
+     * @note added in QGIS 2.16
+     * @see renderedFeatureIndex()
+     */
+    void setRenderedFeatureIndex( QgsSpatialIndex* index ) { mRenderedFeatureIndex = index; }
+
+    /** Returns the spatial index in which the bounds of rendered features have been stored.
+     * @note added in QGIS 2.16
+     * @see setRenderedFeatureIndex()
+     */
+    QgsSpatialIndex* renderedFeatureIndex() const { return mRenderedFeatureIndex; }
+
   private:
 
     Flags mFlags;
@@ -265,6 +280,9 @@ class CORE_EXPORT QgsRenderContext
 
     /** The feature filter provider */
     const QgsFeatureFilterProvider* mFeatureFilterProvider;
+
+    //! Spatial index for bounding boxes of rendered features
+    QgsSpatialIndex* mRenderedFeatureIndex;
 
 };
 

@@ -36,6 +36,7 @@
 #include "qgswkbptr.h"
 #include "qgsgeometrycollectionv2.h"
 #include "qgsclipper.h"
+#include "qgsspatialindex.h"
 
 #include <QColor>
 #include <QImage>
@@ -762,12 +763,18 @@ void QgsSymbolV2::renderFeature( const QgsFeature& feature, QgsRenderContext& co
       _getPoint( pt, context, point );
       static_cast<QgsMarkerSymbolV2*>( this )->renderPoint( pt, &feature, context, layer, selected );
 
+      QRectF bounds = static_cast<QgsMarkerSymbolV2*>( this )->bounds( pt, context, feature );
+      if ( context.renderedFeatureIndex() )
+      {
+        context.renderedFeatureIndex()->insertFeature( feature.id(), QgsRectangle( bounds ) );
+      }
+
       if ( context.testFlag( QgsRenderContext::DrawSymbolBounds ) )
       {
         //draw debugging rect
         context.painter()->setPen( Qt::red );
         context.painter()->setBrush( QColor( 255, 0, 0, 100 ) );
-        context.painter()->drawRect( static_cast<QgsMarkerSymbolV2*>( this )->bounds( pt, context, feature ) );
+        context.painter()->drawRect( bounds );
       }
 
       if ( drawVertexMarker )

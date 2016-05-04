@@ -176,6 +176,11 @@ QgsLabelingResults* QgsMapRendererCustomPainterJob::takeLabelingResults()
     return nullptr;
 }
 
+QgsRenderedFeatureIndexes QgsMapRendererCustomPainterJob::takeRenderedFeatureIndexes()
+{
+  return QgsRenderedFeatureIndexes();
+}
+
 
 void QgsMapRendererCustomPainterJob::waitForFinishedWithEventLoop( const QEventLoop::ProcessEventsFlags& flags )
 {

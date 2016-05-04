@@ -76,6 +76,10 @@ class QgsMapCanvas : QGraphicsView
     //! @note added in 2.4
     const QgsLabelingResults* labelingResults() const;
 
+    //! Get access to the rendered feature indexes (may be empty)
+    //! @note added in 2.16
+    const QgsRenderedFeatureIndexes& renderedFeatureIndexes() const;
+
     //! Set whether to cache images of rendered layers
     //! @note added in 2.4
     void setCachingEnabled( bool enabled );

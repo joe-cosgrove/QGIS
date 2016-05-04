@@ -44,6 +44,8 @@ QgsMapRendererParallelJob::~QgsMapRendererParallelJob()
 
   delete mLabelingEngineV2;
   mLabelingEngineV2 = nullptr;
+
+  qDeleteAll( mRenderedFeatureIndexes );
 }
 
 void QgsMapRendererParallelJob::start()
@@ -60,6 +62,9 @@ void QgsMapRendererParallelJob::start()
 
   delete mLabelingEngineV2;
   mLabelingEngineV2 = nullptr;
+
+  qDeleteAll( mRenderedFeatureIndexes );
+  mRenderedFeatureIndexes.clear();
 
   if ( mSettings.testFlag( QgsMapSettings::DrawLabeling ) )
   {
@@ -171,6 +176,13 @@ QgsLabelingResults* QgsMapRendererParallelJob::takeLabelingResults()
     return nullptr;
 }
 
+QgsRenderedFeatureIndexes QgsMapRendererParallelJob::takeRenderedFeatureIndexes()
+{
+  QgsRenderedFeatureIndexes result = mRenderedFeatureIndexes;
+  mRenderedFeatureIndexes.clear();
+  return result;
+}
+
 QImage QgsMapRendererParallelJob::renderedImage()
 {
   if ( mStatus == RenderingLayers )
@@ -185,6 +197,14 @@ void QgsMapRendererParallelJob::renderLayersFinished()
 
   // compose final image
   mFinalImage = composeImage( mSettings, mLayerJobs );
+
+  // take rendered feature indices
+  qDeleteAll( mRenderedFeatureIndexes );
+  mRenderedFeatureIndexes.clear();
+  Q_FOREACH ( const LayerRenderJob& job, mLayerJobs )
+  {
+    mRenderedFeatureIndexes.insert( job.layerId, job.context.renderedFeatureIndex() );
+  }
 
   logRenderingTime( mLayerJobs );
 

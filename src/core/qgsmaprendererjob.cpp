@@ -33,6 +33,7 @@
 #include "qgspallabeling.h"
 #include "qgsvectorlayerrenderer.h"
 #include "qgsvectorlayer.h"
+#include "qgsspatialindex.h"
 
 QgsMapRendererJob::QgsMapRendererJob( const QgsMapSettings& settings )
     : mSettings( settings )
@@ -252,6 +253,10 @@ LayerRenderJobs QgsMapRendererJob::prepareJobs( QPainter* painter, QgsPalLabelin
     job.context.setPainter( painter );
     job.context.setLabelingEngine( labelingEngine );
     job.context.setLabelingEngineV2( labelingEngine2 );
+    if ( mSettings.testFlag( QgsMapSettings::CreateSpatialIndexes ) )
+    {
+      job.context.setRenderedFeatureIndex( new QgsSpatialIndex() );
+    }
     job.context.setCoordinateTransform( ct );
     job.context.setExtent( r1 );
 

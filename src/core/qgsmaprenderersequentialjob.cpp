@@ -106,6 +106,11 @@ QgsLabelingResults* QgsMapRendererSequentialJob::takeLabelingResults()
   return tmp;
 }
 
+QgsRenderedFeatureIndexes QgsMapRendererSequentialJob::takeRenderedFeatureIndexes()
+{
+  return QgsRenderedFeatureIndexes();
+}
+
 
 QImage QgsMapRendererSequentialJob::renderedImage()
 {

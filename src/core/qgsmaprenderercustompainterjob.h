@@ -40,6 +40,7 @@ class CORE_EXPORT QgsMapRendererCustomPainterJob : public QgsMapRendererJob
     virtual void waitForFinished() override;
     virtual bool isActive() const override;
     virtual QgsLabelingResults* takeLabelingResults() override;
+    virtual QgsRenderedFeatureIndexes takeRenderedFeatureIndexes() override;
 
     //! @note not available in python bindings
     const LayerRenderJobs& jobs() const { return mLayerJobs; }

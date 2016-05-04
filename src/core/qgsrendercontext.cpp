@@ -35,6 +35,7 @@ QgsRenderContext::QgsRenderContext()
     , mLabelingEngine2( nullptr )
     , mGeometry( nullptr )
     , mFeatureFilterProvider( nullptr )
+    , mRenderedFeatureIndex( nullptr )
 {
   mVectorSimplifyMethod.setSimplifyHints( QgsVectorSimplifyMethod::NoSimplification );
 }
@@ -56,6 +57,7 @@ QgsRenderContext::QgsRenderContext( const QgsRenderContext& rh )
     , mExpressionContext( rh.mExpressionContext )
     , mGeometry( rh.mGeometry )
     , mFeatureFilterProvider( rh.mFeatureFilterProvider ? rh.mFeatureFilterProvider->clone() : nullptr )
+    , mRenderedFeatureIndex( rh.mRenderedFeatureIndex )
 {
 }
 
@@ -77,6 +79,7 @@ QgsRenderContext&QgsRenderContext::operator=( const QgsRenderContext & rh )
   mExpressionContext = rh.mExpressionContext;
   mGeometry = rh.mGeometry;
   mFeatureFilterProvider = rh.mFeatureFilterProvider ? rh.mFeatureFilterProvider->clone() : nullptr;
+  mRenderedFeatureIndex = rh.mRenderedFeatureIndex;
   return *this;
 }
 

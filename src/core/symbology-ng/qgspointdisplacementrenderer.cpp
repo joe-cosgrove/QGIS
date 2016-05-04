@@ -156,13 +156,13 @@ void QgsPointDisplacementRenderer::drawGroup( const DisplacementGroup& group, Qg
 
   //get list of labels and symbols
   QStringList labelAttributeList;
-  QList<QgsMarkerSymbolV2*> symbolList;
+  QList< QPair< QgsFeature, QgsMarkerSymbolV2* > > symbolList;
 
   QgsMultiPointV2* groupMultiPoint = new QgsMultiPointV2();
   for ( DisplacementGroup::const_iterator attIt = group.constBegin(); attIt != group.constEnd(); ++attIt )
   {
     labelAttributeList << ( mDrawLabels ? getLabel( attIt.value().first ) : QString() );
-    symbolList << dynamic_cast<QgsMarkerSymbolV2*>( attIt.value().second );
+    symbolList << qMakePair( attIt.value().first, dynamic_cast<QgsMarkerSymbolV2*>( attIt.value().second ) );
     groupMultiPoint->addGeometry( attIt.value().first.constGeometry()->geometry()->clone() );
   }
 
@@ -175,13 +175,14 @@ void QgsPointDisplacementRenderer::drawGroup( const DisplacementGroup& group, Qg
 
   //calculate max diagonal size from all symbols in group
   double diagonal = 0;
-  Q_FOREACH ( QgsMarkerSymbolV2* symbol, symbolList )
+  QList< QPair< QgsFeature, QgsMarkerSymbolV2* > >::const_iterator it = symbolList.constBegin();
+  for ( ; it != symbolList.constEnd(); ++it )
   {
-    if ( symbol )
+    if ( it->second )
     {
       diagonal = qMax( diagonal, QgsSymbolLayerV2Utils::convertToPainterUnits( context,
-                       M_SQRT2 * symbol->size(),
-                       symbol->outputUnit(), symbol->mapUnitScale() ) );
+                       M_SQRT2 * it->second->size(),
+                       it->second->sizeUnit(), it->second->sizeMapUnitScale() ) );
     }
   }
 
@@ -210,7 +211,7 @@ void QgsPointDisplacementRenderer::drawGroup( const DisplacementGroup& group, Qg
   }
 
   //draw symbols on the circle
-  drawSymbols( feature, context, symbolList, symbolPositions, selected );
+  drawSymbols( context, symbolList, symbolPositions, selected );
   //and also the labels
   drawLabels( pt, symbolContext, labelPositions, labelAttributeList );
 }
@@ -582,15 +583,21 @@ void QgsPointDisplacementRenderer::drawCircle( double radiusPainterUnits, QgsSym
   p->drawArc( QRectF( centerPoint.x() - radiusPainterUnits, centerPoint.y() - radiusPainterUnits, 2 * radiusPainterUnits, 2 * radiusPainterUnits ), 0, 5760 );
 }
 
-void QgsPointDisplacementRenderer::drawSymbols( const QgsFeature& f, QgsRenderContext& context, const QList<QgsMarkerSymbolV2*>& symbolList, const QList<QPointF>& symbolPositions, bool selected )
+void QgsPointDisplacementRenderer::drawSymbols( QgsRenderContext& context, const QList< QPair< QgsFeature, QgsMarkerSymbolV2* > >& symbolList, const QList<QPointF>& symbolPositions, bool selected )
 {
   QList<QPointF>::const_iterator symbolPosIt = symbolPositions.constBegin();
-  QList<QgsMarkerSymbolV2*>::const_iterator symbolIt = symbolList.constBegin();
+  QList< QPair< QgsFeature, QgsMarkerSymbolV2*> >::const_iterator symbolIt = symbolList.constBegin();
   for ( ; symbolPosIt != symbolPositions.constEnd() && symbolIt != symbolList.constEnd(); ++symbolPosIt, ++symbolIt )
   {
-    if ( *symbolIt )
+    if ( symbolIt->second )
     {
-      ( *symbolIt )->renderPoint( *symbolPosIt, &f, context, -1, selected );
+      symbolIt->second->renderPoint( *symbolPosIt, &( symbolIt->first ), context, -1, selected );
+
+      if ( context.renderedFeatureIndex() )
+      {
+        QRectF bounds = symbolIt->second->bounds( *symbolPosIt, context, symbolIt->first );
+        context.renderedFeatureIndex()->insertFeature( symbolIt->first.id(), QgsRectangle( bounds ) );
+      }
     }
   }
 }

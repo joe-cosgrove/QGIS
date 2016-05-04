@@ -40,6 +40,7 @@ class CORE_EXPORT QgsMapRendererSequentialJob : public QgsMapRendererQImageJob
     virtual bool isActive() const override;
 
     virtual QgsLabelingResults* takeLabelingResults() override;
+    virtual QgsRenderedFeatureIndexes takeRenderedFeatureIndexes() override;
 
     // from QgsMapRendererJobWithPreview
     virtual QImage renderedImage() override;
