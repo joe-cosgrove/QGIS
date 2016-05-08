@@ -95,6 +95,42 @@ matrix:
         - BUILD=osx
         - IGNORE_BUILD_FAILURES=YES
 
+    # code quality build (runs extra static analysis tests)
+    - os: linux
+      language: python # This lets us use newer python versions from virtualenv
+      env:
+        - BUILD=codequality
+        - QT_VERSION=5
+        - LLVM_VERSION=3.8
+      sudo: false
+      cache:
+        apt: true
+        directories:
+          - $HOME/.ccache
+      compiler: clang
+      python: "3.3"
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
+          packages:
+            - bison
+            - flex
+            - graphviz
+            - libpq-dev
+            - libfcgi-dev
+            - pkg-config
+            - poppler-utils
+            - txt2tags
+            - xvfb
+            - flip
+            - clang-3.8
+            - llvm-3.8
+            - llvm-3.8-dev
+            - libclang-3.8-dev
+
+
 git:
   depth: 30
 
