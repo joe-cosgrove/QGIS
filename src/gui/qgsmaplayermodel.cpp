@@ -48,9 +48,10 @@ void QgsMapLayerModel::setItemsCheckable( bool checkable )
 
 void QgsMapLayerModel::checkAll( Qt::CheckState checkState )
 {
-  Q_FOREACH ( const QString& key, mLayersChecked.keys() )
+  QMap<QString, Qt::CheckState>::const_iterator checkIt = mLayersChecked.constBegin();
+  for ( ; checkIt != mLayersChecked.constEnd(); ++checkIt )
   {
-    mLayersChecked[key] = checkState;
+    mLayersChecked[ checkIt.key()] = checkState;
   }
   emit dataChanged( index( 0, 0 ), index( mLayers.length() - 1, 0 ) );
 }

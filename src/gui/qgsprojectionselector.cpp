@@ -188,12 +188,14 @@ QString QgsProjectionSelector::ogcWmsCrsFilterAsSqlExpression( QSet<QString> * c
   if ( !authParts.isEmpty() )
   {
     QString prefix = " AND (";
-    Q_FOREACH ( const QString& auth_name, authParts.keys() )
+
+    QMap<QString, QStringList>::const_iterator partIt = authParts.constBegin();
+    for ( ; partIt != authParts.constEnd(); ++partIt )
     {
       sqlExpression += QString( "%1(upper(auth_name)='%2' AND upper(auth_id) IN ('%3'))" )
                        .arg( prefix,
-                             auth_name,
-                             authParts[auth_name].join( "','" ) );
+                             partIt.key(),
+                             partIt.value().join( "','" ) );
       prefix = " OR ";
     }
     sqlExpression += ')';

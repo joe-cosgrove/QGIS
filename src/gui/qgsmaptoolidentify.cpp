@@ -530,19 +530,20 @@ bool QgsMapToolIdentify::identifyRasterLayer( QList<IdentifyResult> *results, Qg
   if ( identifyResult.isValid() )
   {
     QMap<int, QVariant> values = identifyResult.results();
-    QgsGeometry geometry;
     if ( format == QgsRaster::IdentifyFormatValue )
     {
-      Q_FOREACH ( int bandNo, values.keys() )
+      QMap<int, QVariant>::const_iterator valueIt = values.constBegin();
+      for ( ; valueIt != values.constEnd(); ++valueIt )
       {
+        int bandNo = valueIt.key();
         QString valueString;
-        if ( values.value( bandNo ).isNull() )
+        if ( valueIt.value().isNull() )
         {
           valueString = tr( "no data" );
         }
         else
         {
-          double value = values.value( bandNo ).toDouble();
+          double value = valueIt.value().toDouble();
           valueString = QgsRasterBlock::printValue( value );
         }
         attributes.insert( dprovider->generateBandName( bandNo ), valueString );
@@ -552,9 +553,10 @@ bool QgsMapToolIdentify::identifyRasterLayer( QList<IdentifyResult> *results, Qg
     }
     else if ( format == QgsRaster::IdentifyFormatFeature )
     {
-      Q_FOREACH ( int i, values.keys() )
+      QMap<int, QVariant>::const_iterator valueIt = values.constBegin();
+      for ( ; valueIt != values.constEnd(); ++valueIt )
       {
-        QVariant value = values.value( i );
+        QVariant value = valueIt.value();
         if ( value.type() == QVariant::Bool && !value.toBool() )
         {
           // sublayer not visible or not queryable
@@ -565,7 +567,7 @@ bool QgsMapToolIdentify::identifyRasterLayer( QList<IdentifyResult> *results, Qg
         {
           // error
           // TODO: better error reporting
-          QString label = layer->subLayers().value( i );
+          QString label = layer->subLayers().value( valueIt.key() );
           attributes.clear();
           attributes.insert( tr( "Error" ), value.toString() );
 
@@ -574,7 +576,7 @@ bool QgsMapToolIdentify::identifyRasterLayer( QList<IdentifyResult> *results, Qg
         }
 
         // list of feature stores for a single sublayer
-        QgsFeatureStoreList featureStoreList = values.value( i ).value<QgsFeatureStoreList>();
+        QgsFeatureStoreList featureStoreList = valueIt.value().value<QgsFeatureStoreList>();
 
         Q_FOREACH ( QgsFeatureStore featureStore, featureStoreList )
         {
@@ -612,9 +614,11 @@ bool QgsMapToolIdentify::identifyRasterLayer( QList<IdentifyResult> *results, Qg
     else // text or html
     {
       QgsDebugMsg( QString( "%1 HTML or text values" ).arg( values.size() ) );
-      Q_FOREACH ( int bandNo, values.keys() )
+      QMap<int, QVariant>::const_iterator valueIt = values.constBegin();
+      for ( ; valueIt != values.constEnd(); ++valueIt )
       {
-        QString value = values.value( bandNo ).toString();
+        int bandNo = valueIt.key();
+        QString value = valueIt.value().toString();
         attributes.clear();
         attributes.insert( "", value );
 

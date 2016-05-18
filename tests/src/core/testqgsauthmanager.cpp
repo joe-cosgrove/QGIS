@@ -259,9 +259,11 @@ void TestQgsAuthManager::testAuthConfigs()
     QVERIFY( config == config2 );
 
     // changed config should update then correctly roundtrip
-    Q_FOREACH ( const QString &key, config2.configMap().keys() )
+    QgsStringMap configMap = config2.configMap();
+    QgsStringMap::const_iterator configIt = configMap.constBegin();
+    for ( ; configIt != configMap.constEnd(); ++configIt )
     {
-      config2.setConfig( key, config2.configMap().value( key ) + "changed" );
+      config2.setConfig( configIt.key(), config2.configMap().value( configIt.key() ) + "changed" );
     }
     config2.setName( config2.name() + "changed" );
     config2.setUri( config2.uri() + "changed" );

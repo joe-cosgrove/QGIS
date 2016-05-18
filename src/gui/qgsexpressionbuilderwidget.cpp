@@ -311,9 +311,10 @@ void QgsExpressionBuilderWidget::loadFieldNames( const QgsFields& fields )
 void QgsExpressionBuilderWidget::loadFieldsAndValues( const QMap<QString, QStringList> &fieldValues )
 {
   QgsFields fields;
-  Q_FOREACH ( const QString& fieldName, fieldValues.keys() )
+  QMap<QString, QStringList>::const_iterator fieldIt = fieldValues.constBegin();
+  for ( ; fieldIt != fieldValues.constEnd(); ++fieldIt )
   {
-    fields.append( QgsField( fieldName ) );
+    fields.append( QgsField( fieldIt.key() ) );
   }
   loadFieldNames( fields );
   mFieldValues = fieldValues;
