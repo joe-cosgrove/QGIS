@@ -3244,7 +3244,8 @@ QDomElement QgsOgcUtilsSQLStatementToFilter::toOgcFilter( const QgsSQLStatement:
   }
 
   // Process JOIN conditions
-  QString leftTable = node->tables().last()->name();
+  QList<  QgsSQLStatement::NodeTableDef* > tables = node->tables();
+  QString leftTable = tables.last()->name();
   Q_FOREACH ( QgsSQLStatement::NodeJoin* join, node->joins() )
   {
     QDomElement joinElem = toOgcFilter( join, leftTable );
