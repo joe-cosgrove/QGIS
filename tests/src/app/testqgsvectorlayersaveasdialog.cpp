@@ -123,7 +123,7 @@ void TestQgsVectorLayerSaveAsDialog::testAttributesAsDisplayedValues()
   QCOMPARE( mAttributeTable->item( 0, 2 )->flags(), Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
 
   QCOMPARE( d.attributesAsDisplayedValues().size(), 1 );
-  QCOMPARE( d.attributesAsDisplayedValues()[0], 0 );
+  QCOMPARE( d.attributesAsDisplayedValues().at( 0 ), 0 );
 
   // Disable item
   mAttributeTable->item( 0, 0 )->setCheckState( Qt::Unchecked );
