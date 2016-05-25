@@ -405,7 +405,7 @@ void QgsWFSFeatureDownloader::run( bool serializeFeatures, int maxFeatures )
   {
     success = true;
     QgsGmlStreamingParser* parser;
-    if ( mShared->mLayerPropertiesList.size() )
+    if ( !mShared->mLayerPropertiesList.isEmpty() )
     {
       QList< QgsGmlStreamingParser::LayerProperties > layerPropertiesList;
       Q_FOREACH ( QgsOgcUtils::LayerProperties layerProperties, mShared->mLayerPropertiesList )
