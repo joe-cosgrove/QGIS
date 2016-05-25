@@ -5,10 +5,6 @@ ABS_CLAZY_PATH=`cd "$TRAVIS_BUILD_DIR/clazy/lib"; pwd`
 
 export CLAZY_TESTS="assert-with-side-effects"
 export CLAZY_TESTS="$CLAZY_TESTS,detaching-temporary"
-
-# too many results for now
-export CLAZY_TESTS="$CLAZY_TESTS,container-anti-pattern"
-
 export CLAZY_TESTS="$CLAZY_TESTS,bogus-dynamic-cast"
 export CLAZY_TESTS="$CLAZY_TESTS,qdeleteall"
 export CLAZY_TESTS="$CLAZY_TESTS,isempty-vs-count"
@@ -17,6 +13,7 @@ export CLAZY_TESTS="$CLAZY_TESTS,qgetenv"
 export CLAZY_TESTS="$CLAZY_TESTS,unused-non-trivial-variable"
 export CLAZY_TESTS="$CLAZY_TESTS,temporary-iterator"
 export CLAZY_TESTS="$CLAZY_TESTS,writing-to-temporary"
+export CLAZY_TESTS="$CLAZY_TESTS,detaching-member"
 
 # TODO
 # export CLAZY_TESTS="$CLAZY_TESTS,qstring-arg"
@@ -31,6 +28,8 @@ export CLAZY_TESTS="$CLAZY_TESTS,writing-to-temporary"
 #export CLAZY_TESTS="$CLAZY_TESTS,qstring-ref"
 # Requires API break:
 #export CLAZY_TESTS="$CLAZY_TESTS,inefficient-qlist-soft"
+# Requires Qt5:
+#export CLAZY_TESTS="$CLAZY_TESTS,container-anti-pattern"
 
 export CLANG_WARNINGS="-Wall \
                     -Wno-c++98-compat \
