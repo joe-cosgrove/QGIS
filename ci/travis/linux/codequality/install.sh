@@ -86,6 +86,6 @@ cmake \
       -DENABLE_QT5=ON \
       -DENABLE_PYTHON3=ON \
       -DDISABLE_DEPRECATED=ON \
-      -DCXX_EXTRA_FLAGS="$CLANG_WARNINGS -Xclang -load -Xclang $ABS_CLAZY_PATH/ClangLazy.so -Xclang -add-plugin -Xclang clang-lazy -Xclang -plugin-arg-clang-lazy -Xclang $CLAZY_TESTS" \
+      -DCXX_EXTRA_FLAGS="$CLANG_WARNINGS -ferror-limit=1000 -Xclang -load -Xclang $ABS_CLAZY_PATH/ClangLazy.so -Xclang -add-plugin -Xclang clang-lazy -Xclang -plugin-arg-clang-lazy -Xclang $CLAZY_TESTS" \
       ..
 
