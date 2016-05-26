@@ -354,14 +354,14 @@ void QgsRasterProjector::calcSrcExtent()
   // For now, we run through all matrix
   // mCPMatrix is used for both Approximate and Exact because QgsCoordinateTransform::transformBoundingBox()
   // is not precise enough, see #13665
-  QgsPoint myPoint = mCPMatrix[0][0];
+  QgsPoint myPoint = mCPMatrix.at( 0 ).at( 0 );
   mSrcExtent = QgsRectangle( myPoint.x(), myPoint.y(), myPoint.x(), myPoint.y() );
   for ( int i = 0; i < mCPRows; i++ )
   {
     for ( int j = 0; j < mCPCols ; j++ )
     {
-      myPoint = mCPMatrix[i][j];
-      if ( mCPLegalMatrix[i][j] )
+      myPoint = mCPMatrix.at( i ).at( j );
+      if ( mCPLegalMatrix.at( i ).at( j ) )
       {
         mSrcExtent.combineExtentWith( myPoint.x(), myPoint.y() );
       }

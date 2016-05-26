@@ -318,7 +318,7 @@ int joinVertexToGraph( QgsTracerGraph& g, const QgsPoint& pt )
   if ( eIdx == -1 )
     return -1;
 
-  const QgsTracerGraph::E& e = g.e[eIdx];
+  const QgsTracerGraph::E& e = g.e.at( eIdx );
   QgsTracerGraph::V& v1 = g.v[e.v1];
   QgsTracerGraph::V& v2 = g.v[e.v2];
 
@@ -384,11 +384,11 @@ void resetGraph( QgsTracerGraph& g )
   {
     if ( eIdx >= g.e.count() )
       continue;
-    const QgsTracerGraph::E& e = g.e[eIdx];
+    const QgsTracerGraph::E& e = g.e.at( eIdx );
     QgsTracerGraph::V& v1 = g.v[e.v1];
     for ( int i = 0; i < v1.edges.count(); ++i )
     {
-      if ( v1.edges[i] >= g.e.count() )
+      if ( v1.edges.at( i ) >= g.e.count() )
         v1.edges.remove( i-- );
     }
     v1.edges << eIdx;
@@ -396,7 +396,7 @@ void resetGraph( QgsTracerGraph& g )
     QgsTracerGraph::V& v2 = g.v[e.v2];
     for ( int i = 0; i < v2.edges.count(); ++i )
     {
-      if ( v2.edges[i] >= g.e.count() )
+      if ( v2.edges.at( i ) >= g.e.count() )
         v2.edges.remove( i-- );
     }
     v2.edges << eIdx;

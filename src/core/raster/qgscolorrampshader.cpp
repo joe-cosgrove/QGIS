@@ -94,7 +94,7 @@ bool QgsColorRampShader::shade( double theValue, int* theReturnRedValue, int* th
   {
     // calculate LUT for faster index recovery
     mLUTFactor = 1.0;
-    double minimumValue = mColorRampItemList.first().value;
+    double minimumValue = mColorRampItemList.at( 0 ).value;
     mLUTOffset = minimumValue + DOUBLE_DIFF_THRESHOLD;
     // Only make lut if at least 3 items, with 2 items the low and high cases handle both
     if ( colorRampItemListCount >= 3 )

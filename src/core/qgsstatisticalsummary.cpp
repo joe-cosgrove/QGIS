@@ -132,11 +132,11 @@ void QgsStatisticalSummary::finalize()
     bool even = ( mCount % 2 ) < 1;
     if ( even )
     {
-      mMedian = ( mValues[mCount / 2 - 1] + mValues[mCount / 2] ) / 2.0;
+      mMedian = ( mValues.at( mCount / 2 - 1 ) + mValues.at( mCount / 2 ) ) / 2.0;
     }
     else //odd
     {
-      mMedian = mValues[( mCount + 1 ) / 2 - 1];
+      mMedian = mValues.at(( mCount + 1 ) / 2 - 1 );
     }
   }
 
@@ -149,11 +149,11 @@ void QgsStatisticalSummary::finalize()
       bool even = ( halfCount % 2 ) < 1;
       if ( even )
       {
-        mFirstQuartile = ( mValues[halfCount / 2 - 1] + mValues[halfCount / 2] ) / 2.0;
+        mFirstQuartile = ( mValues.at( halfCount / 2 - 1 ) + mValues.at( halfCount / 2 ) ) / 2.0;
       }
       else //odd
       {
-        mFirstQuartile = mValues[( halfCount  + 1 ) / 2 - 1];
+        mFirstQuartile = mValues.at(( halfCount  + 1 ) / 2 - 1 );
       }
     }
     else
@@ -162,11 +162,11 @@ void QgsStatisticalSummary::finalize()
       bool even = ( halfCount % 2 ) < 1;
       if ( even )
       {
-        mFirstQuartile = ( mValues[halfCount / 2 - 1] + mValues[halfCount / 2] ) / 2.0;
+        mFirstQuartile = ( mValues.at( halfCount / 2 - 1 ) + mValues.at( halfCount / 2 ) ) / 2.0;
       }
       else //odd
       {
-        mFirstQuartile = mValues[( halfCount  + 1 ) / 2 - 1];
+        mFirstQuartile = mValues.at(( halfCount  + 1 ) / 2 - 1 );
       }
     }
   }
@@ -180,11 +180,11 @@ void QgsStatisticalSummary::finalize()
       bool even = ( halfCount % 2 ) < 1;
       if ( even )
       {
-        mThirdQuartile = ( mValues[ halfCount + halfCount / 2 - 1] + mValues[ halfCount + halfCount / 2] ) / 2.0;
+        mThirdQuartile = ( mValues.at( halfCount + halfCount / 2 - 1 ) + mValues.at( halfCount + halfCount / 2 ) ) / 2.0;
       }
       else //odd
       {
-        mThirdQuartile = mValues[( halfCount + 1 ) / 2 - 1 + halfCount ];
+        mThirdQuartile = mValues.at(( halfCount + 1 ) / 2 - 1 + halfCount );
       }
     }
     else
@@ -193,11 +193,11 @@ void QgsStatisticalSummary::finalize()
       bool even = ( halfCount % 2 ) < 1;
       if ( even )
       {
-        mThirdQuartile = ( mValues[ halfCount + halfCount / 2 - 2 ] + mValues[ halfCount + halfCount / 2 - 1 ] ) / 2.0;
+        mThirdQuartile = ( mValues.at( halfCount + halfCount / 2 - 2 ) + mValues.at( halfCount + halfCount / 2 - 1 ) ) / 2.0;
       }
       else //odd
       {
-        mThirdQuartile = mValues[( halfCount + 1 ) / 2 - 2 + halfCount ];
+        mThirdQuartile = mValues.at(( halfCount + 1 ) / 2 - 2 + halfCount );
       }
     }
   }
