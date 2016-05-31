@@ -43,6 +43,13 @@ class APP_EXPORT QgsMapToolSelectFeatures : public QgsMapTool
     //! Overridden mouse release event
     virtual void canvasReleaseEvent( QgsMapMouseEvent* e ) override;
 
+  private slots:
+
+    // we don't override the QgsMapTool methods, as they will not be called
+    // when a mouse button is depressed
+    void keyPress( QKeyEvent* e );
+    void keyRelease( QKeyEvent* e );
+
   private:
 
     //! Flag to indicate a map canvas drag operation is taking place
@@ -56,6 +63,10 @@ class APP_EXPORT QgsMapToolSelectFeatures : public QgsMapTool
     QColor mFillColor;
 
     QColor mBorderColour;
+
+    QCursor mAddCursor;
+    QCursor mMinusCursor;
+    QCursor mIntersectCursor;
 };
 
 #endif

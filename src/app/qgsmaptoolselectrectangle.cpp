@@ -39,6 +39,16 @@ QgsMapToolSelectFeatures::QgsMapToolSelectFeatures( QgsMapCanvas* canvas )
   mRubberBand = nullptr;
   mFillColor = QColor( 254, 178, 76, 63 );
   mBorderColour = QColor( 254, 58, 29, 100 );
+
+  QPixmap selectAddPixmap = QPixmap(( const char ** ) select_plus_cursor );
+  mAddCursor = QCursor( selectAddPixmap, 1, 1 );
+  QPixmap selectMinusPixmap = QPixmap(( const char ** ) select_minus_cursor );
+  mMinusCursor = QCursor( selectMinusPixmap, 1, 1 );
+  QPixmap selectIntersectPixmap = QPixmap(( const char ** ) select_intersect_cursor );
+  mIntersectCursor = QCursor( selectIntersectPixmap, 1, 1 );
+
+  connect( mCanvas, SIGNAL( keyPressed( QKeyEvent* ) ), this, SLOT( keyPress( QKeyEvent* ) ) );
+  connect( mCanvas, SIGNAL( keyReleased( QKeyEvent* ) ), this, SLOT( keyRelease( QKeyEvent* ) ) );
 }
 
 
@@ -118,4 +128,43 @@ void QgsMapToolSelectFeatures::canvasReleaseEvent( QgsMapMouseEvent* e )
   }
 
   mDragging = false;
+}
+
+void QgsMapToolSelectFeatures::keyPress( QKeyEvent* e )
+{
+  if ( e->isAutoRepeat() )
+    return;
+
+  if (( e->key() == Qt::Key_Shift && e->modifiers() & Qt::ControlModifier )
+      || ( e->key() == Qt::Key_Control && e->modifiers() & Qt::ShiftModifier ) )
+  {
+    mCanvas->setCursor( mIntersectCursor );
+  }
+  else if ( e->key() == Qt::Key_Shift )
+  {
+    mCanvas->setCursor( mAddCursor );
+  }
+  else if ( e->key() == Qt::Key_Control )
+  {
+    mCanvas->setCursor( mMinusCursor );
+  }
+}
+
+void QgsMapToolSelectFeatures::keyRelease( QKeyEvent* e )
+{
+  if ( e->isAutoRepeat() )
+    return;
+
+  if ( !( e->modifiers() & Qt::ShiftModifier ) && !( e->modifiers() & Qt::ControlModifier ) )
+  {
+    mCanvas->setCursor( mCursor );
+  }
+  else if ( !( e->modifiers() & Qt::ShiftModifier ) )
+  {
+    mCanvas->setCursor( mMinusCursor );
+  }
+  else if ( !( e->modifiers() & Qt::ControlModifier ) )
+  {
+    mCanvas->setCursor( mAddCursor );
+  }
 }
