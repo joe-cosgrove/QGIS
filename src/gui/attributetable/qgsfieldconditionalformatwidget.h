@@ -23,6 +23,7 @@
 #include <QStandardItem>
 
 #include "ui_qgsfieldconditionalformatwidget.h"
+#include "ui_qgseditconditionalformatrulewidget.h"
 #include "qgsfieldcombobox.h"
 #include "qgsconditionalstyle.h"
 
@@ -31,7 +32,7 @@
  * A widget for customising conditional formatting options.
  * \note added in QGIS 2.12
  */
-class GUI_EXPORT QgsFieldConditionalFormatWidget : public QWidget, private Ui::QgsFieldConditionalWidget
+class GUI_EXPORT QgsFieldConditionalFormatWidget : public QgsPanelWidget, private Ui::QgsFieldConditionalWidget
 {
     Q_OBJECT
   public:
@@ -45,7 +46,79 @@ class GUI_EXPORT QgsFieldConditionalFormatWidget : public QWidget, private Ui::Q
 
     /** Switches the widget to the rules page.
      */
-    void viewRules();
+    Q_DECL_DEPRECATED void viewRules();
+
+    /** Sets the vector layer associated with the widget.
+     * @param theLayer vector layer
+     */
+    void setLayer( QgsVectorLayer* theLayer );
+
+    /** Switches the widget to the edit style mode for the specified style.
+     * @param index index of conditional style to edit
+     * @param style initial conditional styling options
+     */
+    void editStyle( int index, const QgsConditionalStyle& style );
+
+    /**
+     * @param style initial conditional styling options
+     * @deprecated no longer used
+     */
+    Q_DECL_DEPRECATED void loadStyle( const QgsConditionalStyle& style );
+
+    /** Resets the formatting options to their default state.
+     */
+    Q_DECL_DEPRECATED void reset();
+
+    /**
+     * @brief Set the presets that can be used for quick pick
+     * @param styles A list of styles used as presets
+     */
+    void setPresets( const QList<QgsConditionalStyle>& styles );
+
+    /**
+     * @brief The default presets for the widget.  Normally set when the widget is
+     * created however called setPresets will override the default styles.
+     * @return List of default presets.
+     */
+    QList<QgsConditionalStyle> defaultPresets() const;
+
+  signals:
+
+    /** Emitted when the conditional styling rules are updated.
+     * @param fieldName name of field whose rules have been modified.
+     */
+    void rulesUpdated( const QString& fieldName );
+
+  public slots:
+
+  private:
+    QgsVectorLayer* mLayer;
+    int mEditIndex;
+    bool mEditing;
+    QStandardItemModel* mModel;
+
+    QList<QgsConditionalStyle> getStyles();
+
+  private slots:
+
+    void ruleClicked( const QModelIndex& index );
+    void reloadStyles();
+    void addNewRule();
+    void fieldChanged( const QString& fieldName );
+
+};
+
+class GUI_EXPORT QgsEditConditionalFormatRuleWidget : public QgsPanelWidget, private Ui::QgsEditConditionalRuleWidget
+{
+    Q_OBJECT
+  public:
+
+    /** Constructor for QgsFieldConditionalFormatWidget.
+     * @param parent parent widget
+     */
+    explicit QgsEditConditionalFormatRuleWidget( QWidget *parent = nullptr );
+
+    ~QgsEditConditionalFormatRuleWidget();
 
     /** Sets the vector layer associated with the widget.
      * @param theLayer vector layer
@@ -93,7 +166,6 @@ class GUI_EXPORT QgsFieldConditionalFormatWidget : public QWidget, private Ui::Q
     QgsVectorLayer* mLayer;
     int mEditIndex;
     bool mEditing;
-    QStandardItemModel* mModel;
     QStandardItemModel* mPresetsModel;
     QgsSymbolV2* mSymbol;
     QList<QgsConditionalStyle> mPresets;
@@ -108,13 +180,10 @@ class GUI_EXPORT QgsFieldConditionalFormatWidget : public QWidget, private Ui::Q
     void presetSet( int index );
     bool isCustomSet();
     void ruleClicked( const QModelIndex& index );
-    void reloadStyles();
     void cancelRule();
     void deleteRule();
     void saveRule();
-    void addNewRule();
     void fieldChanged( const QString& fieldName );
 
 };
-
 #endif // QGSFIELDCONDITIONALFORMATWIDGET_H
