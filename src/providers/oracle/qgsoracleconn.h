@@ -126,18 +126,19 @@ class QgsOracleConn : public QObject
      * @param users list to store users in
      * @returns true if users where fetched successfully
      */
-    bool getUsersWithTables( QStringList &users );
+    bool getOwnersWithTables( QStringList &users );
 
     //! Get the list of supported layers
     bool supportedLayers( QVector<QgsOracleLayerProperty> &layers,
                           bool geometryTablesOnly,
                           bool userTablesOnly = true,
-                          bool allowGeometrylessTables = false );
+                          bool allowGeometrylessTables = false,
+                          const QString& owner = QString() );
 
     void retrieveLayerTypes( QgsOracleLayerProperty &layerProperty, bool useEstimatedMetadata, bool onlyExistingTypes );
 
     /** Gets information about the spatial tables */
-    bool tableInfo( bool geometryTablesOnly, bool userTablesOnly, bool allowGeometrylessTables );
+    bool tableInfo( QVector<QgsOracleLayerProperty>& layers, bool geometryTablesOnly, bool userTablesOnly, bool allowGeometrylessTables, const QString& owner = QString() );
 
     /** Get primary key candidates (all int4 columns) */
     QStringList pkCandidates( QString ownerName, QString viewName );
@@ -190,9 +191,6 @@ class QgsOracleConn : public QObject
 
     QSqlDatabase mDatabase;
     QSqlQuery mQuery;
-
-    //! List of the supported layers
-    QVector<QgsOracleLayerProperty> mLayersSupported;
 
     static QMap<QString, QgsOracleConn *> sConnections;
     static int snConnections;

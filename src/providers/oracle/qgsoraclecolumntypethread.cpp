@@ -49,13 +49,6 @@ void QgsOracleColumnTypeThread::run()
     return;
   }
 
-  QStringList users;
-  if ( !conn->getUsersWithTables( users ) )
-  {
-    mStopped = true;
-    return;
-  }
-
   emit progressMessage( tr( "Retrieving tables of %1..." ).arg( mName ) );
   QVector<QgsOracleLayerProperty> layerProperties;
   if ( !conn->supportedLayers( layerProperties,

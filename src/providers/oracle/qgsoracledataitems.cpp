@@ -52,21 +52,6 @@ void QgsOracleConnectionItem::stop()
   }
 }
 
-void QgsOracleConnectionItem::refresh()
-{
-  stop();
-
-  Q_FOREACH ( QgsDataItem *child, mChildren )
-  {
-    deleteChildItem( child );
-  }
-
-  Q_FOREACH ( QgsDataItem *item, createChildren() )
-  {
-    addChildItem( item, true );
-  }
-}
-
 void QgsOracleConnectionItem::setAllAsPopulated()
 {
   Q_FOREACH ( QgsDataItem *child, mChildren )
@@ -86,6 +71,34 @@ QVector<QgsDataItem*> QgsOracleConnectionItem::createChildren()
 
   if ( deferredDelete() )
     return QVector<QgsDataItem*>();
+
+  QVector<QgsDataItem*> items;
+
+  QString conninfo = QgsOracleConn::toPoolName( QgsOracleConn::connUri( mName ) );
+  QgsOracleConn *conn = QgsOracleConnPool::instance()->acquireConnection( conninfo );
+  if ( !conn )
+  {
+    items.append( new QgsErrorItem( this, tr( "Connection failed" ), mPath + "/error" ) );
+    QgsDebugMsg( "Connection failed - " + conninfo );
+    return items;
+  }
+
+  QStringList owners;
+  if ( !conn->getOwnersWithTables( owners ) )
+  {
+    items.append( new QgsErrorItem( this, tr( "Failed to get owners" ), mPath + "/error" ) );
+    QgsOracleConnPool::instance()->releaseConnection( conn );
+    return items;
+  }
+
+  Q_FOREACH ( const QString& owner, owners )
+  {
+    QgsOracleOwnerItem * ownerItem = new QgsOracleOwnerItem( this, mName, owner, mPath + '/' + owner );
+    items.append( ownerItem );
+  }
+
+  QgsOracleConnPool::instance()->releaseConnection( conn );
+  return items;
 
   if ( !mColumnTypeThread )
   {
@@ -146,7 +159,7 @@ void QgsOracleConnectionItem::setLayerType( QgsOracleLayerProperty layerProperty
 
     if ( !ownerItem )
     {
-      ownerItem = new QgsOracleOwnerItem( this, layerProperty.ownerName, mPath + "/" + layerProperty.ownerName );
+      ownerItem = new QgsOracleOwnerItem( this, mName, layerProperty.ownerName, mPath + "/" + layerProperty.ownerName );
       ownerItem->setState( Populating );
       QgsDebugMsgLevel( "add owner item: " + layerProperty.ownerName, 3 );
       addChildItem( ownerItem, true );
@@ -154,7 +167,7 @@ void QgsOracleConnectionItem::setLayerType( QgsOracleLayerProperty layerProperty
     }
 
     QgsDebugMsgLevel( "ADD LAYER", 3 );
-    ownerItem->addLayer( layerProperty.at( i ) );
+    ownerItem->createLayer( layerProperty.at( i ) );
   }
 }
 
@@ -382,25 +395,75 @@ QString QgsOracleLayerItem::createUri()
 }
 
 // ---------------------------------------------------------------------------
-QgsOracleOwnerItem::QgsOracleOwnerItem( QgsDataItem* parent, QString name, QString path )
+QgsOracleOwnerItem::QgsOracleOwnerItem( QgsDataItem* parent, QString connection, QString name, QString path )
     : QgsDataCollectionItem( parent, name, path )
+    , mConnectionName( connection )
 {
-  mIconName = "mIconDbOwner.png";
-  //not fertile, since children are created by QgsOracleConnectionItem
-  mCapabilities &= ~( Fertile );
+  mIconName = "mIconDbSchema.png";
 }
 
 QVector<QgsDataItem*> QgsOracleOwnerItem::createChildren()
 {
-  QgsDebugMsgLevel( "Entering.", 3 );
-  return QVector<QgsDataItem*>();
+  QVector<QgsDataItem*> items;
+
+  QString conninfo = QgsOracleConn::toPoolName( QgsOracleConn::connUri( mConnectionName ) );
+  QgsOracleConn *conn = QgsOracleConnPool::instance()->acquireConnection( conninfo );
+  if ( !conn )
+  {
+    items.append( new QgsErrorItem( this, tr( "Connection failed" ), mPath + "/error" ) );
+    QgsDebugMsg( "Connection failed - " + conninfo );
+    return items;
+  }
+
+  QVector<QgsOracleLayerProperty> layerProperties;
+  bool ok = conn->supportedLayers( layerProperties, QgsOracleConn::geometryColumnsOnly( mConnectionName ),
+                                   QgsOracleConn::userTablesOnly( mConnectionName ),
+                                   QgsOracleConn::allowGeometrylessTables( mConnectionName ),
+                                   mName );
+
+  if ( !ok )
+  {
+    items.append( new QgsErrorItem( this, tr( "Failed to get layers" ), mPath + "/error" ) );
+    QgsOracleConnPool::instance()->releaseConnection( conn );
+    return items;
+  }
+
+//  bool dontResolveType = QgsOracleConn::dontResolveType( mConnectionName );
+  Q_FOREACH ( const QgsOracleLayerProperty& layerProperty, layerProperties )
+  {
+    if ( layerProperty.ownerName != mName )
+      continue;
+
+    if ( !layerProperty.geometryColName.isNull() &&
+         ( layerProperty.types.value( 0, QGis::WKBUnknown ) == QGis::WKBUnknown ||
+           layerProperty.srids.value( 0, INT_MIN ) == INT_MIN ) )
+    {
+      // if ( dontResolveType )
+      {
+        //QgsDebugMsg( QString( "skipping column %1.%2 without type constraint" ).arg( layerProperty.schemaName ).arg( layerProperty.tableName ) );
+        //  continue;
+      }
+
+      // conn->retrieveLayerTypes( layerProperty, true /* useEstimatedMetadata */ );
+    }
+
+    for ( int i = 0; i < layerProperty.size(); i++ )
+    {
+      QgsOracleLayerItem *layerItem = createLayer( layerProperty.at( i ) );
+      if ( layerItem )
+        items.append( layerItem );
+    }
+  }
+
+  QgsOracleConnPool::instance()->releaseConnection( conn );
+  return items;
 }
 
 QgsOracleOwnerItem::~QgsOracleOwnerItem()
 {
 }
 
-void QgsOracleOwnerItem::addLayer( QgsOracleLayerProperty layerProperty )
+QgsOracleLayerItem* QgsOracleOwnerItem::createLayer( QgsOracleLayerProperty layerProperty )
 {
   QgsDebugMsgLevel( layerProperty.toString(), 3 );
 
@@ -437,13 +500,14 @@ void QgsOracleOwnerItem::addLayer( QgsOracleLayerProperty layerProperty )
       }
       else
       {
-        return;
+        return nullptr;
       }
   }
 
   QgsOracleLayerItem *layerItem = new QgsOracleLayerItem( this, layerProperty.tableName, mPath + "/" + layerProperty.tableName, layerType, layerProperty );
   layerItem->setToolTip( tip );
-  addChildItem( layerItem, true );
+  return layerItem;
+//  addChildItem( layerItem, true );
 }
 
 // ---------------------------------------------------------------------------

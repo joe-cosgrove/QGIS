@@ -66,8 +66,6 @@ class QgsOracleConnectionItem : public QgsDataCollectionItem
     virtual bool acceptDrop() { return true; }
     virtual bool handleDrop( const QMimeData * data, Qt::DropAction action );
 
-    void refresh();
-
   signals:
     void addGeometryColumn( QgsOracleLayerProperty );
 
@@ -92,12 +90,18 @@ class QgsOracleOwnerItem : public QgsDataCollectionItem
 {
     Q_OBJECT
   public:
-    QgsOracleOwnerItem( QgsDataItem* parent, QString name, QString path );
+    QgsOracleOwnerItem( QgsDataItem* parent, QString connectionName, QString name, QString path );
     ~QgsOracleOwnerItem();
 
     QVector<QgsDataItem*> createChildren();
 
-    void addLayer( QgsOracleLayerProperty layerProperty );
+    QgsOracleLayerItem* createLayer( QgsOracleLayerProperty layerProperty );
+
+  private:
+
+    QString mConnectionName;
+
+
 };
 
 class QgsOracleLayerItem : public QgsLayerItem
