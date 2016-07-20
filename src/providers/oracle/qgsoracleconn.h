@@ -122,6 +122,12 @@ class QgsOracleConn : public QObject
      */
     static QString quotedValue( const QVariant &value, QVariant::Type type = QVariant::Invalid );
 
+    /** Gets a list of users on the database who have layer objects.
+     * @param users list to store users in
+     * @returns true if users where fetched successfully
+     */
+    bool getUsersWithTables( QStringList &users );
+
     //! Get the list of supported layers
     bool supportedLayers( QVector<QgsOracleLayerProperty> &layers,
                           bool geometryTablesOnly,

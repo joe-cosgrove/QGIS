@@ -345,6 +345,33 @@ QString QgsOracleConn::quotedValue( const QVariant &value, QVariant::Type type )
   return v.prepend( "'" ).append( "'" );
 }
 
+bool QgsOracleConn::getUsersWithTables( QStringList& users )
+{
+  users.clear();
+
+  QString sql = "SELECT DISTINCT owner FROM all_objects WHERE object_type IN ('TABLE','VIEW','SYNONYM')";
+
+  QSqlQuery qry( mDatabase );
+  if ( !exec( qry, sql ) )
+  {
+    QgsMessageLog::logMessage( tr( "Querying available users failed.\nSQL:%1\nerror:%2\n" ).arg( qry.lastQuery() ).arg( qry.lastError().text() ), tr( "Oracle" ) );
+    return false;
+  }
+
+  while ( qry.next() )
+  {
+    users << qry.value( 0 ).toString();
+  }
+
+  if ( users.isEmpty() )
+  {
+    QgsMessageLog::logMessage( tr( "Database connection was successful, but the users could not be determined." ), tr( "Oracle" ) );
+  }
+
+  users.sort();
+  return true;
+}
+
 QString QgsOracleConn::fieldExpression( const QgsField &fld )
 {
 #if 0
