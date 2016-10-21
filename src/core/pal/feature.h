@@ -78,7 +78,6 @@ namespace pal
   };
 
   class LabelPosition;
-  class FeaturePart;
 
   /**
    * \ingroup core
@@ -91,11 +90,7 @@ namespace pal
 
     public:
 
-      /** Creates a new generic feature.
-        * @param lf a pointer for a feature which contains the spatial entites
-        * @param geom a pointer to a GEOS geometry
-        */
-      FeaturePart( QgsLabelFeature* lf, const GEOSGeometry* geom );
+      FeaturePart();
 
       FeaturePart( const FeaturePart& other );
 
@@ -103,13 +98,74 @@ namespace pal
        */
       virtual ~FeaturePart();
 
+      //! Returns the feature's obstacle factor, which represents the penalty
+      //! incurred for a label to overlap the feature
+      virtual double obstacleFactor() const = 0;
+
+      //! Returns the obstacle type for this feature
+      virtual QgsPalLayerSettings::ObstacleType obstacleType() const = 0;
+
+      virtual FeaturePart* clone() const = 0;
+
+    protected:
+
+      QList<FeaturePart*> mHoles;
+
+      /** \brief read coordinates from a GEOS geom */
+      void extractCoords( const GEOSGeometry* geom );
+
+      void init( const GEOSGeometry* geom );
+
+    private:
+      virtual FeaturePart* createHole( const GEOSGeometry* geom ) = 0;
+
+  };
+
+  class CORE_EXPORT ObstacleFeaturePart : public FeaturePart
+  {
+    public:
+      /** Creates a new generic feature.
+        * @param geom a pointer to a GEOS geometry
+        */
+      ObstacleFeaturePart( const GEOSGeometry* geom, double obstacleFactor, QgsPalLayerSettings::ObstacleType obstacleType );
+
+      double obstacleFactor() const override { return mObstacleFactor; }
+      QgsPalLayerSettings::ObstacleType obstacleType() const override { return mObstacleType; }
+      FeaturePart* clone() const override;
+
+    private:
+      double mObstacleFactor;
+      QgsPalLayerSettings::ObstacleType mObstacleType;
+
+      FeaturePart* createHole( const GEOSGeometry* geom ) override;
+  };
+
+  /**
+   * \ingroup core
+   * \brief Main class to handle feature
+   * \class pal::FeaturePart
+   * \note not available in Python bindings
+   */
+  class CORE_EXPORT LabelFeaturePart : public FeaturePart
+  {
+
+    public:
+
+      /** Creates a new generic feature.
+        * @param lf a pointer for a feature which contains the spatial entites
+        * @param geom a pointer to a GEOS geometry
+        */
+      LabelFeaturePart( QgsLabelFeature* lf, const GEOSGeometry* geom );
+
+      FeaturePart* clone() const override;
+
       /** Returns the parent feature.
        */
       QgsLabelFeature* feature() { return mLF; }
 
       /** Returns the layer that feature belongs to.
        */
-      Layer* layer();
+      Layer* layer() const;
 
       /** Returns the unique ID of the feature.
        */
@@ -209,7 +265,7 @@ namespace pal
        * @param part part to compare to
        * @returns true if both parts belong to same QgsLabelFeature
        */
-      bool hasSameLabelFeatureAs( FeaturePart* part ) const;
+      bool hasSameLabelFeatureAs( LabelFeaturePart* part ) const;
 
 #if 0
       /**
@@ -239,9 +295,8 @@ namespace pal
       //! Returns true if the feature should act as an obstacle to labels
       bool isObstacle() const { return mLF->isObstacle(); }
 
-      //! Returns the feature's obstacle factor, which represents the penalty
-      //! incurred for a label to overlap the feature
-      double obstacleFactor() const { return mLF->obstacleFactor(); }
+      double obstacleFactor() const override { return mLF->obstacleFactor(); }
+      QgsPalLayerSettings::ObstacleType obstacleType() const override;
 
       //! Returns the distance between repeating labels for this feature
       double repeatDistance() const { return mLF->repeatDistance(); }
@@ -249,14 +304,14 @@ namespace pal
       //! Get number of holes (inner rings) - they are considered as obstacles
       int getNumSelfObstacles() const { return mHoles.count(); }
       //! Get hole (inner ring) - considered as obstacle
-      FeaturePart* getSelfObstacle( int i ) { return mHoles.at( i ); }
+      LabelFeaturePart* getSelfObstacle( int i ) { return static_cast< LabelFeaturePart*>( mHoles.at( i ) ); }
 
       /** Check whether this part is connected with some other part */
-      bool isConnected( FeaturePart* p2 );
+      bool isConnected( LabelFeaturePart* p2 );
 
       /** Merge other (connected) part with this one and save the result in this part (other is unchanged).
        * Return true on success, false if the feature wasn't modified */
-      bool mergeWithFeaturePart( FeaturePart* other );
+      bool mergeWithFeaturePart( LabelFeaturePart* other );
 
       void addSizePenalty( int nbp, QList<LabelPosition *> &lPos, double bbx[4], double bby[4] );
 
@@ -277,14 +332,12 @@ namespace pal
     protected:
 
       QgsLabelFeature* mLF;
-      QList<FeaturePart*> mHoles;
-
-      /** \brief read coordinates from a GEOS geom */
-      void extractCoords( const GEOSGeometry* geom );
 
     private:
 
       LabelPosition::Quadrant quadrantFromOffset() const;
+
+      FeaturePart* createHole( const GEOSGeometry* geom ) override;
   };
 
 } // end namespace pal

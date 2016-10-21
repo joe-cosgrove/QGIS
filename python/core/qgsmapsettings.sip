@@ -1,4 +1,24 @@
 
+/**
+ * \class QgsLabelBlockingRegion
+ * \ingroup core
+ *
+ * Label blocking region (in map coordinates) to blocking priority (0-10)
+ * @note added in 3.0
+*/
+class QgsLabelBlockingRegion
+{
+  public:
+    QgsLabelBlockingRegion( const QgsGeometry& geometry, double obstacleFactor );
+
+    //!
+    QgsGeometry geometry;
+
+    //!
+    double factor;
+
+};
+
 class QgsMapSettings
 {
 %TypeHeaderCode
@@ -160,6 +180,20 @@ class QgsMapSettings
      * @note added in QGIS 2.12
      */
     const QgsExpressionContext& expressionContext() const;
+
+    /**
+     * Sets a list of regions to avoid placing labels within.
+     * @note added in QGIS 3.0
+     * @see labelBlockingRegions()
+     */
+    void setLabelBlockingRegions( const QList< QgsLabelBlockingRegion >& regions );
+
+   /**
+     * Returns the list of regions to avoid placing labels within.
+     * @note added in QGIS 3.0
+     * @see setLabelBlockingRegions()
+     */
+    QList< QgsLabelBlockingRegion > labelBlockingRegions() const;
 
     // -- utility functions --
 

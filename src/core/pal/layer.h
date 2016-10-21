@@ -46,7 +46,7 @@ namespace pal
   template<class DATATYPE, class ELEMTYPE, int NUMDIMS, class ELEMTYPEREAL, int TMAXNODES, int TMINNODES> class RTree;
   /// @endcond
 
-  class FeaturePart;
+  class LabelFeaturePart;
   class Pal;
   class LabelInfo;
 
@@ -59,7 +59,7 @@ namespace pal
   class CORE_EXPORT Layer
   {
       friend class Pal;
-      friend class FeaturePart;
+      friend class LabelFeaturePart;
 
       friend class Problem;
 
@@ -245,10 +245,10 @@ namespace pal
       QString mName;
 
       /** List of feature parts */
-      QLinkedList<FeaturePart*> mFeatureParts;
+      QLinkedList<LabelFeaturePart*> mFeatureParts;
 
       /** List of obstacle parts */
-      QList<FeaturePart*> mObstacleParts;
+      QList<LabelFeaturePart*> mObstacleParts;
 
       Pal *pal;
 
@@ -269,14 +269,14 @@ namespace pal
       UpsideDownLabels mUpsidedownLabels;
 
       // indexes (spatial and id)
-      RTree<FeaturePart*, double, 2, double, 8, 4> *mFeatureIndex;
+      RTree<LabelFeaturePart*, double, 2, double, 8, 4> *mFeatureIndex;
       //! Lookup table of label features (owned by the label feature provider that created them)
       QHash< QgsFeatureId, QgsLabelFeature*> mHashtable;
 
       //obstacle r-tree
-      RTree<FeaturePart*, double, 2, double, 8, 4> *mObstacleIndex;
+      RTree<LabelFeaturePart*, double, 2, double, 8, 4> *mObstacleIndex;
 
-      QHash< QString, QLinkedList<FeaturePart*>* > mConnectedHashtable;
+      QHash< QString, QLinkedList<LabelFeaturePart*>* > mConnectedHashtable;
       QStringList mConnectedTexts;
       QHash< QgsFeatureId, int > mConnectedFeaturesIds;
 
@@ -298,10 +298,10 @@ namespace pal
       Layer( QgsAbstractLabelProvider* provider, const QString& name, QgsPalLayerSettings::Placement arrangement, double defaultPriority, bool active, bool toLabel, Pal *pal, bool displayAll = false );
 
       /** Add newly created feature part into r tree and to the list */
-      void addFeaturePart( FeaturePart* fpart, const QString &labelText = QString() );
+      void addFeaturePart( LabelFeaturePart* fpart, const QString &labelText = QString() );
 
       /** Add newly created obstacle part into r tree and to the list */
-      void addObstaclePart( FeaturePart* fpart );
+      void addObstaclePart( LabelFeaturePart* fpart );
 
   };
 

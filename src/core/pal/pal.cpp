@@ -135,7 +135,7 @@ typedef struct _featCbackCtx
  *
  * Extract a specific shape from indexes
  */
-bool extractFeatCallback( FeaturePart *ft_ptr, void *ctx )
+bool extractFeatCallback( LabelFeaturePart *ft_ptr, void *ctx )
 {
   double amin[2], amax[2];
   FeatCallBackCtx *context = reinterpret_cast< FeatCallBackCtx* >( ctx );
@@ -184,7 +184,7 @@ typedef struct _obstaclebackCtx
  *
  * Extract obstacles from indexes
  */
-bool extractObstaclesCallback( FeaturePart *ft_ptr, void *ctx )
+bool extractObstaclesCallback( LabelFeaturePart *ft_ptr, void *ctx )
 {
   double amin[2], amax[2];
   ObstacleCallBackCtx *context = reinterpret_cast< ObstacleCallBackCtx* >( ctx );
@@ -319,6 +319,22 @@ Problem* Pal::extract( double lambda_min, double phi_min, double lambda_max, dou
     return nullptr;
   }
 
+  // add manual obstacles
+  QList< QgsLabelBlockingRegion >::const_iterator regionIt = mLabelBlockingRegions.constBegin();
+  QList< ObstacleFeaturePart* > blockingRegionParts;
+  for ( ; regionIt != mLabelBlockingRegions.constEnd(); ++regionIt )
+  {
+    QgsGeometry region = regionIt->geometry;
+    double factor = regionIt->factor;
+
+    ObstacleFeaturePart* regionPart = new ObstacleFeaturePart( region.asGeos(), factor, QgsPalLayerSettings::PolygonWhole );
+    blockingRegionParts << regionPart;
+
+    double amin[2], amax[2];
+    regionPart->getBoundingBox( amin, amax );
+    obstacles->Insert( amin, amax, regionPart );
+  }
+
   prob->nbft = fFeats->size();
   prob->nblp = 0;
   prob->featNbLp = new int [prob->nbft];
@@ -347,6 +363,7 @@ Problem* Pal::extract( double lambda_min, double phi_min, double lambda_max, dou
     delete fFeats;
     delete prob;
     delete obstacles;
+    qDeleteAll( blockingRegionParts );
     return nullptr;
   }
 
@@ -412,6 +429,7 @@ Problem* Pal::extract( double lambda_min, double phi_min, double lambda_max, dou
       delete fFeats;
       delete prob;
       delete obstacles;
+      qDeleteAll( blockingRegionParts );
       return nullptr;
     }
 
@@ -440,6 +458,7 @@ Problem* Pal::extract( double lambda_min, double phi_min, double lambda_max, dou
 
   //delete candidates;
   delete obstacles;
+  qDeleteAll( blockingRegionParts );
 
   nbOverlaps /= 2;
   prob->all_nblp = prob->nblp;

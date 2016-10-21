@@ -62,7 +62,7 @@ namespace pal
    */
   class CORE_EXPORT PointSet
   {
-      friend class FeaturePart;
+      friend class LabelFeaturePart;
       friend class LabelPosition;
       friend class CostCalculator;
       friend class PolygonCostCalculator;

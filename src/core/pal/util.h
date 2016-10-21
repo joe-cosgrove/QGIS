@@ -37,7 +37,7 @@ namespace pal
 
   class LabelPosition;
   class Layer;
-  class FeaturePart;
+  class LabelFeaturePart;
 
   /**
    * \ingroup core
@@ -53,7 +53,7 @@ namespace pal
           , priority( 0 )
       {}
 
-      FeaturePart *feature;
+      LabelFeaturePart *feature;
       PointSet *shape;
       double priority;
       QList< LabelPosition*> lPos;

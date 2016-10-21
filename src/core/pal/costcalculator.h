@@ -26,6 +26,8 @@
 namespace pal
 {
   class Feats;
+  class FeaturePart;
+  class LabelFeaturePart;
 
   /** \ingroup core
    */

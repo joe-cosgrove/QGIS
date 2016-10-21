@@ -28,6 +28,7 @@
 #include "qgsrectangle.h"
 #include "qgsscalecalculator.h"
 #include "qgsexpressioncontext.h"
+#include "qgsgeometry.h"
 
 class QPainter;
 
@@ -35,6 +36,29 @@ class QgsCoordinateTransform;
 class QgsScaleCalculator;
 class QgsMapRendererJob;
 class QgsMapLayer;
+
+/**
+ * \class QgsLabelBlockingRegion
+ * \ingroup core
+ *
+ * Label blocking region (in map coordinates) to blocking priority (0-10)
+ * @note added in 3.0
+*/
+class QgsLabelBlockingRegion
+{
+  public:
+    QgsLabelBlockingRegion( const QgsGeometry& geometry, double obstacleFactor )
+        : geometry( geometry )
+        , factor( obstacleFactor )
+    {}
+
+    //!
+    QgsGeometry geometry;
+
+    //!
+    double factor;
+
+};
 
 
 /** \ingroup core
@@ -210,6 +234,20 @@ class CORE_EXPORT QgsMapSettings
      */
     const QgsExpressionContext& expressionContext() const { return mExpressionContext; }
 
+    /**
+     * Sets a list of regions to avoid placing labels within.
+     * @note added in QGIS 3.0
+     * @see labelBlockingRegions()
+     */
+    void setLabelBlockingRegions( const QList< QgsLabelBlockingRegion >& regions ) { mLabelBlockingRegions = regions; }
+
+    /**
+     * Returns the list of regions to avoid placing labels within.
+     * @note added in QGIS 3.0
+     * @see setLabelBlockingRegions()
+     */
+    QList< QgsLabelBlockingRegion > labelBlockingRegions() const { return mLabelBlockingRegions; }
+
     // -- utility functions --
 
     //! @note not available in python bindings
@@ -334,6 +372,10 @@ class CORE_EXPORT QgsMapSettings
     QgsMapToPixel mMapToPixel;
 
     void updateDerived();
+
+  private:
+
+    QList< QgsLabelBlockingRegion > mLabelBlockingRegions;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( QgsMapSettings::Flags )

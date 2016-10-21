@@ -50,30 +50,18 @@
 
 using namespace pal;
 
-FeaturePart::FeaturePart( QgsLabelFeature* feat, const GEOSGeometry* geom )
-    : mLF( feat )
+
+FeaturePart::FeaturePart()
 {
-  // we'll remove const, but we won't modify that geometry
-  mGeos = const_cast<GEOSGeometry*>( geom );
-  mOwnsGeom = false; // geometry is owned by Feature class
-
-  extractCoords( geom );
-
-  holeOf = nullptr;
-  for ( int i = 0; i < mHoles.count(); i++ )
-  {
-    mHoles.at( i )->holeOf = this;
-  }
 
 }
 
 FeaturePart::FeaturePart( const FeaturePart& other )
     : PointSet( other )
-    , mLF( other.mLF )
 {
   Q_FOREACH ( const FeaturePart* hole, other.mHoles )
   {
-    mHoles << new FeaturePart( *hole );
+    mHoles << hole->clone();
     mHoles.last()->holeOf = this;
   }
 }
@@ -102,7 +90,7 @@ void FeaturePart::extractCoords( const GEOSGeometry* geom )
       for ( int i = 0; i < numHoles; ++i )
       {
         const GEOSGeometry* interior =  GEOSGetInteriorRingN_r( geosctxt, geom, i );
-        FeaturePart* hole = new FeaturePart( mLF, interior );
+        FeaturePart* hole = createHole( interior );
         hole->holeOf = nullptr;
         // possibly not needed. it's not done for the exterior ring, so I'm not sure
         // why it's just done here...
@@ -147,17 +135,44 @@ void FeaturePart::extractCoords( const GEOSGeometry* geom )
   }
 }
 
-Layer* FeaturePart::layer()
+void FeaturePart::init( const GEOSGeometry* geom )
+{
+  // we'll remove const, but we won't modify that geometry
+  mGeos = const_cast<GEOSGeometry*>( geom );
+  mOwnsGeom = false; // geometry is owned by Feature class
+
+  extractCoords( geom );
+
+  holeOf = nullptr;
+  for ( int i = 0; i < mHoles.count(); i++ )
+  {
+    mHoles.at( i )->holeOf = this;
+  }
+}
+
+LabelFeaturePart::LabelFeaturePart( QgsLabelFeature* feat, const GEOSGeometry* geom )
+    : FeaturePart()
+    , mLF( feat )
+{
+  init( geom );
+}
+
+FeaturePart* LabelFeaturePart::clone() const
+{
+  return new LabelFeaturePart( *this );
+}
+
+Layer* LabelFeaturePart::layer() const
 {
   return mLF->layer();
 }
 
-QgsFeatureId FeaturePart::featureId() const
+QgsFeatureId LabelFeaturePart::featureId() const
 {
   return mLF->id();
 }
 
-bool FeaturePart::hasSameLabelFeatureAs( FeaturePart* part ) const
+bool LabelFeaturePart::hasSameLabelFeatureAs( LabelFeaturePart* part ) const
 {
   if ( !part )
     return false;
@@ -176,7 +191,12 @@ bool FeaturePart::hasSameLabelFeatureAs( FeaturePart* part ) const
   return false;
 }
 
-LabelPosition::Quadrant FeaturePart::quadrantFromOffset() const
+QgsPalLayerSettings::ObstacleType LabelFeaturePart::obstacleType() const
+{
+  return layer()->obstacleType();
+}
+
+LabelPosition::Quadrant LabelFeaturePart::quadrantFromOffset() const
 {
   QPointF quadOffset = mLF->quadOffset();
   qreal quadOffsetX = quadOffset.x(), quadOffsetY = quadOffset.y();
@@ -228,7 +248,12 @@ LabelPosition::Quadrant FeaturePart::quadrantFromOffset() const
   }
 }
 
-int FeaturePart::createCandidatesOverPoint( double x, double y, QList< LabelPosition*>& lPos, double angle )
+FeaturePart* LabelFeaturePart::createHole( const GEOSGeometry* geom )
+{
+  return new LabelFeaturePart( mLF, geom );
+}
+
+int LabelFeaturePart::createCandidatesOverPoint( double x, double y, QList< LabelPosition*>& lPos, double angle )
 {
   int nbp = 1;
 
@@ -307,7 +332,7 @@ int FeaturePart::createCandidatesOverPoint( double x, double y, QList< LabelPosi
   return nbp;
 }
 
-int FeaturePart::createCandidatesAtOrderedPositionsOverPoint( double x, double y, QList<LabelPosition*>& lPos, double angle )
+int LabelFeaturePart::createCandidatesAtOrderedPositionsOverPoint( double x, double y, QList<LabelPosition*>& lPos, double angle )
 {
   QVector< QgsPalLayerSettings::PredefinedPointPosition > positions = mLF->predefinedPositionOrder();
   double labelWidth = getLabelWidth();
@@ -433,7 +458,7 @@ int FeaturePart::createCandidatesAtOrderedPositionsOverPoint( double x, double y
   return lPos.count();
 }
 
-int FeaturePart::createCandidatesAroundPoint( double x, double y, QList< LabelPosition* >& lPos, double angle )
+int LabelFeaturePart::createCandidatesAroundPoint( double x, double y, QList< LabelPosition* >& lPos, double angle )
 {
   double labelWidth = getLabelWidth();
   double labelHeight = getLabelHeight();
@@ -586,7 +611,7 @@ int FeaturePart::createCandidatesAroundPoint( double x, double y, QList< LabelPo
   return candidates.count();
 }
 
-int FeaturePart::createCandidatesAlongLine( QList< LabelPosition* >& lPos, PointSet *mapShape )
+int LabelFeaturePart::createCandidatesAlongLine( QList< LabelPosition* >& lPos, PointSet *mapShape )
 {
   //prefer to label along straightish segments:
   int candidates = createCandidatesAlongLineNearStraightSegments( lPos, mapShape );
@@ -599,7 +624,7 @@ int FeaturePart::createCandidatesAlongLine( QList< LabelPosition* >& lPos, Point
   return candidates;
 }
 
-int FeaturePart::createCandidatesAlongLineNearStraightSegments( QList<LabelPosition*>& lPos, PointSet* mapShape )
+int LabelFeaturePart::createCandidatesAlongLineNearStraightSegments( QList<LabelPosition*>& lPos, PointSet* mapShape )
 {
   double labelWidth = getLabelWidth();
   double labelHeight = getLabelHeight();
@@ -819,7 +844,7 @@ int FeaturePart::createCandidatesAlongLineNearStraightSegments( QList<LabelPosit
   return lPos.size();
 }
 
-int FeaturePart::createCandidatesAlongLineNearMidpoint( QList<LabelPosition*>& lPos, PointSet* mapShape, double initialCost )
+int LabelFeaturePart::createCandidatesAlongLineNearMidpoint( QList<LabelPosition*>& lPos, PointSet* mapShape, double initialCost )
 {
   double distanceLineToLabel = getLabelDistance();
 
@@ -966,7 +991,7 @@ int FeaturePart::createCandidatesAlongLineNearMidpoint( QList<LabelPosition*>& l
 }
 
 
-LabelPosition* FeaturePart::curvedPlacementAtOffset( PointSet* path_positions, double* path_distances, int& orientation, int index, double distance, bool& reversed, bool& flip )
+LabelPosition* LabelFeaturePart::curvedPlacementAtOffset( PointSet* path_positions, double* path_distances, int& orientation, int index, double distance, bool& reversed, bool& flip )
 {
   // Check that the given distance is on the given index and find the correct index and distance if not
   while ( distance < 0 && index > 1 )
@@ -1140,7 +1165,7 @@ static LabelPosition* _createCurvedCandidate( LabelPosition* lp, double angle, d
   return newLp;
 }
 
-int FeaturePart::createCurvedCandidatesAlongLine( QList< LabelPosition* >& lPos, PointSet* mapShape )
+int LabelFeaturePart::createCurvedCandidatesAlongLine( QList< LabelPosition* >& lPos, PointSet* mapShape )
 {
   LabelInfo* li = mLF->curvedLabelInfo();
 
@@ -1308,7 +1333,7 @@ int FeaturePart::createCurvedCandidatesAlongLine( QList< LabelPosition* >& lPos,
  *
  */
 
-int FeaturePart::createCandidatesForPolygon( QList< LabelPosition*>& lPos, PointSet *mapShape )
+int LabelFeaturePart::createCandidatesForPolygon( QList< LabelPosition*>& lPos, PointSet *mapShape )
 {
   int i;
   int j;
@@ -1514,9 +1539,9 @@ int FeaturePart::createCandidatesForPolygon( QList< LabelPosition*>& lPos, Point
   return nbp;
 }
 
-int FeaturePart::createCandidates( QList< LabelPosition*>& lPos,
-                                   double bboxMin[2], double bboxMax[2],
-                                   PointSet *mapShape, RTree<LabelPosition*, double, 2, double>* candidates )
+int LabelFeaturePart::createCandidates( QList< LabelPosition*>& lPos,
+                                        double bboxMin[2], double bboxMax[2],
+                                        PointSet *mapShape, RTree<LabelPosition*, double, 2, double>* candidates )
 {
   double bbox[4];
 
@@ -1601,7 +1626,7 @@ int FeaturePart::createCandidates( QList< LabelPosition*>& lPos,
   return lPos.count();
 }
 
-void FeaturePart::addSizePenalty( int nbp, QList< LabelPosition* >& lPos, double bbx[4], double bby[4] )
+void LabelFeaturePart::addSizePenalty( int nbp, QList< LabelPosition* >& lPos, double bbx[4], double bby[4] )
 {
   if ( !mGeos )
     createGeosGeom();
@@ -1658,7 +1683,7 @@ void FeaturePart::addSizePenalty( int nbp, QList< LabelPosition* >& lPos, double
   }
 }
 
-bool FeaturePart::isConnected( FeaturePart* p2 )
+bool LabelFeaturePart::isConnected( LabelFeaturePart* p2 )
 {
   if ( !p2->mGeos )
     p2->createGeosGeom();
@@ -1674,7 +1699,7 @@ bool FeaturePart::isConnected( FeaturePart* p2 )
   }
 }
 
-bool FeaturePart::mergeWithFeaturePart( FeaturePart* other )
+bool LabelFeaturePart::mergeWithFeaturePart( LabelFeaturePart* other )
 {
   if ( !mGeos )
     createGeosGeom();
@@ -1716,7 +1741,7 @@ bool FeaturePart::mergeWithFeaturePart( FeaturePart* other )
   }
 }
 
-double FeaturePart::calculatePriority() const
+double LabelFeaturePart::calculatePriority() const
 {
   if ( mLF->alwaysShow() )
   {
@@ -1729,7 +1754,7 @@ double FeaturePart::calculatePriority() const
   return mLF->priority() >= 0 ? mLF->priority() : mLF->layer()->priority();
 }
 
-bool FeaturePart::showUprightLabels() const
+bool LabelFeaturePart::showUprightLabels() const
 {
   bool uprightLabel = false;
 
@@ -1753,8 +1778,8 @@ bool FeaturePart::showUprightLabels() const
   return uprightLabel;
 }
 
-bool FeaturePart::nextCharPosition( double charWidth, double segment_length, PointSet* path_positions, int& index, double& distance,
-                                    double& start_x, double& start_y, double& end_x, double& end_y ) const
+bool LabelFeaturePart::nextCharPosition( double charWidth, double segment_length, PointSet* path_positions, int& index, double& distance,
+    double& start_x, double& start_y, double& end_x, double& end_y ) const
 {
   // Coordinates this character will start at
   if ( qgsDoubleNear( segment_length, 0.0 ) )
@@ -1813,4 +1838,24 @@ bool FeaturePart::nextCharPosition( double charWidth, double segment_length, Poi
     distance = sqrt( pow( old_x - end_x, 2 ) + pow( old_y - end_y, 2 ) );
   }
   return true;
+}
+
+
+ObstacleFeaturePart::ObstacleFeaturePart( const GEOSGeometry* geom, double obstacleFactor, QgsPalLayerSettings::ObstacleType obstacleType )
+    : FeaturePart()
+    , mObstacleFactor( obstacleFactor )
+    , mObstacleType( obstacleType )
+{
+  init( geom );
+}
+
+
+FeaturePart*ObstacleFeaturePart::clone() const
+{
+  return new ObstacleFeaturePart( *this );
+}
+
+FeaturePart*ObstacleFeaturePart::createHole( const GEOSGeometry* geom )
+{
+  return new ObstacleFeaturePart( geom, mObstacleFactor, mObstacleType );
 }

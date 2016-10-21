@@ -63,6 +63,7 @@ email                : sherman at mrcc.com
 #include "qgsrubberband.h"
 #include "qgsvectorlayer.h"
 #include "qgscursors.h"
+#include "qgsannotationitem.h"
 #include <math.h>
 
 
@@ -145,7 +146,6 @@ QgsMapCanvas::QgsMapCanvas( QWidget * parent )
   mSettings.setFlag( QgsMapSettings::UseRenderingOptimization );
   mSettings.setFlag( QgsMapSettings::RenderPartialOutput );
 
-  //segmentation parameters
   QSettings settings;
   double segmentationTolerance = settings.value( "/qgis/segmentationTolerance", "0.01745" ).toDouble();
   QgsAbstractGeometry::SegmentationToleranceType toleranceType = QgsAbstractGeometry::SegmentationToleranceType( settings.value( "/qgis/segmentationToleranceType", 0 ).toInt() );
@@ -586,6 +586,37 @@ void QgsMapCanvas::refreshMap()
   << new QgsExpressionContextScope( mExpressionContextScope );
 
   mSettings.setExpressionContext( expressionContext );
+
+  QList< QgsLabelBlockingRegion > regions;
+  Q_FOREACH ( QGraphicsItem* item, items() )
+  {
+    if ( QgsAnnotationItem* annotation = dynamic_cast< QgsAnnotationItem* >( item ) )
+    {
+      QSizeF frameSize = annotation->frameSize();
+      frameSize *= mSettings.mapToPixel().mapUnitsPerPixel();
+
+      QgsRectangle rect = QgsRectangle( annotation->mapPosition().x(), annotation->mapPosition().y(),
+                                        annotation->mapPosition().x() + frameSize.width(),
+                                        annotation->mapPosition().y() + frameSize.height() );
+      QgsGeometry g = QgsGeometry::fromRect( rect );
+      regions << QgsLabelBlockingRegion( g, 10 );
+
+
+    }
+  }
+
+// QgsGeometry g1 = QgsGeometry::fromWkt("Polygon ((2306884.92373478412628174 2606616.69829238066449761, 2311054.62202716432511806 2525724.55142019828781486, 2392780.70855782274156809 2533230.00834648357704282, 2398618.28616715548560023 2615790.03453561756759882, 2306884.92373478412628174 2606616.69829238066449761))");
+
+// QgsGeometry g2 = QgsGeometry::fromWkt("Polygon ((2663811.09756255662068725 2457341.49942515790462494, 2661309.27858712850138545 2395629.96469792630523443, 2778894.77043225895613432 2417312.39581830473616719, 2768887.49453054554760456 2480691.80986248888075352, 2662977.15790408058091998 2482359.68917944096028805, 2663811.09756255662068725 2457341.49942515790462494))");
+
+
+
+  //   << QgsLabelBlockingRegion( g2, 10 );
+
+  mSettings.setLabelBlockingRegions( regions );
+
+
+
 
   // create the renderer job
   Q_ASSERT( !mJob );

@@ -32,6 +32,7 @@
 
 #include "qgsgeometry.h"
 #include "qgspallabeling.h"
+#include "qgsmapsettings.h"
 #include <QList>
 #include <iostream>
 #include <ctime>
@@ -84,7 +85,7 @@ namespace pal
   class CORE_EXPORT Pal
   {
       friend class Problem;
-      friend class FeaturePart;
+      friend class LabelFeaturePart;
       friend class Layer;
 
     public:
@@ -217,6 +218,21 @@ namespace pal
        */
       SearchMethod getSearch();
 
+      /**
+       * Sets a list of regions to avoid placing labels within.
+       * @note added in QGIS 3.0
+       * @see labelBlockers()
+       */
+      void setBlockingRegions( const QList< QgsLabelBlockingRegion >& regions ) { mLabelBlockingRegions = regions; }
+
+      /**
+       * Returns the list of regions to avoid placing labels within.
+       * @note added in QGIS 3.0
+       * @see setLabelBlockers()
+       */
+      QList< QgsLabelBlockingRegion > blockingRegions() const { return mLabelBlockingRegions; }
+
+
     private:
 
       QHash< QgsAbstractLabelProvider*, Layer* > mLayers;
@@ -239,6 +255,8 @@ namespace pal
       int poly_p;
 
       SearchMethod searchMethod;
+
+      QList< QgsLabelBlockingRegion > mLabelBlockingRegions;
 
       /*
        * POPMUSIC Tuning

@@ -37,6 +37,7 @@
 namespace pal
 {
 
+  class LabelFeaturePart;
   class FeaturePart;
   class Pal;
   class Label;
@@ -88,7 +89,7 @@ namespace pal
       LabelPosition( int id, double x1, double y1,
                      double w, double h,
                      double alpha, double cost,
-                     FeaturePart *feature, bool isReversed = false, Quadrant quadrant = QuadrantOver );
+                     LabelFeaturePart *feature, bool isReversed = false, Quadrant quadrant = QuadrantOver );
 
       /** Copy constructor */
       LabelPosition( const LabelPosition& other );
@@ -157,7 +158,7 @@ namespace pal
       /** \brief return the feature corresponding to this labelposition
        * \return the feature
        */
-      FeaturePart * getFeaturePart();
+      LabelFeaturePart * getFeaturePart();
 
       int getNumOverlaps() const { return nbOverlap; }
       void resetNumOverlaps() { nbOverlap = 0; } // called from problem.cpp, pal.cpp
@@ -266,13 +267,13 @@ namespace pal
       static bool removeOverlapCallback( LabelPosition *lp, void *ctx );
 
       // for polygon cost calculation
-      static bool polygonObstacleCallback( pal::FeaturePart *obstacle, void *ctx );
+      static bool polygonObstacleCallback( pal::FeaturePart* obstacle, void *ctx );
 
     protected:
 
       int id;
 
-      FeaturePart *feature;
+      LabelFeaturePart *feature;
 
       // bug # 1 (maxence 10/23/2008)
       int probFeat;
