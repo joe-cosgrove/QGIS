@@ -119,6 +119,10 @@ class GUI_EXPORT QgsRendererPropertiesDialog : public QDialog, private Ui::QgsRe
 
     void syncToLayer();
 
+    void transparencyChanged( int value );
+
+    void blendModeChanged();
+
   protected:
     /**
      * Connect the given slot to the value changed event for the set of widgets

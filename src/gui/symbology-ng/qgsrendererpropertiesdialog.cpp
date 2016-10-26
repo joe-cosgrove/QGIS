@@ -30,6 +30,7 @@
 #include "qgsnullsymbolrendererwidget.h"
 #include "qgspanelwidget.h"
 #include "qgspainteffect.h"
+#include "qgsmapcanvas.h"
 
 #include "qgsorderbydialog.h"
 #include "qgsapplication.h"
@@ -118,6 +119,8 @@ QgsRendererPropertiesDialog::QgsRendererPropertiesDialog( QgsVectorLayer* layer,
   // connect layer transparency slider and spin box
   connect( mLayerTransparencySlider, SIGNAL( valueChanged( int ) ), mLayerTransparencySpnBx, SLOT( setValue( int ) ) );
   connect( mLayerTransparencySpnBx, SIGNAL( valueChanged( int ) ), mLayerTransparencySlider, SLOT( setValue( int ) ) );
+  connect( mLayerTransparencySpnBx, SIGNAL( valueChanged( int ) ), this, SLOT( transparencyChanged( int ) ) );
+
 
   connect( cboRenderers, SIGNAL( currentIndexChanged( int ) ), this, SLOT( rendererChanged() ) );
   connect( checkboxEnableOrderBy, SIGNAL( toggled( bool ) ), btnOrderBy, SLOT( setEnabled( bool ) ) );
@@ -125,11 +128,13 @@ QgsRendererPropertiesDialog::QgsRendererPropertiesDialog( QgsVectorLayer* layer,
 
   syncToLayer();
 
+  connect( mBlendModeComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( blendModeChanged() ) );
+
   QList<QWidget*> widgets;
-  widgets << mLayerTransparencySpnBx
+  widgets //<< mLayerTransparencySpnBx
   << cboRenderers
   << checkboxEnableOrderBy
-  << mBlendModeComboBox
+  //<< mBlendModeComboBox
   << mFeatureBlendComboBox
   << mEffectWidget;
 
@@ -336,14 +341,14 @@ void QgsRendererPropertiesDialog::openPanel( QgsPanelWidget *panel )
 void QgsRendererPropertiesDialog::syncToLayer()
 {
   // Blend mode
-  mBlendModeComboBox->setBlendMode( mLayer->blendMode() );
+  whileBlocking( mBlendModeComboBox )->setBlendMode( mLayer->blendMode() );
 
   // Feature blend mode
   mFeatureBlendComboBox->setBlendMode( mLayer->featureBlendMode() );
 
   // Layer transparency
-  mLayerTransparencySlider->setValue( mLayer->layerTransparency() );
-  mLayerTransparencySpnBx->setValue( mLayer->layerTransparency() );
+  whileBlocking( mLayerTransparencySlider )->setValue( mLayer->layerTransparency() );
+  whileBlocking( mLayerTransparencySpnBx )->setValue( mLayer->layerTransparency() );
 
   //paint effect widget
   if ( mLayer->renderer() )
@@ -382,6 +387,18 @@ void QgsRendererPropertiesDialog::syncToLayer()
     Q_ASSERT( rendererIdx != -1 && "there must be a renderer!" );
   }
 
+}
+
+void QgsRendererPropertiesDialog::transparencyChanged( int value )
+{
+  whileBlocking( mLayer )->setLayerTransparency( value );
+  mMapCanvas->refresh();
+}
+
+void QgsRendererPropertiesDialog::blendModeChanged()
+{
+  whileBlocking( mLayer )->setBlendMode( mBlendModeComboBox->blendMode() );
+  mMapCanvas->refresh();
 }
 
 void QgsRendererPropertiesDialog::showOrderByDialog()
