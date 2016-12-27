@@ -271,7 +271,7 @@ void QgsMapToolCapture::cadCanvasMoveEvent( QgsMapMouseEvent * e )
       tracingMouseMove( e );
     }
 
-    updateTemporaryRubberBand( point );
+    updateTemporaryRubberBand( point, e );
   }
 }
 
@@ -383,7 +383,7 @@ int QgsMapToolCapture::addVertex( const QgsPoint& point, const QgsPointLocator::
     mCaptureCurve.addVertex( layerPoint );
   }
 
-  updateTemporaryRubberBand( point );
+  updateTemporaryRubberBand( point, nullptr );
 
   validateGeometry();
 
@@ -459,7 +459,7 @@ void QgsMapToolCapture::undo()
     }
     mCapturedNodes.removeLast();
 
-    updateTemporaryRubberBand( mLastMousePoint );
+    updateTemporaryRubberBand( mLastMousePoint, nullptr );
 
     validateGeometry();
   }
@@ -547,7 +547,7 @@ void QgsMapToolCapture::closePolygon()
   mCaptureCurve.close();
 }
 
-QList<QgsPoint> QgsMapToolCapture::temporaryRubberBandPoints( const QVector<QgsPoint>& clickedPoints, const QgsPoint& mousePoint , const QVector<QgsPoint>& tracedPoints ) const
+QList<QgsPoint> QgsMapToolCapture::temporaryRubberBandPoints( const QVector<QgsPoint>& clickedPoints, const QgsPoint& mousePoint , const QVector<QgsPoint>& tracedPoints, QgsMapMouseEvent * ) const
 {
   QList<QgsPoint> result;
 
@@ -567,7 +567,7 @@ QList<QgsPoint> QgsMapToolCapture::temporaryRubberBandPoints( const QVector<QgsP
   return result;
 }
 
-void QgsMapToolCapture::updateTemporaryRubberBand( const QgsPoint& mousePoint )
+void QgsMapToolCapture::updateTemporaryRubberBand( const QgsPoint mousePoint, QgsMapMouseEvent* e )
 {
   if ( !mTempRubberBand && !mCapturedNodes.isEmpty() )
   {
@@ -583,7 +583,7 @@ void QgsMapToolCapture::updateTemporaryRubberBand( const QgsPoint& mousePoint )
     return;
   }
 
-  QList< QgsPoint > rbPoints = temporaryRubberBandPoints( mCapturedNodes, mousePoint, mTracedPoints );
+  QList< QgsPoint > rbPoints = temporaryRubberBandPoints( mCapturedNodes, mousePoint, mTracedPoints, e );
 
   for ( int i = 0; i < rbPoints.size(); ++i )
   {

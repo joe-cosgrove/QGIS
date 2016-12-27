@@ -180,9 +180,9 @@ class GUI_EXPORT QgsMapToolCapture : public QgsMapToolAdvancedDigitizing
     void closePolygon();
 
     virtual QList< QgsPoint > temporaryRubberBandPoints( const QVector< QgsPoint >& clickedPoints, const QgsPoint& mousePoint,
-        const QVector< QgsPoint >& tracedPoints ) const;
+        const QVector< QgsPoint >& tracedPoints, QgsMapMouseEvent * e ) const;
 
-    void updateTemporaryRubberBand( const QgsPoint& mousePoint );
+    void updateTemporaryRubberBand( const QgsPoint mousePoint, QgsMapMouseEvent * e );
 
   private:
     //! whether tracing has been requested by the user

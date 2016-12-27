@@ -27,7 +27,9 @@ class APP_EXPORT QgsMapToolCreateRectangle: public QgsMapToolAddFeature
     QgsMapToolCreateRectangle( QgsMapCanvas* canvas );
 
   protected:
-    void canvasReleaseEventAddNode( QgsMapMouseEvent * e ) override;
+    virtual QList< QgsPoint > temporaryRubberBandPoints( const QVector< QgsPoint >& clickedPoints, const QgsPoint& mousePoint,
+        const QVector< QgsPoint >& tracedPoints, QgsMapMouseEvent * e ) const override;
+
 
   private:
 

@@ -16,50 +16,44 @@
 #include "qgsmaptoolcreaterectangle.h"
 #include "qgsvectordataprovider.h"
 
-QgsMapToolCreateRectangle::QgsMapToolCreateRectangle(QgsMapCanvas* canvas)
-  : QgsMapToolAddFeature( canvas, CapturePolygon )
-  , mRectRubberBand( nullptr )
+QgsMapToolCreateRectangle::QgsMapToolCreateRectangle( QgsMapCanvas* canvas )
+    : QgsMapToolAddFeature( canvas, CapturePolygon )
+    , mRectRubberBand( nullptr )
 {
   mToolName = tr( "Add rectangle" );
 }
 
-void QgsMapToolCreateRectangle::canvasReleaseEventAddNode( QgsMapMouseEvent* e )
+QList<QgsPoint> QgsMapToolCreateRectangle::temporaryRubberBandPoints( const QVector<QgsPoint>& clickedPoints, const QgsPoint& mousePoint, const QVector<QgsPoint>& , QgsMapMouseEvent* e ) const
 {
-  startCapturing();
+  QList<QgsPoint> result;
 
-  int res;
-  QgsPointV2 layerPoint;
-  res = fetchLayerPoint( e->mapPointMatch(), layerPoint );
-  if ( res != 0 )
+  if ( clickedPoints.isEmpty() )
+    return result;
+
+  QgsPoint newCorner = mousePoint;
+
+  // shift modifer = square
+  if ( e && e->modifiers() & Qt::ShiftModifier )
   {
-    res = nextPoint( QgsPointV2( e->mapPoint() ), layerPoint );
-    if ( res != 0 )
-    {
-      return;
-    }
+    double dx = newCorner.x() - clickedPoints.at( 0 ).x();
+    double dy = newCorner.y() - clickedPoints.at( 0 ).y();
+
+    if ( qAbs( dx ) > qAbs( dy ) )
+      newCorner.setY( clickedPoints.at( 0 ).y() + ( dy > 0 ? 1 : -1 ) * qAbs( dx ) );
+    \
+    else
+      newCorner.setX( clickedPoints.at( 0 ).x() + ( dx > 0 ? 1 : -1 ) * qAbs( dy ) );
+    \
   }
 
-  if ( !mRectRubberBand.data() )
-  {
-    mRectRubberBand.reset( createRubberBand( mCaptureMode == CapturePolygon ? QgsWkbTypes::PolygonGeometry : QgsWkbTypes::LineGeometry, true ) );
-  }
-  else
-  {
-    mRectRubberBand->reset( mCaptureMode == CapturePolygon ? QgsWkbTypes::PolygonGeometry : QgsWkbTypes::LineGeometry );
-  }
-
-  if ( mPoints.isEmpty() )
-  {
-    // adding first corner
-    mPoints << layerPoint;
-    for ( int i = 0; i < 6; ++i )
-      mRectRubberBand->addPoint( e->mapPoint() );
-  }
-  else
-  {
+  // create rectangle using first clicked point and mouse point as opposite corners
+  QgsRectangle r( clickedPoints.at( 0 ), newCorner );
 
 
 
-  }
-
+  result << QgsPoint( r.xMinimum(), r.yMinimum() );
+  result << QgsPoint( r.xMinimum(), r.yMaximum() );
+  result << QgsPoint( r.xMaximum(), r.yMaximum() );
+  result << QgsPoint( r.xMaximum(), r.yMinimum() );
+  return result;
 }
