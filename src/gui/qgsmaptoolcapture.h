@@ -179,6 +179,11 @@ class GUI_EXPORT QgsMapToolCapture : public QgsMapToolAdvancedDigitizing
      */
     void closePolygon();
 
+    virtual QList< QgsPoint > temporaryRubberBandPoints( const QVector< QgsPoint >& clickedPoints, const QgsPoint& mousePoint,
+        const QVector< QgsPoint >& tracedPoints ) const;
+
+    void updateTemporaryRubberBand( const QgsPoint& mousePoint );
+
   private:
     //! whether tracing has been requested by the user
     bool tracingEnabled();
@@ -199,8 +204,17 @@ class GUI_EXPORT QgsMapToolCapture : public QgsMapToolAdvancedDigitizing
     //! Temporary rubber band for polylines and polygons. this connects the last added point to the mouse cursor position
     QgsRubberBand* mTempRubberBand;
 
+    //! Last mouse move position, in map coordinates
+    QgsPoint mLastMousePoint;
+
     //! List to store the points of digitised lines and polygons (in layer coordinates)
     QgsCompoundCurve mCaptureCurve;
+
+    //! List of traced node points, in map coordinates
+    QVector< QgsPoint > mTracedPoints;
+
+    //! List of captured node points, in map coordinates
+    QVector< QgsPoint > mCapturedNodes;
 
     void validateGeometry();
     QStringList mValidationWarnings;
