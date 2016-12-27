@@ -193,20 +193,7 @@ void QgsMapToolAddFeature::cadCanvasReleaseEvent( QgsMapMouseEvent* e )
     //add point to list and to rubber band
     if ( e->button() == Qt::LeftButton )
     {
-      int error = addVertex( e->mapPoint(), e->mapPointMatch() );
-      if ( error == 1 )
-      {
-        //current layer is not a vector layer
-        return;
-      }
-      else if ( error == 2 )
-      {
-        //problem with coordinate transformation
-        emit messageEmitted( tr( "Cannot transform the point to the layers coordinate system" ), QgsMessageBar::WARNING );
-        return;
-      }
-
-      startCapturing();
+      canvasReleaseEventAddNode( e );
     }
     else if ( e->button() == Qt::RightButton )
     {
@@ -320,4 +307,23 @@ void QgsMapToolAddFeature::cadCanvasReleaseEvent( QgsMapMouseEvent* e )
       stopCapturing();
     }
   }
+}
+
+
+void QgsMapToolAddFeature::canvasReleaseEventAddNode(QgsMapMouseEvent* e)
+{
+  int error = addVertex( e->mapPoint(), e->mapPointMatch() );
+  if ( error == 1 )
+  {
+    //current layer is not a vector layer
+    return;
+  }
+  else if ( error == 2 )
+  {
+    //problem with coordinate transformation
+    emit messageEmitted( tr( "Cannot transform the point to the layers coordinate system" ), QgsMessageBar::WARNING );
+    return;
+  }
+
+  startCapturing();
 }

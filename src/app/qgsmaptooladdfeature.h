@@ -13,6 +13,9 @@
  *                                                                         *
  ***************************************************************************/
 
+#ifndef QGSMAPTOOLADDFEATURE_H
+#define QGSMAPTOOLADDFEATURE_H
+
 #include "qgsmaptoolcapture.h"
 
 //! This tool adds new point/line/polygon features to already existing vector layers
@@ -33,4 +36,9 @@ class APP_EXPORT QgsMapToolAddFeature : public QgsMapToolCapture
     /** Check if CaptureMode match layer type. Default is true.
      * @note Added in 2.12 */
     bool mCheckGeometryType;
+
+    //! Called when a left click is made while adding a line or polygon
+    virtual void canvasReleaseEventAddNode( QgsMapMouseEvent* e );
 };
+
+#endif //QGSMAPTOOLADDFEATURE_H

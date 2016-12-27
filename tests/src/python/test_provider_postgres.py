@@ -50,6 +50,8 @@ class TestPyQgsPostgresProvider(unittest.TestCase, ProviderTestCase):
         cls.dbconn = 'dbname=\'qgis_test\''
         if 'QGIS_PGTEST_DB' in os.environ:
             cls.dbconn = os.environ['QGIS_PGTEST_DB']
+        cls.dbconn = "dbname='qgis_test' host=10.42.0.221 port=5432 user='nr' password='nr' "
+
         # Create test layers
         cls.vl = QgsVectorLayer(cls.dbconn + ' sslmode=disable key=\'pk\' srid=4326 type=POINT table="qgis_test"."someData" (geom) sql=', 'test', 'postgres')
         assert cls.vl.isValid()
@@ -648,6 +650,7 @@ class TestPyQgsPostgresProviderCompoundKey(unittest.TestCase, ProviderTestCase):
         cls.dbconn = 'dbname=\'qgis_test\''
         if 'QGIS_PGTEST_DB' in os.environ:
             cls.dbconn = os.environ['QGIS_PGTEST_DB']
+        cls.dbconn = "dbname='qgis_test' host=10.42.0.221 port=5432 user='nr' password='nr' "
         # Create test layers
         cls.vl = QgsVectorLayer(cls.dbconn + ' sslmode=disable key=\'"key1","key2"\' srid=4326 type=POINT table="qgis_test"."someDataCompound" (geom) sql=', 'test', 'postgres')
         assert cls.vl.isValid()

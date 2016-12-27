@@ -1595,6 +1595,7 @@ class APP_EXPORT QgisApp : public QMainWindow, private Ui::MainWindow
             , mAddFeature( nullptr )
             , mCircularStringCurvePoint( nullptr )
             , mCircularStringRadius( nullptr )
+            , mCreateRectangle( nullptr )
             , mMoveFeature( nullptr )
             , mOffsetCurve( nullptr )
             , mReshapeFeatures( nullptr )
@@ -1644,6 +1645,7 @@ class APP_EXPORT QgisApp : public QMainWindow, private Ui::MainWindow
         QgsMapTool *mAddFeature;
         QgsMapTool *mCircularStringCurvePoint;
         QgsMapTool *mCircularStringRadius;
+        QgsMapTool *mCreateRectangle;
         QgsMapTool *mMoveFeature;
         QgsMapTool *mMoveFeatureCopy;
         QgsMapTool *mOffsetCurve;

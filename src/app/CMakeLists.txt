@@ -65,6 +65,7 @@ SET(QGIS_APP_SRCS
   qgsmaptoolfillring.cpp
   qgsmaptoolannotation.cpp
   qgsmaptoolchangelabelproperties.cpp
+  qgsmaptoolcreaterectangle.cpp
   qgsmaptooldeletering.cpp
   qgsmaptooldeletepart.cpp
   qgsmaptoolfeatureaction.cpp
@@ -240,6 +241,7 @@ SET (QGIS_APP_MOC_HDRS
   qgsmaptooladdfeature.h
   qgsmaptoolannotation.h
   qgsmaptoolcircularstringradius.h
+  qgsmaptoolcreaterectangle.h
   qgsmaptooladdpart.h
   qgsmaptooladdring.h
   qgsmaptoolfillring.h

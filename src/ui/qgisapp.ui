@@ -275,6 +275,7 @@
     <addaction name="mActionAddFeature"/>
     <addaction name="mActionCircularStringCurvePoint"/>
     <addaction name="mActionCircularStringRadius"/>
+    <addaction name="mActionCreateRectangle"/>
     <addaction name="mActionMoveFeature"/>
     <addaction name="mActionDeleteSelected"/>
     <addaction name="mActionMultiEditAttributes"/>
@@ -2482,6 +2483,21 @@ Acts on currently active editable layer</string>
    </property>
    <property name="toolTip">
     <string>Add circular string by radius</string>
+   </property>
+  </action>
+  <action name="mActionCreateRectangle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../images/images.qrc">
+     <normaloff>:/images/themes/default/mActionCircularStringCurvePoint.svg</normaloff>:/images/themes/default/mActionCircularStringCurvePoint.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Add Rectangle</string>
+   </property>
+   <property name="toolTip">
+    <string>Add rectangle</string>
    </property>
   </action>
   <action name="mActionReportaBug">
