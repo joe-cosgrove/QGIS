@@ -129,17 +129,17 @@ void QgsMapToolAddPart::cadCanvasReleaseEvent( QgsMapMouseEvent * e )
 
       //does compoundcurve contain circular strings?
       //does provider support circular strings?
-      bool hasCurvedSegments = captureCurve()->hasCurvedSegments();
+      bool hasCurvedSegments = captureCurve().geometry()->hasCurvedSegments();
       bool providerSupportsCurvedSegments = vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::CircularGeometries;
 
       QgsCurve* curveToAdd = nullptr;
       if ( hasCurvedSegments && providerSupportsCurvedSegments )
       {
-        curveToAdd = captureCurve()->clone();
+        curveToAdd = static_cast< QgsCurve* >( captureCurve().geometry() )->clone();
       }
       else
       {
-        curveToAdd = captureCurve()->curveToLine();
+        curveToAdd = static_cast< QgsCurve* >( captureCurve().geometry() )->curveToLine();
       }
 
       vlayer->beginEditCommand( tr( "Part added" ) );

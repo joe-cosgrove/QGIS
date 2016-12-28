@@ -23,6 +23,13 @@ QgsMapToolCreateRectangle::QgsMapToolCreateRectangle( QgsMapCanvas* canvas )
   mToolName = tr( "Add rectangle" );
 }
 
+QgsGeometry QgsMapToolCreateRectangle::captureCurve() const
+{
+  QgsGeometry g = QgsMapToolAddFeature::captureCurve();
+  QgsRectangle r( g.vertexAt( 0 ), g.vertexAt( 1 ) );
+  return QgsGeometry::fromRect( r );
+}
+
 QList<QgsPoint> QgsMapToolCreateRectangle::temporaryRubberBandPoints( const QVector<QgsPoint>& clickedPoints, const QgsPoint& mousePoint, const QVector<QgsPoint>& , QgsMapMouseEvent* e ) const
 {
   QList<QgsPoint> result;
@@ -48,8 +55,6 @@ QList<QgsPoint> QgsMapToolCreateRectangle::temporaryRubberBandPoints( const QVec
 
   // create rectangle using first clicked point and mouse point as opposite corners
   QgsRectangle r( clickedPoints.at( 0 ), newCorner );
-
-
 
   result << QgsPoint( r.xMinimum(), r.yMinimum() );
   result << QgsPoint( r.xMinimum(), r.yMaximum() );

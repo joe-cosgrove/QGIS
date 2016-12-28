@@ -145,7 +145,8 @@ void QgsMapToolAddCircularString::activate()
     if ( mPoints.isEmpty() )
     {
       // if the parent tool has a curve, use its last point as the first point in this curve
-      const QgsCompoundCurve* compoundCurve = mParentTool->captureCurve();
+      QgsGeometry parentCurve = mParentTool->captureCurve();
+      const QgsCompoundCurve* compoundCurve = dynamic_cast< QgsCompoundCurve* >( parentCurve.geometry() );
       if ( compoundCurve && compoundCurve->nCurves() > 0 )
       {
         const QgsCurve* curve = compoundCurve->curveAt( compoundCurve->nCurves() - 1 );

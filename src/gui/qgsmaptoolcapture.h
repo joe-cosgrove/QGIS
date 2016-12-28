@@ -57,8 +57,7 @@ class GUI_EXPORT QgsMapToolCapture : public QgsMapToolAdvancedDigitizing
      *
      * @return Capture curve
      */
-    const QgsCompoundCurve* captureCurve() const { return &mCaptureCurve; }
-
+    virtual QgsGeometry captureCurve() const { return QgsGeometry( mCaptureCurve.clone() ); }
 
     /**
      * Update the rubberband according to mouse position
@@ -166,6 +165,11 @@ class GUI_EXPORT QgsMapToolCapture : public QgsMapToolAdvancedDigitizing
      * @return List of points
      */
     QList<QgsPoint> points();
+
+    /**
+     * Returns the list of captured points, in map coordinates.
+     */
+    QVector< QgsPoint > capturedPoints() const { return mCapturedNodes; }
 
     /**
      * Set the points on which to work

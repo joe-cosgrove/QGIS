@@ -39,7 +39,7 @@ class QgsMapToolCapture : public QgsMapToolAdvancedDigitizing
      *
      * @return Capture curve
      */
-    const QgsCompoundCurve* captureCurve() const;
+    virtual QgsGeometry captureCurve() const;
 
 
     /**

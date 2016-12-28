@@ -213,15 +213,17 @@ void QgsMapToolAddFeature::cadCanvasReleaseEvent( QgsMapMouseEvent* e )
       // End of string
       deleteTempRubberBand();
 
+      QgsGeometry c = captureCurve();
+
       //lines: bail out if there are not at least two vertices
-      if ( mode() == CaptureLine && size() < 2 )
+      if ( mode() == CaptureLine && c.geometry()->nCoordinates() < 2 )
       {
         stopCapturing();
         return;
       }
 
       //polygons: bail out if there are not at least two vertices
-      if ( mode() == CapturePolygon && size() < 3 )
+      if ( mode() == CapturePolygon && c.geometry()->nCoordinates() < 3 )
       {
         stopCapturing();
         return;
@@ -229,7 +231,8 @@ void QgsMapToolAddFeature::cadCanvasReleaseEvent( QgsMapMouseEvent* e )
 
       if ( mode() == CapturePolygon )
       {
-        closePolygon();
+        //TODO FIX
+        static_cast< QgsCurve* >( c.geometry() )->close();
       }
 
       //create QgsFeature with wkb representation
@@ -237,24 +240,22 @@ void QgsMapToolAddFeature::cadCanvasReleaseEvent( QgsMapMouseEvent* e )
 
       //does compoundcurve contain circular strings?
       //does provider support circular strings?
-      bool hasCurvedSegments = captureCurve()->hasCurvedSegments();
+      bool hasCurvedSegments = c.geometry()->hasCurvedSegments();
       bool providerSupportsCurvedSegments = vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::CircularGeometries;
 
       QgsCurve* curveToAdd = nullptr;
       if ( hasCurvedSegments && providerSupportsCurvedSegments )
       {
-        curveToAdd = captureCurve()->clone();
+        curveToAdd = static_cast< QgsCurve* >( c.geometry() )->clone();
       }
       else
       {
-        curveToAdd = captureCurve()->curveToLine();
+        curveToAdd = static_cast< QgsCurve* >( c.geometry() )->curveToLine();
       }
 
       if ( mode() == CaptureLine )
       {
-        QgsGeometry* g = new QgsGeometry( curveToAdd );
-        f->setGeometry( *g );
-        delete g;
+        f->setGeometry( QgsGeometry( curveToAdd ) );
       }
       else
       {
@@ -268,9 +269,7 @@ void QgsMapToolAddFeature::cadCanvasReleaseEvent( QgsMapMouseEvent* e )
           poly = new QgsPolygonV2();
         }
         poly->setExteriorRing( curveToAdd );
-        QgsGeometry* g = new QgsGeometry( poly );
-        f->setGeometry( *g );
-        delete g;
+        f->setGeometry( QgsGeometry( poly ) );
 
         QgsGeometry featGeom = f->geometry();
         int avoidIntersectionsReturn = featGeom.avoidIntersections();
