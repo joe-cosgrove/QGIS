@@ -19,6 +19,11 @@
 #include "qgsapplication.h"
 #include "qgsprocessingprovider.h"
 
+QgsProcessingAlgorithm::~QgsProcessingAlgorithm()
+{
+  qDeleteAll( mParameters );
+}
+
 QString QgsProcessingAlgorithm::id() const
 {
   if ( mProvider )
@@ -45,6 +50,22 @@ QgsProcessingAlgorithm::Flags QgsProcessingAlgorithm::flags() const
 QgsProcessingProvider *QgsProcessingAlgorithm::provider() const
 {
   return mProvider;
+}
+
+bool QgsProcessingAlgorithm::addParameter( QgsProcessingParameter *parameter )
+{
+  if ( !parameter )
+    return false;
+
+  // check for duplicate named parameters
+  Q_FOREACH ( QgsProcessingParameter *p, mParameters )
+  {
+    if ( p->name() == parameter->name() )
+      return false;
+  }
+
+  mParameters << parameter;
+  return true;
 }
 
 void QgsProcessingAlgorithm::setProvider( QgsProcessingProvider *provider )

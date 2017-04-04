@@ -19,6 +19,8 @@
 #define QGSPROCESSINGALGORITHM_H
 
 #include "qgis_core.h"
+#include "qgsprocessingparameters.h"
+#include "qgis.h"
 #include <QString>
 #include <QVariant>
 #include <QIcon>
@@ -50,7 +52,7 @@ class CORE_EXPORT QgsProcessingAlgorithm
      */
     QgsProcessingAlgorithm() = default;
 
-    virtual ~QgsProcessingAlgorithm() = default;
+    virtual ~QgsProcessingAlgorithm();
 
     //! Algorithms cannot be copied
     QgsProcessingAlgorithm( const QgsProcessingAlgorithm &other ) = delete;
@@ -118,6 +120,18 @@ class CORE_EXPORT QgsProcessingAlgorithm
      */
     QgsProcessingProvider *provider() const;
 
+    /**
+     * Returns an ordered list of parameters utilized by the algorithm.
+     */
+    QList< QgsProcessingParameter * > parameters() const { return mParameters; }
+
+  protected:
+
+    /**
+     * Adds a parameter to the algorithm. Ownership of the parameter is transferred to the algorithm.
+     */
+    bool addParameter( QgsProcessingParameter *parameter SIP_TRANSFER );
+
   private:
 
     /**
@@ -126,6 +140,8 @@ class CORE_EXPORT QgsProcessingAlgorithm
     void setProvider( QgsProcessingProvider *provider );
 
     QgsProcessingProvider *mProvider = nullptr;
+
+    QList< QgsProcessingParameter * > mParameters;
 
     // friend class to access setProvider() - we do not want this public!
     friend class QgsProcessingProvider;

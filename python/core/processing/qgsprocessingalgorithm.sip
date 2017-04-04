@@ -101,6 +101,13 @@ class QgsProcessingAlgorithm
  Returns the provider to which this algorithm belongs.
 %End
 
+  protected:
+
+    bool addParameter( QgsProcessingParameter *parameter /Transfer/ );
+%Docstring
+ Adds a parameter to the algorithm. Ownership of the parameter is transferred to the algorithm.
+%End
+
   private:
     QgsProcessingAlgorithm( const QgsProcessingAlgorithm &other );
 };

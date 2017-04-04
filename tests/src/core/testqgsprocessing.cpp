@@ -19,6 +19,7 @@
 #include "qgsprocessingprovider.h"
 #include "qgsprocessingutils.h"
 #include "qgsprocessingalgorithm.h"
+#include "qgsprocessingparameters.h"
 #include <QObject>
 #include <QtTest/QSignalSpy>
 #include "qgstest.h"
@@ -35,6 +36,23 @@ class DummyAlgorithm : public QgsProcessingAlgorithm
     QString displayName() const override { return mName; }
 
     QString mName;
+
+    void runParameterChecks()
+    {
+      QVERIFY( parameters().isEmpty() );
+      QVERIFY( addParameter( new QgsProcessingParameterBoolean( "p1" ) ) );
+      QCOMPARE( parameters().count(), 1 );
+      QCOMPARE( parameters().at( 0 )->name(), QString( "p1" ) );
+
+      QVERIFY( !addParameter( nullptr ) );
+      QCOMPARE( parameters().count(), 1 );
+      // duplicate name!
+      QgsProcessingParameterBoolean *p2 = new QgsProcessingParameterBoolean( "p1" );
+      QVERIFY( !addParameter( p2 ) );
+      delete p2;
+      QCOMPARE( parameters().count(), 1 );
+    }
+
 };
 
 //dummy provider for testing
@@ -102,6 +120,7 @@ class TestQgsProcessing: public QObject
     void normalizeLayerSource();
     void mapLayerFromString();
     void algorithm();
+    void algorithmParameters();
 
   private:
 
@@ -428,6 +447,12 @@ void TestQgsProcessing::algorithm()
   QVERIFY( p3->algorithms().isEmpty() );
   r.addProvider( p3 );
   QCOMPARE( p3->algorithms().size(), 2 );
+}
+
+void TestQgsProcessing::algorithmParameters()
+{
+  DummyAlgorithm alg( "test" );
+  alg.runParameterChecks();
 }
 
 QGSTEST_MAIN( TestQgsProcessing )
