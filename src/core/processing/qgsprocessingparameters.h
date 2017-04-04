@@ -23,10 +23,17 @@
 #include <QString>
 #include <QVariant>
 
+/**
+ * \class QgsProcessingParameter
+ * \ingroup core
+ * Abstract base class for processing algorithm parameters.
+  * \since QGIS 3.0
+ */
 class CORE_EXPORT QgsProcessingParameter
 {
   public:
 
+    //! Flags dictating behavior of parameter
     enum Flag
     {
       FlagAdvanced = 1 << 1, //!< Parameter is an advanced parameter which should be hidden from users by default
@@ -35,26 +42,26 @@ class CORE_EXPORT QgsProcessingParameter
     };
     Q_DECLARE_FLAGS( Flags, Flag )
 
-    QgsProcessingParameter( const QString &name, const QString &description = QString(), const QVariant &defaultValue = QVariant(),
+    /**
+     * Constructor for QgsProcessingParameter. The \a name must be unique for each parameter/algorithm
+     * combination, and should consist of alphanumeric characters only. Setting a parameter as \a optional
+     * will add the FlagOptional flag to the parameter.
+     */
+    QgsProcessingParameter( const QString &name, const QString &description = QString(),
                             bool optional = false );
 
     virtual ~QgsProcessingParameter() = default;
 
+    /**
+     * Returns a unique string representing the parameter type.
+     */
     virtual QString type() const = 0;
 
     /**
      * Returns the name of the parameter. This is the internal identifier by which
      * algorithms access this parameter.
-     * \see setName()
      */
     QString name() const { return mName; }
-
-    /**
-     * Sets the name of the parameter. This is the internal identifier by which
-     * algorithms access this parameter.
-     * \see name()
-     */
-    void setName( const QString &name );
 
     /**
      * Returns the description for the parameter. This is the user-visible string
@@ -64,7 +71,7 @@ class CORE_EXPORT QgsProcessingParameter
     QString description() const { return mDescription; }
 
     /**
-     * Sets the description for the parameter. This is the user-visible string
+     * Sets the \a description for the parameter. This is the user-visible string
      * used to identify this parameter.
      * \see description()
      */
@@ -77,7 +84,7 @@ class CORE_EXPORT QgsProcessingParameter
     virtual QVariant defaultValue() const { return mDefault; }
 
     /**
-     * Sets the default value for the parameter. Returns true if default value was successfully set,
+     * Sets the default \a value for the parameter. Returns true if default value was successfully set,
      * or false if value is not acceptable for the parameter.
      * \see defaultValue()
      */
@@ -90,27 +97,37 @@ class CORE_EXPORT QgsProcessingParameter
     Flags flags() const { return mFlags; }
 
     /**
-     * Sets the flags associated with the parameter.
+     * Sets the \a flags associated with the parameter.
      * \see flags()
      */
     void setFlags( const Flags &flags );
 
     /**
-     * Returns true if the specified value is acceptable for the parameter.
+     * Returns true if the specified \a value is acceptable for the parameter.
+     * \see parseValue()
      */
     virtual bool acceptsValue( const QVariant &value ) const = 0;
 
+    /**
+     * Parses a raw input \a value and converts it to a value usable by the parameter.
+     * E.g. a boolean parameter may take string inputs like "true", "yes", and convert
+     * to a boolean true value, and a map layer parmeter may take inputs like layer IDs
+     * or filesnames and return a map layer pointer. Subclasses should override this to
+     * implement suitable conversions for their parameter types.
+     * Before parsing values, callers should test that input values are acceptable
+     * by calling acceptsValue(). Behavior is undefined when parsing unacceptable
+     * values.
+     * \see acceptsValue()
+     */
     virtual QVariant parseValue( const QVariant &value ) const { return value; }
 
     /**
-     * Returns the value of this parameter as it should have been entered in the console if calling
-     * an algorithm manually.
+     * Returns a text string representing the parameter's configuration for use
+     * in processing scripts.
      */
-    virtual QString valueAsCommandLineParameter( const QVariant &value ) const;
-
     virtual QString asScriptCode() const;
 
-  protected:
+  private:
 
     //! Parameter name
     QString mName;
@@ -122,35 +139,79 @@ class CORE_EXPORT QgsProcessingParameter
     QVariant mDefault;
 
     //! Parameter flags
-    Flags mFlags;
-
+    Flags mFlags = 0;
 
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( QgsProcessingParameter::Flags )
 
 
+/**
+ * \class QgsProcessingParameterBoolean
+ * \ingroup core
+ * A boolean parameter for processing algorithms.
+  * \since QGIS 3.0
+ */
 class CORE_EXPORT QgsProcessingParameterBoolean : public QgsProcessingParameter
 {
   public:
 
-    QgsProcessingParameterBoolean( const QString &name, const QString &description = QString(), const QVariant &defaultValue = QVariant(),
+    /**
+     * Constructor for QgsProcessingParameterBoolean.
+     */
+    QgsProcessingParameterBoolean( const QString &name, const QString &description = QString(), bool defaultValue = false,
                                    bool optional = false );
 
     QString type() const override { return QStringLiteral( "boolean" ); }
-
     bool acceptsValue( const QVariant &value ) const override;
-
     QVariant parseValue( const QVariant &value ) const override;
+    virtual QString asScriptCode() const override;
 
-    static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition );
+    /**
+     * Returns a new QgsProcessingParameterBoolean configured using the \a definition from a script code.
+     * This is not usually called directly but instead called when required by QgsProcessingRegistry::createParameterFromScriptCode().
+     */
+    static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) SIP_FACTORY;
 
   private:
 
-    static QVariant convertToBool( const QVariant &value );
+    static bool convertToBool( const QVariant &value );
 
 };
 
+
+/**
+ * \class QgsProcessingParameterCrs
+ * \ingroup core
+ * A coordinate reference system parameter for processing algorithms.
+  * \since QGIS 3.0
+ */
+class CORE_EXPORT QgsProcessingParameterCrs : public QgsProcessingParameter
+{
+  public:
+
+    /**
+     * Constructor for QgsProcessingParameterCrs.
+     */
+    QgsProcessingParameterCrs( const QString &name, const QString &description = QString(), const QVariant &defaultValue = QVariant(),
+                               bool optional = false );
+
+    QString type() const override { return QStringLiteral( "crs" ); }
+    bool acceptsValue( const QVariant &value ) const override;
+    QVariant parseValue( const QVariant &value ) const override;
+    virtual QString asScriptCode() const override;
+
+    /**
+     * Returns a new QgsProcessingParameterBoolean configured using the \a definition from a script code.
+     * This is not usually called directly but instead called when required by QgsProcessingRegistry::createParameterFromScriptCode().
+     */
+    static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) SIP_FACTORY;
+
+  private:
+
+    static bool convertToBool( const QVariant &value );
+
+};
 
 #endif // QGSPROCESSINGPARAMETERS_H
 

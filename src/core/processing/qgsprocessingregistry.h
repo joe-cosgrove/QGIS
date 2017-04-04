@@ -23,6 +23,72 @@
 #include "qgsprocessingprovider.h"
 #include <QMap>
 
+class QgsProcessingParameter;
+
+/**
+ * \class QgsProcessingParameterAbstractMetadata
+ * \ingroup core
+ * Stores metadata about one processing parameter class.
+ * \note In C++ you can use QgsProcessingParameterMetadata convenience class.
+ * \since QGIS 3.0
+ */
+class CORE_EXPORT QgsProcessingParameterAbstractMetadata
+{
+  public:
+
+    /**
+     * Constructor for parameter abstract metadata. The type parameter must be unique.
+     */
+    QgsProcessingParameterAbstractMetadata( const QString &type );
+
+    virtual ~QgsProcessingParameterAbstractMetadata() = default;
+
+    /**
+     * Returns the unique type string which identifies the parameter type.
+     */
+    QString type() const { return mType; }
+
+    /**
+     * Creates a new parameter of this type from an encoded script code line. The name, description and optional flag will have already
+     * been parsed when this function is called, so only any extra handling of the remaining definition string needs to be done by the class.
+     */
+    virtual QgsProcessingParameter *createParameterFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition );
+
+  private:
+    QString mType;
+};
+
+//! Function to create a parameter from an encoded script code line
+typedef QgsProcessingParameter *( *QgsProcessingParameterFromScriptCodeFunc )( const QString &, const QString &, bool, const QString & );
+
+#ifndef SIP_RUN
+
+/**
+ * \class QgsProcessingParameterMetadata
+ * \ingroup core
+ * Convenience class that uses static functions to create parameter metadata.
+ * \note Not available in Python bindings
+ * \since QGIS 3.0
+ */
+class CORE_EXPORT QgsProcessingParameterMetadata : public QgsProcessingParameterAbstractMetadata
+{
+  public:
+
+    /**
+     * Constructor for QgsProcessingParameterMetadata which accepts static functions for the
+     * parameter creation functions.
+     */
+    QgsProcessingParameterMetadata( const QString &type,
+                                    QgsProcessingParameterFromScriptCodeFunc pfCreateFromScriptCode = nullptr );
+
+    virtual QgsProcessingParameter *createParameterFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) override { return mCreateFromScriptCodeFunc ? mCreateFromScriptCodeFunc( name, description, isOptional, definition ) : nullptr; }
+
+  private:
+    QgsProcessingParameterFromScriptCodeFunc mCreateFromScriptCodeFunc;
+
+};
+#endif
+
 /**
  * \class QgsProcessingRegistry
  * \ingroup core
@@ -99,6 +165,23 @@ class CORE_EXPORT QgsProcessingRegistry : public QObject
      */
     QgsProcessingAlgorithm *algorithmById( const QString &id ) const;
 
+    /**
+     * Returns a pointer to the metadata for a parameter \a type.
+     */
+    QgsProcessingParameterAbstractMetadata *parameterMetadata( const QString &type ) const;
+
+    /**
+     * Adds \a metadata for a new parameter type to the registry. Ownership of the metadata is transferred.
+     * Returns true if the parameter type was successfully registered, or false if the type could not
+     * be registered (eg as a result of a duplicate type string).
+     */
+    bool addParameterType( QgsProcessingParameterAbstractMetadata *metadata SIP_TRANSFER );
+
+    /**
+     * Creates a new parameter from an encoded script \a code.
+     */
+    QgsProcessingParameter *createParameterFromScriptCode( const QString &code ) const;
+
   signals:
 
     //! Emitted when a provider has been added to the registry.
@@ -111,6 +194,12 @@ class CORE_EXPORT QgsProcessingRegistry : public QObject
 
     //! Map of available providers by id. This class owns the pointers
     QMap<QString, QgsProcessingProvider *> mProviders;
+
+    QMap<QString, QgsProcessingParameterAbstractMetadata *> mParameterMetadata;
+
+    static bool parseScriptCodeParameterOptions( const QString &code, bool &isOptional, QString &name, QString &type, QString &definition );
+
+    static QString createParameterDescription( const QString &name );
 
 #ifdef SIP_RUN
     QgsProcessingRegistry( const QgsProcessingRegistry &other );

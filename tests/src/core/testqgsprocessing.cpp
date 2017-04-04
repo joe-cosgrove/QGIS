@@ -121,6 +121,8 @@ class TestQgsProcessing: public QObject
     void mapLayerFromString();
     void algorithm();
     void algorithmParameters();
+    void parameterGeneral();
+    void parameterBoolean();
 
   private:
 
@@ -453,6 +455,120 @@ void TestQgsProcessing::algorithmParameters()
 {
   DummyAlgorithm alg( "test" );
   alg.runParameterChecks();
+}
+
+void TestQgsProcessing::parameterGeneral()
+{
+  // test constructor
+  QgsProcessingParameterBoolean param( "p1", "desc", true, true );
+  QCOMPARE( param.name(), QString( "p1" ) );
+  QCOMPARE( param.description(), QString( "desc" ) );
+  QCOMPARE( param.defaultValue(), QVariant( true ) );
+  QVERIFY( param.flags() & QgsProcessingParameter::FlagOptional );
+
+  // test getters and setters
+  param.setDescription( "p2" );
+  QCOMPARE( param.description(), QString( "p2" ) );
+  param.setDefaultValue( false );
+  QCOMPARE( param.defaultValue(), QVariant( false ) );
+  param.setFlags( QgsProcessingParameter::FlagHidden );
+  QCOMPARE( param.flags(), QgsProcessingParameter::FlagHidden );
+
+  // test that setDefaultValue checks the input for valid types
+  QVERIFY( param.setDefaultValue( true ) );
+  QCOMPARE( param.defaultValue(), QVariant( true ) );
+  // not acceptable!
+  QVERIFY( !param.setDefaultValue( QVariant() ) );
+  // ...so should be no change
+  QCOMPARE( param.defaultValue(), QVariant( true ) );
+}
+
+void TestQgsProcessing::parameterBoolean()
+{
+  QgsProcessingParameterBoolean pNonOptionalDefaultFalse( "p" );
+  QVERIFY( pNonOptionalDefaultFalse.acceptsValue( false ) );
+  QCOMPARE( pNonOptionalDefaultFalse.parseValue( false ), QVariant( false ) );
+  QVERIFY( pNonOptionalDefaultFalse.acceptsValue( true ) );
+  QCOMPARE( pNonOptionalDefaultFalse.parseValue( true ), QVariant( true ) );
+
+  QVERIFY( !pNonOptionalDefaultFalse.acceptsValue( QVariant() ) );
+  // no need to check parseValue here - behavior is undefined
+
+  QVERIFY( pNonOptionalDefaultFalse.acceptsValue( "true" ) );
+  QCOMPARE( pNonOptionalDefaultFalse.parseValue( "true" ), QVariant( true ) );
+
+  QgsProcessingParameterBoolean pOptionalDefaultTrue( "p", "", true, true );
+  QVERIFY( pOptionalDefaultTrue.acceptsValue( false ) );
+  QCOMPARE( pOptionalDefaultTrue.parseValue( false ), QVariant( false ) );
+  QVERIFY( pOptionalDefaultTrue.acceptsValue( true ) );
+  QCOMPARE( pOptionalDefaultTrue.parseValue( true ), QVariant( true ) );
+  QVERIFY( pOptionalDefaultTrue.acceptsValue( QVariant() ) );
+  // should be default
+  QCOMPARE( pOptionalDefaultTrue.parseValue( QVariant() ), QVariant( true ) );
+  QVERIFY( pOptionalDefaultTrue.acceptsValue( "true" ) );
+  QCOMPARE( pOptionalDefaultTrue.parseValue( "true" ), QVariant( true ) );
+
+  QgsProcessingParameterBoolean pOptionalDefaultFalse( "p", "", false, true );
+  QVERIFY( pOptionalDefaultFalse.acceptsValue( false ) );
+  QCOMPARE( pOptionalDefaultFalse.parseValue( false ), QVariant( false ) );
+  QVERIFY( pOptionalDefaultFalse.acceptsValue( true ) );
+  QCOMPARE( pOptionalDefaultFalse.parseValue( true ), QVariant( true ) );
+  QVERIFY( pOptionalDefaultFalse.acceptsValue( QVariant() ) );
+  // should be default
+  QCOMPARE( pOptionalDefaultFalse.parseValue( QVariant() ), QVariant( false ) );
+  QVERIFY( pOptionalDefaultFalse.acceptsValue( "true" ) );
+  QCOMPARE( pOptionalDefaultFalse.parseValue( "true" ), QVariant( true ) );
+
+
+  QgsProcessingParameterBoolean pNonOptionalDefaultTrue( "p", "", true, false );
+  QVERIFY( pNonOptionalDefaultTrue.acceptsValue( false ) );
+  QCOMPARE( pNonOptionalDefaultTrue.parseValue( false ), QVariant( false ) );
+  QVERIFY( pNonOptionalDefaultTrue.acceptsValue( true ) );
+  QCOMPARE( pNonOptionalDefaultTrue.parseValue( true ), QVariant( true ) );
+
+  QVERIFY( !pNonOptionalDefaultTrue.acceptsValue( QVariant() ) );
+  // no need to check parseValue here - behavior is undefined
+
+  QVERIFY( pNonOptionalDefaultTrue.acceptsValue( "true" ) );
+  QCOMPARE( pNonOptionalDefaultTrue.parseValue( "true" ), QVariant( true ) );
+
+  // test create from script code
+  QgsProcessingParameterBoolean p1( "myName", "myDescription", false, false );
+  QString code = p1.asScriptCode();
+  QgsProcessingParameter *p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->name(), QString( "myName" ) );
+  QCOMPARE( p2->description(), QString( "myName" ) );
+  QCOMPARE( p2->flags(),  0 );
+  QCOMPARE( p2->defaultValue(), QVariant( false ) );
+  delete p2;
+
+  QgsProcessingParameterBoolean p3( "myName", "myDescription", true, false );
+  code = p3.asScriptCode();
+  QgsProcessingParameter *p4 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p4->name(), QString( "myName" ) );
+  QCOMPARE( p4->description(), QString( "myName" ) );
+  QCOMPARE( p4->flags(),  0 );
+  QCOMPARE( p4->defaultValue(), QVariant( true ) );
+  delete p4;
+
+  // optional
+  QgsProcessingParameterBoolean p5( "myName", "myDescription", false, true );
+  code = p5.asScriptCode();
+  p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->name(), QString( "myName" ) );
+  QCOMPARE( p2->description(), QString( "myName" ) );
+  QCOMPARE( p2->flags(),  QgsProcessingParameter::FlagOptional );
+  QCOMPARE( p2->defaultValue(), QVariant( false ) );
+  delete p2;
+
+  QgsProcessingParameterBoolean p7( "myName", "myDescription", true, true );
+  code = p7.asScriptCode();
+  p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->name(), QString( "myName" ) );
+  QCOMPARE( p2->description(), QString( "myName" ) );
+  QCOMPARE( p2->flags(),  QgsProcessingParameter::FlagOptional );
+  QCOMPARE( p2->defaultValue(), QVariant( true ) );
+  delete p2;
 }
 
 QGSTEST_MAIN( TestQgsProcessing )

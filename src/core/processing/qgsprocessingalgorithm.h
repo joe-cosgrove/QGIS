@@ -123,7 +123,7 @@ class CORE_EXPORT QgsProcessingAlgorithm
     /**
      * Returns an ordered list of parameters utilized by the algorithm.
      */
-    QList< QgsProcessingParameter * > parameters() const { return mParameters; }
+    QList< const QgsProcessingParameter * > parameters() const { return mParameters; }
 
   protected:
 
@@ -141,7 +141,7 @@ class CORE_EXPORT QgsProcessingAlgorithm
 
     QgsProcessingProvider *mProvider = nullptr;
 
-    QList< QgsProcessingParameter * > mParameters;
+    QList< const QgsProcessingParameter * > mParameters;
 
     // friend class to access setProvider() - we do not want this public!
     friend class QgsProcessingProvider;

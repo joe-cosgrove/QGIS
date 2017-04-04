@@ -16,7 +16,8 @@
  ***************************************************************************/
 
 #include "qgsprocessingparameters.h"
-
+#include "qgscoordinatereferencesystem.h"
+#include "qgsmaplayer.h"
 #include <QRegularExpression>
 
 
@@ -24,20 +25,11 @@
 // QgsProcessingParameter
 //
 
-QgsProcessingParameter::QgsProcessingParameter( const QString &name, const QString &description, const QVariant &defaultValue, bool optional )
+QgsProcessingParameter::QgsProcessingParameter( const QString &name, const QString &description, bool optional )
   : mName( name )
   , mDescription( description )
-  , mDefault( defaultValue )
   , mFlags( optional ? QgsProcessingParameter::FlagOptional : 0 )
-{
-
-}
-
-void QgsProcessingParameter::setName( const QString &name )
-{
-  mName = name;
-}
-
+{}
 
 void QgsProcessingParameter::setDescription( const QString &description )
 {
@@ -59,11 +51,6 @@ void QgsProcessingParameter::setFlags( const Flags &flags )
   mFlags = flags;
 }
 
-QString QgsProcessingParameter::valueAsCommandLineParameter( const QVariant &value ) const
-{
-  return value.toString();
-}
-
 QString QgsProcessingParameter::asScriptCode() const
 {
   QString code = QStringLiteral( "##%1=" ).arg( mName );
@@ -78,13 +65,15 @@ QString QgsProcessingParameter::asScriptCode() const
 // QgsProcessingParameterBoolean
 //
 
-QgsProcessingParameterBoolean::QgsProcessingParameterBoolean( const QString &name, const QString &description, const QVariant &defaultValue, bool optional )
-  : QgsProcessingParameter( name, description, defaultValue, optional )
-{}
+QgsProcessingParameterBoolean::QgsProcessingParameterBoolean( const QString &name, const QString &description, bool defaultValue, bool optional )
+  : QgsProcessingParameter( name, description, optional )
+{
+  setDefaultValue( defaultValue );
+}
 
 bool QgsProcessingParameterBoolean::acceptsValue( const QVariant &value ) const
 {
-  if ( !value.isValid() && !( mFlags & FlagOptional ) )
+  if ( !value.isValid() && !( flags() & FlagOptional ) )
     return false;
 
   return true;
@@ -92,16 +81,29 @@ bool QgsProcessingParameterBoolean::acceptsValue( const QVariant &value ) const
 
 QVariant QgsProcessingParameterBoolean::parseValue( const QVariant &value ) const
 {
+  if ( !value.isValid() )
+    return defaultValue();
+
   return convertToBool( value );
 }
 
 QgsProcessingParameter *QgsProcessingParameterBoolean::createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition )
 {
-  QVariant defaultVal = convertToBool( definition );
+  bool defaultVal = convertToBool( definition );
   return new QgsProcessingParameterBoolean( name, description, defaultVal, isOptional );
 }
 
-QVariant QgsProcessingParameterBoolean::convertToBool( const QVariant &value )
+QString QgsProcessingParameterBoolean::asScriptCode() const
+{
+  QString code = QStringLiteral( "##%1=" ).arg( name() );
+  if ( flags() && FlagOptional )
+    code += QStringLiteral( "optional " );
+  code += type() + ' ';
+  code += defaultValue().toBool() ? "true" : "false";
+  return code;
+}
+
+bool QgsProcessingParameterBoolean::convertToBool( const QVariant &value )
 {
   if ( value.type() == QVariant::String )
     return value.toString().toLower().trimmed() == QStringLiteral( "true" );
@@ -110,4 +112,58 @@ QVariant QgsProcessingParameterBoolean::convertToBool( const QVariant &value )
 }
 
 
+//
+// QgsProcessingParameterCrs
+//
 
+QgsProcessingParameterCrs::QgsProcessingParameterCrs( const QString &name, const QString &description, const QVariant &defaultValue, bool optional )
+  : QgsProcessingParameter( name, description, optional )
+{
+  setDefaultValue( defaultValue );
+}
+
+bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
+{
+  if ( flags() & FlagOptional )
+    return true;
+
+  if ( !value.isValid() )
+    return false;
+
+  // is it a QgsCoordinateReferenceSystem?
+  if ( value.canConvert< QgsCoordinateReferenceSystem >() )
+  {
+    QgsCoordinateReferenceSystem crs = value.value< QgsCoordinateReferenceSystem >();
+    return crs.isValid();
+  }
+
+  // is it a map layer?
+  QObject *o = qvariant_cast<QObject *>( value );
+  if ( QgsMapLayer *l = qobject_cast< QgsMapLayer * >( o ) )
+  {
+    return l->crs().isValid();
+  }
+
+  // try various string parsing
+  QString s = value.toString();
+  if ( s == QStringLiteral( "ProjectCrs" ) )
+    return true;
+
+  QgsCoordinateReferenceSystem crs = QgsCoordinateReferenceSystem::createFromString( s );
+  return crs.isValid();
+}
+
+QVariant QgsProcessingParameterCrs::parseValue( const QVariant &value ) const
+{
+
+}
+
+QString QgsProcessingParameterCrs::asScriptCode() const
+{
+
+}
+
+QgsProcessingParameter *QgsProcessingParameterCrs::createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition )
+{
+
+}

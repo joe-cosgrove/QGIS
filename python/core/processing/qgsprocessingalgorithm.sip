@@ -101,6 +101,11 @@ class QgsProcessingAlgorithm
  Returns the provider to which this algorithm belongs.
 %End
 
+    QList< const QgsProcessingParameter * > parameters() const;
+%Docstring
+ Returns an ordered list of parameters utilized by the algorithm.
+%End
+
   protected:
 
     bool addParameter( QgsProcessingParameter *parameter /Transfer/ );

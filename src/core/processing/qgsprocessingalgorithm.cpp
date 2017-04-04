@@ -58,7 +58,7 @@ bool QgsProcessingAlgorithm::addParameter( QgsProcessingParameter *parameter )
     return false;
 
   // check for duplicate named parameters
-  Q_FOREACH ( QgsProcessingParameter *p, mParameters )
+  Q_FOREACH ( const QgsProcessingParameter *p, mParameters )
   {
     if ( p->name() == parameter->name() )
       return false;

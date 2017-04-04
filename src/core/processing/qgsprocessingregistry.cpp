@@ -17,10 +17,14 @@
 
 #include "qgsprocessingregistry.h"
 #include "qgsvectorfilewriter.h"
+#include "qgsprocessingparameters.h"
 
 QgsProcessingRegistry::QgsProcessingRegistry( QObject *parent SIP_TRANSFERTHIS )
   : QObject( parent )
-{}
+{
+  //add known parameter types
+  addParameterType( new QgsProcessingParameterMetadata( QStringLiteral( "boolean" ), QgsProcessingParameterBoolean::createFromScriptCode ) );
+}
 
 QgsProcessingRegistry::~QgsProcessingRegistry()
 {
@@ -28,6 +32,7 @@ QgsProcessingRegistry::~QgsProcessingRegistry()
   {
     removeProvider( p );
   }
+  qDeleteAll( mParameterMetadata );
 }
 
 bool QgsProcessingRegistry::addProvider( QgsProcessingProvider *provider )
@@ -98,3 +103,92 @@ QgsProcessingAlgorithm *QgsProcessingRegistry::algorithmById( const QString &id 
   return nullptr;
 }
 
+QgsProcessingParameterAbstractMetadata *QgsProcessingRegistry::parameterMetadata( const QString &type ) const
+{
+  return mParameterMetadata.value( type );
+}
+
+bool QgsProcessingRegistry::addParameterType( QgsProcessingParameterAbstractMetadata *metadata )
+{
+  if ( !metadata || mParameterMetadata.contains( metadata->type() ) )
+    return false;
+
+  mParameterMetadata[metadata->type()] = metadata;
+  return true;
+}
+
+QgsProcessingParameter *QgsProcessingRegistry::createParameterFromScriptCode( const QString &code ) const
+{
+  bool isOptional = false;
+  QString name;
+  QString definition;
+  QString type;
+  if ( !parseScriptCodeParameterOptions( code, isOptional, name, type, definition ) )
+    return nullptr;
+
+  if ( !mParameterMetadata.contains( type ) )
+    return nullptr;
+
+  QString description = createParameterDescription( name );
+
+  return mParameterMetadata[type]->createParameterFromScriptCode( name, description, isOptional, definition );
+}
+
+bool QgsProcessingRegistry::parseScriptCodeParameterOptions( const QString &code, bool &isOptional, QString &name, QString &type, QString &definition )
+{
+  QRegularExpression re( "##(.*?)=\\s*(.*)" );
+  QRegularExpressionMatch m = re.match( code );
+  if ( !m.hasMatch() )
+    return false;
+
+  name = m.captured( 1 );
+  QString tokens = m.captured( 2 );
+  if ( tokens.toLower().startsWith( QStringLiteral( "optional" ) ) )
+  {
+    isOptional = true;
+    tokens.remove( 0, 9 ); // length "optional" = 8
+  }
+  else
+  {
+    isOptional = false;
+  }
+
+  QRegularExpression re2( "(.*?)\\s+(.*)" );
+  m = re2.match( tokens );
+  if ( !m.hasMatch() )
+  {
+    type = tokens;
+    definition.clear();
+  }
+  else
+  {
+    type = m.captured( 1 );
+    definition = m.captured( 2 );
+  }
+  return true;
+}
+
+QString QgsProcessingRegistry::createParameterDescription( const QString &name )
+{
+  QString desc = name;
+  return desc.replace( '_', ' ' );
+}
+
+
+QgsProcessingParameterAbstractMetadata::QgsProcessingParameterAbstractMetadata( const QString &type )
+  : mType( type )
+{}
+
+QgsProcessingParameter *QgsProcessingParameterAbstractMetadata::createParameterFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition )
+{
+  Q_UNUSED( definition );
+  Q_UNUSED( description );
+  Q_UNUSED( name );
+  Q_UNUSED( isOptional );
+  return nullptr;
+}
+
+QgsProcessingParameterMetadata::QgsProcessingParameterMetadata( const QString &type, QgsProcessingParameterFromScriptCodeFunc pfCreateFromScriptCode )
+  : QgsProcessingParameterAbstractMetadata( type )
+  , mCreateFromScriptCodeFunc( pfCreateFromScriptCode )
+{}
