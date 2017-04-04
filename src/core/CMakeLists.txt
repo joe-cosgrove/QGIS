@@ -595,6 +595,7 @@ SET(QGIS_CORE_MOC_HDRS
   composer/qgspaperitem.h
 
   processing/qgsprocessingfeedback.h
+  processing/qgsprocessingprovider.h
   processing/qgsprocessingregistry.h
 
   raster/qgsrasterlayer.h
@@ -838,7 +839,6 @@ SET(QGIS_CORE_HDRS
   composer/qgsticksscalebarstyle.h
 
   processing/qgsprocessingalgorithm.h
-  processing/qgsprocessingprovider.h
   processing/qgsprocessingutils.h
 
   raster/qgsbilinearrasterresampler.h
