@@ -149,7 +149,8 @@ bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
   if ( s == QStringLiteral( "ProjectCrs" ) )
     return true;
 
-  QgsCoordinateReferenceSystem crs = QgsCoordinateReferenceSystem::createFromString( s );
+  QgsCoordinateReferenceSystem crs;
+  crs.createFromString( s );
   return crs.isValid();
 }
 
