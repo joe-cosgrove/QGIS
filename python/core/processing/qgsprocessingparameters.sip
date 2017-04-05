@@ -30,7 +30,7 @@ class QgsProcessingParameter
     typedef QFlags<QgsProcessingParameter::Flag> Flags;
 
     QgsProcessingParameter( const QString &name, const QString &description = QString(),
-                            bool optional = false );
+                            const QVariant &defaultValue = QVariant(), bool optional = false );
 %Docstring
  Constructor for QgsProcessingParameter. The name must be unique for each parameter/algorithm
  combination, and should consist of alphanumeric characters only. Setting a parameter as optional
@@ -64,16 +64,16 @@ class QgsProcessingParameter
  \see description()
 %End
 
-    virtual QVariant defaultValue() const;
+    QVariant defaultValue() const;
 %Docstring
  Returns the default value for the parameter.
  \see setDefaultValue()
 %End
 
-    virtual bool setDefaultValue( const QVariant &value );
+    void setDefaultValue( const QVariant &value );
 %Docstring
- Sets the default value for the parameter. Returns true if default value was successfully set,
- or false if value is not acceptable for the parameter.
+ Sets the default value for the parameter. Caller takes responsibility
+ to ensure that value is a valid input for the parameter subclass.
  \see defaultValue()
 %End
 
@@ -89,14 +89,14 @@ class QgsProcessingParameter
  \see flags()
 %End
 
-    virtual bool acceptsValue( const QVariant &value, const QgsProcessingContext& context ) const = 0;
+    virtual bool acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const = 0;
 %Docstring
  Returns true if the specified value is acceptable for the parameter
  within a given context.
  \see parseValue()
 %End
 
-    virtual QVariant parseValue( const QVariant &value, const QgsProcessingContext& context ) const;
+    virtual QVariant parseValue( const QVariant &value, const QgsProcessingContext &context ) const;
 %Docstring
  Parses a raw input value and converts it to a value usable by the parameter.
  E.g. a boolean parameter may take string inputs like "true", "yes", and convert
@@ -141,8 +141,8 @@ class QgsProcessingParameterBoolean : QgsProcessingParameter
 %End
 
     QString type() const;
-    bool acceptsValue( const QVariant &value, const QgsProcessingContext& context ) const;
-    QVariant parseValue( const QVariant &value, const QgsProcessingContext& context ) const;
+    bool acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const;
+    QVariant parseValue( const QVariant &value, const QgsProcessingContext &context ) const;
     virtual QString asScriptCode() const;
 
     static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) /Factory/;
@@ -173,8 +173,8 @@ class QgsProcessingParameterCrs : QgsProcessingParameter
 %End
 
     QString type() const;
-    bool acceptsValue( const QVariant &value, const QgsProcessingContext& context ) const;
-    QVariant parseValue( const QVariant &value, const QgsProcessingContext& context ) const;
+    bool acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const;
+    QVariant parseValue( const QVariant &value, const QgsProcessingContext &context ) const;
     virtual QString asScriptCode() const;
 
     static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) /Factory/;

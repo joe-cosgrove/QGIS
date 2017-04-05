@@ -49,7 +49,7 @@ class CORE_EXPORT QgsProcessingParameter
      * will add the FlagOptional flag to the parameter.
      */
     QgsProcessingParameter( const QString &name, const QString &description = QString(),
-                            bool optional = false );
+                            const QVariant &defaultValue = QVariant(), bool optional = false );
 
     virtual ~QgsProcessingParameter() = default;
 
@@ -82,14 +82,14 @@ class CORE_EXPORT QgsProcessingParameter
      * Returns the default value for the parameter.
      * \see setDefaultValue()
      */
-    virtual QVariant defaultValue() const { return mDefault; }
+    QVariant defaultValue() const { return mDefault; }
 
     /**
-     * Sets the default \a value for the parameter. Returns true if default value was successfully set,
-     * or false if value is not acceptable for the parameter.
+     * Sets the default \a value for the parameter. Caller takes responsibility
+     * to ensure that \a value is a valid input for the parameter subclass.
      * \see defaultValue()
      */
-    virtual bool setDefaultValue( const QVariant &value );
+    void setDefaultValue( const QVariant &value );
 
     /**
      * Returns any flags associated with the parameter.

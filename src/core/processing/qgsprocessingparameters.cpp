@@ -27,9 +27,10 @@
 // QgsProcessingParameter
 //
 
-QgsProcessingParameter::QgsProcessingParameter( const QString &name, const QString &description, bool optional )
+QgsProcessingParameter::QgsProcessingParameter( const QString &name, const QString &description, const QVariant &defaultValue, bool optional )
   : mName( name )
   , mDescription( description )
+  , mDefault( defaultValue )
   , mFlags( optional ? QgsProcessingParameter::FlagOptional : 0 )
 {}
 
@@ -39,13 +40,9 @@ void QgsProcessingParameter::setDescription( const QString &description )
 }
 
 
-bool QgsProcessingParameter::setDefaultValue( const QVariant &value )
+void QgsProcessingParameter::setDefaultValue( const QVariant &value )
 {
-  if ( !acceptsValue( value ) )
-    return false;
-
-  mDefault = parseValue( value );
-  return true;
+  mDefault = value;
 }
 
 void QgsProcessingParameter::setFlags( const Flags &flags )
@@ -68,10 +65,8 @@ QString QgsProcessingParameter::asScriptCode() const
 //
 
 QgsProcessingParameterBoolean::QgsProcessingParameterBoolean( const QString &name, const QString &description, bool defaultValue, bool optional )
-  : QgsProcessingParameter( name, description, optional )
-{
-  setDefaultValue( defaultValue );
-}
+  : QgsProcessingParameter( name, description, defaultValue, optional )
+{}
 
 bool QgsProcessingParameterBoolean::acceptsValue( const QVariant &value, const QgsProcessingContext & ) const
 {
@@ -119,10 +114,8 @@ bool QgsProcessingParameterBoolean::convertToBool( const QVariant &value )
 //
 
 QgsProcessingParameterCrs::QgsProcessingParameterCrs( const QString &name, const QString &description, const QVariant &defaultValue, bool optional )
-  : QgsProcessingParameter( name, description, optional )
-{
-  setDefaultValue( defaultValue );
-}
+  : QgsProcessingParameter( name, description, defaultValue, optional )
+{}
 
 bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const
 {
