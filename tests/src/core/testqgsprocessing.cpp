@@ -123,6 +123,7 @@ class TestQgsProcessing: public QObject
     void algorithmParameters();
     void parameterGeneral();
     void parameterBoolean();
+    void parameterCrs();
 
   private:
 
@@ -529,6 +530,7 @@ void TestQgsProcessing::parameterBoolean()
   QgsProcessingParameterBoolean p1( "myName", "myDescription", false, false );
   QString code = p1.asScriptCode();
   QgsProcessingParameter *p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->type(), QString( "boolean" ) );
   QCOMPARE( p2->name(), QString( "myName" ) );
   QCOMPARE( p2->description(), QString( "myName" ) );
   QCOMPARE( p2->flags(),  0 );
@@ -548,6 +550,7 @@ void TestQgsProcessing::parameterBoolean()
   QgsProcessingParameterBoolean p5( "myName", "myDescription", false, true );
   code = p5.asScriptCode();
   p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->type(), QString( "boolean" ) );
   QCOMPARE( p2->name(), QString( "myName" ) );
   QCOMPARE( p2->description(), QString( "myName" ) );
   QCOMPARE( p2->flags(),  QgsProcessingParameter::FlagOptional );
@@ -562,6 +565,93 @@ void TestQgsProcessing::parameterBoolean()
   QCOMPARE( p2->flags(),  QgsProcessingParameter::FlagOptional );
   QCOMPARE( p2->defaultValue(), QVariant( true ) );
   delete p2;
+}
+
+void TestQgsProcessing::parameterCrs()
+{
+  // setup a context
+  QgsProject p;
+  p.setCrs( QgsCoordinateReferenceSystem::fromEpsgId( 28353 ) );
+  QString testDataDir = QStringLiteral( TEST_DATA_DIR ) + '/'; //defined in CmakeLists.txt
+  QString raster1 = testDataDir + "tenbytenraster.asc";
+  QString raster2 = testDataDir + "landsat.tif";
+  QFileInfo fi1( raster1 );
+  QgsRasterLayer *r1 = new QgsRasterLayer( fi1.filePath(), "R1" );
+  QgsVectorLayer *v1 = new QgsVectorLayer( "Polygon?crs=EPSG:3111", "V4", "memory" );
+  p.addMapLayers( QList<QgsMapLayer *>() << v1 << r1 );
+  QgsProcessingContext context;
+  context.setProject( &p );
+
+  // not optional!
+  QgsProcessingParameterCrs pNonOptional( "p", QString(), QString( "EPSG:3113" ), false );
+  QVERIFY( !pNonOptional.acceptsValue( QVariant(), context ) );
+  // direct CRS value
+  QVariant input = QgsCoordinateReferenceSystem::fromEpsgId( 28356 );
+  QVERIFY( pNonOptional.acceptsValue( input, context ) );
+  QCOMPARE( pNonOptional.parseValue( input, context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:28356" ) );
+  // direct map layer
+  input = QVariant::fromValue( v1 );
+  QVERIFY( pNonOptional.acceptsValue( input, context ) );
+  QCOMPARE( pNonOptional.parseValue( input, context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:3111" ) );
+  // special ProjectCrs string
+  input = QString( "ProjectCrs" );
+  QVERIFY( pNonOptional.acceptsValue( input, context ) );
+  QCOMPARE( pNonOptional.parseValue( input, context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:28353" ) );
+  // string representing a project layer source
+  input = raster1;
+  QVERIFY( pNonOptional.acceptsValue( input, context ) );
+  QCOMPARE( pNonOptional.parseValue( input, context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:4326" ) );
+  // string representing a non-project layer source
+  input = raster2;
+  QVERIFY( pNonOptional.acceptsValue( input, context ) );
+  QCOMPARE( pNonOptional.parseValue( input, context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:32633" ) );
+  // string representation of a crs
+  input = QString( "EPSG:28355" );
+  QVERIFY( pNonOptional.acceptsValue( input, context ) );
+  QCOMPARE( pNonOptional.parseValue( input, context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:28355" ) );
+  // nonsense string
+  input = QString( "i'm not a crs, and nothing you can do will make me one" );
+  QVERIFY( !pNonOptional.acceptsValue( input, context ) );
+
+  // optional
+  QgsProcessingParameterCrs pOptional( "p", QString(), QString( "EPSG:3113" ), true );
+  QVERIFY( pOptional.acceptsValue( QVariant(), context ) );
+  QCOMPARE( pOptional.parseValue( QVariant(), context ).value< QgsCoordinateReferenceSystem >().authid(), QString( "EPSG:3113" ) );
+
+
+  // test create from script code
+  QgsProcessingParameterCrs p1( "myName", "myDescription", QString( "EPSG:3113" ), false );
+  QString code = p1.asScriptCode();
+  QgsProcessingParameter *p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->type(), QString( "crs" ) );
+  QCOMPARE( p2->name(), QString( "myName" ) );
+  QCOMPARE( p2->description(), QString( "myName" ) );
+  QCOMPARE( p2->flags(),  0 );
+  QCOMPARE( p2->defaultValue(), QVariant( "EPSG:3113" ) );
+  delete p2;
+
+  // optional
+  QgsProcessingParameterCrs p3( "myName", "myDescription", QString( "ProjectCrs" ), true );
+  code = p3.asScriptCode();
+  p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->type(), QString( "crs" ) );
+  QCOMPARE( p2->name(), QString( "myName" ) );
+  QCOMPARE( p2->description(), QString( "myName" ) );
+  QCOMPARE( p2->flags(), QgsProcessingParameter::FlagOptional );
+  QCOMPARE( p2->defaultValue(), QVariant( "ProjectCrs" ) );
+  delete p2;
+
+  // default value as a CRS object
+  QgsProcessingParameterCrs p4( "myName", "myDescription", QgsCoordinateReferenceSystem::fromEpsgId( 28356 ), true );
+  code = p4.asScriptCode();
+  p2 = QgsApplication::processingRegistry()->createParameterFromScriptCode( code );
+  QCOMPARE( p2->type(), QString( "crs" ) );
+  QCOMPARE( p2->name(), QString( "myName" ) );
+  QCOMPARE( p2->description(), QString( "myName" ) );
+  QCOMPARE( p2->flags(), QgsProcessingParameter::FlagOptional );
+  QCOMPARE( p2->defaultValue(), QVariant( "EPSG:28356" ) );
+  delete p2;
+
 }
 
 QGSTEST_MAIN( TestQgsProcessing )

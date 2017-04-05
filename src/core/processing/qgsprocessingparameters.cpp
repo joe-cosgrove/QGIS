@@ -164,7 +164,7 @@ bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value, const QgsPr
 QVariant QgsProcessingParameterCrs::parseValue( const QVariant &value, const QgsProcessingContext &context ) const
 {
   if ( !value.isValid() )
-    return defaultValue();
+    return convertToCrs( defaultValue(), context );
 
   return convertToCrs( value, context );
 }
@@ -175,14 +175,17 @@ QString QgsProcessingParameterCrs::asScriptCode() const
   if ( flags() && FlagOptional )
     code += QStringLiteral( "optional " );
   code += type() + ' ';
-  code += defaultValue().value< QgsCoordinateReferenceSystem >().authid();
+
+  if ( defaultValue().type() == QVariant::UserType )
+    code += parseValue( defaultValue(), QgsProcessingContext() ).value< QgsCoordinateReferenceSystem >().authid();
+  else
+    code += defaultValue().toString();
   return code;
 }
 
 QgsProcessingParameter *QgsProcessingParameterCrs::createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition )
 {
-  QVariant defaultVal = convertToCrs( definition, QgsProcessingContext() );
-  return new QgsProcessingParameterCrs( name, description, defaultVal, isOptional );
+  return new QgsProcessingParameterCrs( name, description, definition, isOptional );
 }
 
 QVariant QgsProcessingParameterCrs::convertToCrs( const QVariant &value, const QgsProcessingContext &context )
@@ -202,8 +205,8 @@ QVariant QgsProcessingParameterCrs::convertToCrs( const QVariant &value, const Q
 
   // try various other string parsing
   QString s = value.toString();
-  if ( s == QStringLiteral( "ProjectCrs" ) )
-    return QgsProject::instance()->crs();
+  if ( context.project() && s == QStringLiteral( "ProjectCrs" ) )
+    return context.project()->crs();
 
   //maybe a string representing a layer
   if ( context.project() )
