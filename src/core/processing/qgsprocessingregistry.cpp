@@ -24,6 +24,7 @@ QgsProcessingRegistry::QgsProcessingRegistry( QObject *parent SIP_TRANSFERTHIS )
 {
   //add known parameter types
   addParameterType( new QgsProcessingParameterMetadata( QStringLiteral( "boolean" ), QgsProcessingParameterBoolean::createFromScriptCode ) );
+  addParameterType( new QgsProcessingParameterMetadata( QStringLiteral( "crs" ), QgsProcessingParameterCrs::createFromScriptCode ) );
 }
 
 QgsProcessingRegistry::~QgsProcessingRegistry()

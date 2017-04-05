@@ -18,6 +18,8 @@
 #include "qgsprocessingparameters.h"
 #include "qgscoordinatereferencesystem.h"
 #include "qgsmaplayer.h"
+#include "qgsprocessingutils.h"
+#include "qgsproject.h"
 #include <QRegularExpression>
 
 
@@ -144,10 +146,26 @@ bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
     return l->crs().isValid();
   }
 
-  // try various string parsing
+  // try various other string parsing
   QString s = value.toString();
   if ( s == QStringLiteral( "ProjectCrs" ) )
     return true;
+
+  //maybe a string representing a layer
+#if 0
+  // unsure about this - I don't think we require this (better to use direct QVariant maplayer storage) and avoid
+  // dependence on project
+  QgsMapLayer *l = QgsProcessingUtils::mapLayerFromProject( s, QgsProject::instance() );
+  if ( l )
+  {
+    return l->crs().isValid();
+  }
+#endif
+  std::unique_ptr< QgsMapLayer > nonProjectLayer( QgsProcessingUtils::mapLayerFromString( s ) );
+  if ( nonProjectLayer )
+  {
+    return nonProjectLayer->crs().isValid();
+  }
 
   QgsCoordinateReferenceSystem crs;
   crs.createFromString( s );
@@ -156,15 +174,65 @@ bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
 
 QVariant QgsProcessingParameterCrs::parseValue( const QVariant &value ) const
 {
+  if ( !value.isValid() )
+    return defaultValue();
 
+  return convertToCrs( value );
 }
 
 QString QgsProcessingParameterCrs::asScriptCode() const
 {
-
+  QString code = QStringLiteral( "##%1=" ).arg( name() );
+  if ( flags() && FlagOptional )
+    code += QStringLiteral( "optional " );
+  code += type() + ' ';
+  code += defaultValue().value< QgsCoordinateReferenceSystem >().authid();
+  return code;
 }
 
 QgsProcessingParameter *QgsProcessingParameterCrs::createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition )
 {
+  QVariant defaultVal = convertToCrs( definition );
+  return new QgsProcessingParameterCrs( name, description, defaultVal, isOptional );
+}
 
+QVariant QgsProcessingParameterCrs::convertToCrs( const QVariant &value )
+{
+  // is it a QgsCoordinateReferenceSystem?
+  if ( value.canConvert< QgsCoordinateReferenceSystem >() )
+  {
+    return value;
+  }
+
+  // is it a map layer?
+  QObject *o = qvariant_cast<QObject *>( value );
+  if ( QgsMapLayer *l = qobject_cast< QgsMapLayer * >( o ) )
+  {
+    return l->crs();
+  }
+
+  // try various other string parsing
+  QString s = value.toString();
+  if ( s == QStringLiteral( "ProjectCrs" ) )
+    return QgsProject::instance()->crs();
+
+  //maybe a string representing a layer
+#if 0
+  // unsure about this - I don't think we require this (better to use direct QVariant maplayer storage) and avoid
+  // dependence on project
+  QgsMapLayer *l = QgsProcessingUtils::mapLayerFromProject( s, QgsProject::instance() );
+  if ( l )
+  {
+    return l->crs();
+  }
+#endif
+  std::unique_ptr< QgsMapLayer > nonProjectLayer( QgsProcessingUtils::mapLayerFromString( s ) );
+  if ( nonProjectLayer )
+  {
+    return nonProjectLayer->crs();
+  }
+
+  QgsCoordinateReferenceSystem crs;
+  crs.createFromString( s );
+  return crs;
 }

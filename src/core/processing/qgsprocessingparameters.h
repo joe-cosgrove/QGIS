@@ -23,6 +23,8 @@
 #include <QString>
 #include <QVariant>
 
+class QgsProject;
+
 /**
  * \class QgsProcessingParameter
  * \ingroup core
@@ -209,7 +211,7 @@ class CORE_EXPORT QgsProcessingParameterCrs : public QgsProcessingParameter
 
   private:
 
-    static bool convertToBool( const QVariant &value );
+    static QVariant convertToCrs( const QVariant &value );
 
 };
 
