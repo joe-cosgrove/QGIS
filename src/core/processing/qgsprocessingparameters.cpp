@@ -73,7 +73,7 @@ QgsProcessingParameterBoolean::QgsProcessingParameterBoolean( const QString &nam
   setDefaultValue( defaultValue );
 }
 
-bool QgsProcessingParameterBoolean::acceptsValue( const QVariant &value ) const
+bool QgsProcessingParameterBoolean::acceptsValue( const QVariant &value, const QgsProcessingContext & ) const
 {
   if ( !value.isValid() && !( flags() & FlagOptional ) )
     return false;
@@ -81,7 +81,7 @@ bool QgsProcessingParameterBoolean::acceptsValue( const QVariant &value ) const
   return true;
 }
 
-QVariant QgsProcessingParameterBoolean::parseValue( const QVariant &value ) const
+QVariant QgsProcessingParameterBoolean::parseValue( const QVariant &value, const QgsProcessingContext & ) const
 {
   if ( !value.isValid() )
     return defaultValue();
@@ -124,7 +124,7 @@ QgsProcessingParameterCrs::QgsProcessingParameterCrs( const QString &name, const
   setDefaultValue( defaultValue );
 }
 
-bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
+bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const
 {
   if ( flags() & FlagOptional )
     return true;
@@ -152,15 +152,11 @@ bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
     return true;
 
   //maybe a string representing a layer
-#if 0
-  // unsure about this - I don't think we require this (better to use direct QVariant maplayer storage) and avoid
-  // dependence on project
-  QgsMapLayer *l = QgsProcessingUtils::mapLayerFromProject( s, QgsProject::instance() );
+  QgsMapLayer *l = QgsProcessingUtils::mapLayerFromProject( s, context.project() );
   if ( l )
   {
     return l->crs().isValid();
   }
-#endif
   std::unique_ptr< QgsMapLayer > nonProjectLayer( QgsProcessingUtils::mapLayerFromString( s ) );
   if ( nonProjectLayer )
   {
@@ -172,12 +168,12 @@ bool QgsProcessingParameterCrs::acceptsValue( const QVariant &value ) const
   return crs.isValid();
 }
 
-QVariant QgsProcessingParameterCrs::parseValue( const QVariant &value ) const
+QVariant QgsProcessingParameterCrs::parseValue( const QVariant &value, const QgsProcessingContext &context ) const
 {
   if ( !value.isValid() )
     return defaultValue();
 
-  return convertToCrs( value );
+  return convertToCrs( value, context );
 }
 
 QString QgsProcessingParameterCrs::asScriptCode() const
@@ -192,11 +188,11 @@ QString QgsProcessingParameterCrs::asScriptCode() const
 
 QgsProcessingParameter *QgsProcessingParameterCrs::createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition )
 {
-  QVariant defaultVal = convertToCrs( definition );
+  QVariant defaultVal = convertToCrs( definition, QgsProcessingContext() );
   return new QgsProcessingParameterCrs( name, description, defaultVal, isOptional );
 }
 
-QVariant QgsProcessingParameterCrs::convertToCrs( const QVariant &value )
+QVariant QgsProcessingParameterCrs::convertToCrs( const QVariant &value, const QgsProcessingContext &context )
 {
   // is it a QgsCoordinateReferenceSystem?
   if ( value.canConvert< QgsCoordinateReferenceSystem >() )
@@ -217,15 +213,14 @@ QVariant QgsProcessingParameterCrs::convertToCrs( const QVariant &value )
     return QgsProject::instance()->crs();
 
   //maybe a string representing a layer
-#if 0
-  // unsure about this - I don't think we require this (better to use direct QVariant maplayer storage) and avoid
-  // dependence on project
-  QgsMapLayer *l = QgsProcessingUtils::mapLayerFromProject( s, QgsProject::instance() );
-  if ( l )
+  if ( context.project() )
   {
-    return l->crs();
+    QgsMapLayer *l = QgsProcessingUtils::mapLayerFromProject( s, QgsProject::instance() );
+    if ( l )
+    {
+      return l->crs();
+    }
   }
-#endif
   std::unique_ptr< QgsMapLayer > nonProjectLayer( QgsProcessingUtils::mapLayerFromString( s ) );
   if ( nonProjectLayer )
   {

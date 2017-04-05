@@ -9,7 +9,6 @@
 
 
 
-
 class QgsProcessingParameter
 {
 %Docstring
@@ -90,19 +89,22 @@ class QgsProcessingParameter
  \see flags()
 %End
 
-    virtual bool acceptsValue( const QVariant &value ) const = 0;
+    virtual bool acceptsValue( const QVariant &value, const QgsProcessingContext& context ) const = 0;
 %Docstring
- Returns true if the specified value is acceptable for the parameter.
+ Returns true if the specified value is acceptable for the parameter
+ within a given context.
  \see parseValue()
 %End
 
-    virtual QVariant parseValue( const QVariant &value ) const;
+    virtual QVariant parseValue( const QVariant &value, const QgsProcessingContext& context ) const;
 %Docstring
  Parses a raw input value and converts it to a value usable by the parameter.
  E.g. a boolean parameter may take string inputs like "true", "yes", and convert
  to a boolean true value, and a map layer parmeter may take inputs like layer IDs
  or filesnames and return a map layer pointer. Subclasses should override this to
  implement suitable conversions for their parameter types.
+ The context argument specifies the context under which the algorithm
+ will be executed.
  Before parsing values, callers should test that input values are acceptable
  by calling acceptsValue(). Behavior is undefined when parsing unacceptable
  values.
@@ -139,8 +141,8 @@ class QgsProcessingParameterBoolean : QgsProcessingParameter
 %End
 
     QString type() const;
-    bool acceptsValue( const QVariant &value ) const;
-    QVariant parseValue( const QVariant &value ) const;
+    bool acceptsValue( const QVariant &value, const QgsProcessingContext& context ) const;
+    QVariant parseValue( const QVariant &value, const QgsProcessingContext& context ) const;
     virtual QString asScriptCode() const;
 
     static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) /Factory/;
@@ -171,8 +173,8 @@ class QgsProcessingParameterCrs : QgsProcessingParameter
 %End
 
     QString type() const;
-    bool acceptsValue( const QVariant &value ) const;
-    QVariant parseValue( const QVariant &value ) const;
+    bool acceptsValue( const QVariant &value, const QgsProcessingContext& context ) const;
+    QVariant parseValue( const QVariant &value, const QgsProcessingContext& context ) const;
     virtual QString asScriptCode() const;
 
     static QgsProcessingParameter *createFromScriptCode( const QString &name, const QString &description, bool isOptional, const QString &definition ) /Factory/;

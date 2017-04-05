@@ -840,6 +840,7 @@ SET(QGIS_CORE_HDRS
   composer/qgsticksscalebarstyle.h
 
   processing/qgsprocessingalgorithm.h
+  processing/qgsprocessingcontext.h
   processing/qgsprocessingparameters.h
   processing/qgsprocessingutils.h
 

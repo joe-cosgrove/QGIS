@@ -20,10 +20,9 @@
 
 #include "qgis_core.h"
 #include "qgis.h"
+#include "qgsprocessingcontext.h"
 #include <QString>
 #include <QVariant>
-
-class QgsProject;
 
 /**
  * \class QgsProcessingParameter
@@ -105,10 +104,11 @@ class CORE_EXPORT QgsProcessingParameter
     void setFlags( const Flags &flags );
 
     /**
-     * Returns true if the specified \a value is acceptable for the parameter.
+     * Returns true if the specified \a value is acceptable for the parameter
+     * within a given \a context.
      * \see parseValue()
      */
-    virtual bool acceptsValue( const QVariant &value ) const = 0;
+    virtual bool acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const = 0;
 
     /**
      * Parses a raw input \a value and converts it to a value usable by the parameter.
@@ -116,12 +116,14 @@ class CORE_EXPORT QgsProcessingParameter
      * to a boolean true value, and a map layer parmeter may take inputs like layer IDs
      * or filesnames and return a map layer pointer. Subclasses should override this to
      * implement suitable conversions for their parameter types.
+     * The \a context argument specifies the context under which the algorithm
+     * will be executed.
      * Before parsing values, callers should test that input values are acceptable
      * by calling acceptsValue(). Behavior is undefined when parsing unacceptable
      * values.
      * \see acceptsValue()
      */
-    virtual QVariant parseValue( const QVariant &value ) const { return value; }
+    virtual QVariant parseValue( const QVariant &value, const QgsProcessingContext &context ) const { Q_UNUSED( context ); return value; }
 
     /**
      * Returns a text string representing the parameter's configuration for use
@@ -165,8 +167,8 @@ class CORE_EXPORT QgsProcessingParameterBoolean : public QgsProcessingParameter
                                    bool optional = false );
 
     QString type() const override { return QStringLiteral( "boolean" ); }
-    bool acceptsValue( const QVariant &value ) const override;
-    QVariant parseValue( const QVariant &value ) const override;
+    bool acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const override;
+    QVariant parseValue( const QVariant &value, const QgsProcessingContext &context ) const override;
     virtual QString asScriptCode() const override;
 
     /**
@@ -199,8 +201,8 @@ class CORE_EXPORT QgsProcessingParameterCrs : public QgsProcessingParameter
                                bool optional = false );
 
     QString type() const override { return QStringLiteral( "crs" ); }
-    bool acceptsValue( const QVariant &value ) const override;
-    QVariant parseValue( const QVariant &value ) const override;
+    bool acceptsValue( const QVariant &value, const QgsProcessingContext &context ) const override;
+    QVariant parseValue( const QVariant &value, const QgsProcessingContext &context ) const override;
     virtual QString asScriptCode() const override;
 
     /**
@@ -211,7 +213,7 @@ class CORE_EXPORT QgsProcessingParameterCrs : public QgsProcessingParameter
 
   private:
 
-    static QVariant convertToCrs( const QVariant &value );
+    static QVariant convertToCrs( const QVariant &value, const QgsProcessingContext &context );
 
 };
 
