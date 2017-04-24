@@ -98,6 +98,11 @@ class QgsProcessingUtils
  :rtype: str
 %End
 
+    static void logMessage( QgsMessageLog::MessageLevel level, const QString &message );
+%Docstring
+ Logs a processing ``message`` of a specified ``level`` to the QGIS message log.
+%End
+
 };
 
 

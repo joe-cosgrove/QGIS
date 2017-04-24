@@ -33,8 +33,9 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (QgsFeature,
                        QgsVectorFileWriter,
                        QgsProcessingFeedback,
-                       QgsSettings)
-from processing.core.ProcessingLog import ProcessingLog
+                       QgsSettings,
+                       QgsProcessingUtils,
+                       QgsMessageLog)
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 from processing.gui.Postprocessing import handleAlgorithmResults
 from processing.tools import dataobjects
@@ -57,7 +58,7 @@ def execute(alg, feedback=None):
         alg.execute(feedback)
         return True
     except GeoAlgorithmExecutionException as e:
-        ProcessingLog.addToLog(sys.exc_info()[0], ProcessingLog.LOG_ERROR)
+        QgsProcessingUtils.logMessage(QgsMessageLog.CRITICAL, sys.exc_info()[0])
         if feedback is not None:
             feedback.reportError(e.msg)
         return False

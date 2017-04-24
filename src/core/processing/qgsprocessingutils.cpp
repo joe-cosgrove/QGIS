@@ -172,3 +172,8 @@ QString QgsProcessingUtils::normalizeLayerSource( const QString &source )
   return normalized.trimmed();
 }
 
+void QgsProcessingUtils::logMessage( QgsMessageLog::MessageLevel level, const QString &message )
+{
+  QgsMessageLog::logMessage( message, QObject::tr( "Processing" ), level );
+}
+

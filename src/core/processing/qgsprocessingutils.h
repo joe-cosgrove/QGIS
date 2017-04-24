@@ -22,6 +22,7 @@
 
 #include "qgsrasterlayer.h"
 #include "qgsvectorlayer.h"
+#include "qgsmessagelog.h"
 
 class QgsProject;
 
@@ -104,6 +105,11 @@ class CORE_EXPORT QgsProcessingUtils
      * operating system environments.
      */
     static QString normalizeLayerSource( const QString &source );
+
+    /**
+     * Logs a processing \a message of a specified \a level to the QGIS message log.
+     */
+    static void logMessage( QgsMessageLog::MessageLevel level, const QString &message );
 
   private:
 

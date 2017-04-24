@@ -41,13 +41,25 @@ import psycopg2
 from osgeo import ogr
 
 from qgis.PyQt.QtCore import QVariant, QCoreApplication
-from qgis.core import (QgsFields, QgsField, QgsGeometry, QgsRectangle, QgsWkbTypes,
-                       QgsSpatialIndex, QgsProject, QgsMapLayer, QgsVectorLayer,
-                       QgsVectorFileWriter, QgsDistanceArea, QgsDataSourceUri, QgsCredentials,
-                       QgsFeatureRequest, QgsSettings)
+from qgis.core import (QgsFields,
+                       QgsField,
+                       QgsGeometry,
+                       QgsRectangle,
+                       QgsWkbTypes,
+                       QgsSpatialIndex,
+                       QgsProject,
+                       QgsMapLayer,
+                       QgsVectorLayer,
+                       QgsVectorFileWriter,
+                       QgsDistanceArea,
+                       QgsDataSourceUri,
+                       QgsCredentials,
+                       QgsFeatureRequest,
+                       QgsSettings,
+                       QgsProcessingUtils,
+                       QgsMessageLog)
 
 from processing.core.ProcessingConfig import ProcessingConfig
-from processing.core.ProcessingLog import ProcessingLog
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 from processing.tools import dataobjects, spatialite, postgis
 
@@ -111,11 +123,11 @@ def features(layer, request=QgsFeatureRequest()):
             def filterFeature(f, ignoreInvalid):
                 geom = f.geometry()
                 if geom is None:
-                    ProcessingLog.addToLog(ProcessingLog.LOG_INFO,
-                                           self.tr('Feature with NULL geometry found.'))
+                    QgsProcessingUtils.logMessage(QgsMessageLog.INFO,
+                                                  self.tr('Feature with NULL geometry found.'))
                 elif not geom.isGeosValid():
-                    ProcessingLog.addToLog(ProcessingLog.LOG_ERROR,
-                                           self.tr('GEOS geoprocessing error: One or more input features have invalid geometry.'))
+                    QgsProcessingUtils.logMessage(QgsMessageLog.CRITICAL,
+                                                  self.tr('GEOS geoprocessing error: One or more input features have invalid geometry.'))
                     if ignoreInvalid:
                         return False
                     else:
