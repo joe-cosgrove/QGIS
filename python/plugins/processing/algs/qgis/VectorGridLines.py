@@ -83,7 +83,7 @@ class VectorGridLines(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Grid'), datatype=[dataobjects.TYPE_VECTOR_LINE]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         extent = self.getParameterValue(self.EXTENT).split(',')
         xSpace = self.getParameterValue(self.STEP_X)
         ySpace = self.getParameterValue(self.STEP_Y)

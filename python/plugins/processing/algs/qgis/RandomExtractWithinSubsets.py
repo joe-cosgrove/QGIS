@@ -78,7 +78,7 @@ class RandomExtractWithinSubsets(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Extracted (random stratified)')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         filename = self.getParameterValue(self.INPUT)
 
         layer = QgsProcessingUtils.mapLayerFromString(filename, context)

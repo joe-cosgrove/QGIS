@@ -79,8 +79,9 @@ class ExampleAlgorithm(GeoAlgorithm):
         self.addOutput(OutputVector(self.OUTPUT_LAYER,
                                     self.tr('Output layer with selected features')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         """Here is where the processing itself takes place.
+        :param parameters:
         :param context:
         """
 

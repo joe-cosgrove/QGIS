@@ -66,7 +66,7 @@ class DropGeometry(GeoAlgorithm):
                                                                    dataobjects.TYPE_VECTOR_POLYGON]))
         self.addOutput(OutputVector(self.OUTPUT_TABLE, self.tr('Dropped geometry')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_LAYER), context)
         writer = self.getOutputFromName(
             self.OUTPUT_TABLE).getVectorWriter(layer.fields(), QgsWkbTypes.NoGeometry, QgsCoordinateReferenceSystem(),

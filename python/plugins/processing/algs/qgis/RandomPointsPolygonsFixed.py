@@ -80,7 +80,7 @@ class RandomPointsPolygonsFixed(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Random points'), datatype=[dataobjects.TYPE_VECTOR_POINT]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.VECTOR), context)
         value = float(self.getParameterValue(self.VALUE))
         minDistance = float(self.getParameterValue(self.MIN_DISTANCE))

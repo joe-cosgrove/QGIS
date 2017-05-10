@@ -82,7 +82,7 @@ class NearestNeighbourAnalysis(GeoAlgorithm):
                                     self.tr('Number of points')))
         self.addOutput(OutputNumber(self.Z_SCORE, self.tr('Z-Score')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.POINTS), context)
         output = self.getOutputValue(self.OUTPUT)
 

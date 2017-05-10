@@ -78,7 +78,7 @@ class Union(GeoAlgorithm):
                                           self.tr('Input layer 2')))
         self.addOutput(OutputVector(Union.OUTPUT, self.tr('Union')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         vlayerA = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(Union.INPUT), context)
         vlayerB = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(Union.INPUT2), context)
 

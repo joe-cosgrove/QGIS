@@ -156,7 +156,7 @@ class ServiceAreaFromPoint(GeoAlgorithm):
                                     self.tr('Service area (convex hull)'),
                                     datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_VECTOR), context)
         startPoint = self.getParameterValue(self.START_POINT)
         strategy = self.getParameterValue(self.STRATEGY)

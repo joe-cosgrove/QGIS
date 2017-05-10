@@ -70,7 +70,7 @@ class SymmetricalDifference(GeoAlgorithm):
         self.addOutput(OutputVector(self.OUTPUT,
                                     self.tr('Symmetrical difference')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layerA = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         layerB = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.OVERLAY), context)
 

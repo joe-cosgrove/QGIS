@@ -93,7 +93,7 @@ class nviz7(GeoAlgorithm):
             self.tr('GRASS region cellsize (leave 0 for default)'),
             0, None, 0.0))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         commands = []
         vector = self.getParameterValue(self.VECTOR)
         elevation = self.getParameterValue(self.ELEVATION)

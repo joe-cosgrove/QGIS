@@ -75,7 +75,7 @@ class ExportGeometryInfo(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Added geom info')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         method = self.getParameterValue(self.METHOD)
 

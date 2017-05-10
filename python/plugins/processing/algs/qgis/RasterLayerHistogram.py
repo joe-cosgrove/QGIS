@@ -66,7 +66,7 @@ class RasterLayerHistogram(GeoAlgorithm):
 
         self.addOutput(OutputHTML(self.PLOT, self.tr('Histogram')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         nbins = self.getParameterValue(self.BINS)
 

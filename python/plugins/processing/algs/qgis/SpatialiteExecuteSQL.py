@@ -60,7 +60,7 @@ class SpatialiteExecuteSQL(GeoAlgorithm):
         self.addParameter(ParameterVector(self.DATABASE, self.tr('File Database'), False, False))
         self.addParameter(ParameterString(self.SQL, self.tr('SQL query'), '', True))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         database = self.getParameterValue(self.DATABASE)
         uri = QgsDataSourceUri(database)
         if uri.database() is '':

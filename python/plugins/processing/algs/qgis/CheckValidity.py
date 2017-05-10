@@ -92,7 +92,7 @@ class CheckValidity(GeoAlgorithm):
             self.ERROR_OUTPUT,
             self.tr('Error output')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         settings = QgsSettings()
         initial_method_setting = settings.value(settings_method_key, 1)
 

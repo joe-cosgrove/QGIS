@@ -66,7 +66,7 @@ class Ruggedness(GeoAlgorithm):
         self.addOutput(OutputRaster(self.OUTPUT_LAYER,
                                     self.tr('Ruggedness index')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         inputFile = self.getParameterValue(self.INPUT_LAYER)
         zFactor = self.getParameterValue(self.Z_FACTOR)
         outputFile = self.getOutputValue(self.OUTPUT_LAYER)

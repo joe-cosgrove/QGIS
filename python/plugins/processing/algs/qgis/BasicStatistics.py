@@ -120,7 +120,7 @@ class BasicStatisticsForField(GeoAlgorithm):
         self.addOutput(OutputNumber(self.THIRDQUARTILE, self.tr('Third quartile')))
         self.addOutput(OutputNumber(self.IQR, self.tr('Interquartile Range (IQR)')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_LAYER), context)
         field_name = self.getParameterValue(self.FIELD_NAME)
         field = layer.fields().at(layer.fields().lookupField(field_name))

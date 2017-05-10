@@ -90,7 +90,7 @@ class PointDistance(GeoAlgorithm):
 
         self.addOutput(OutputTable(self.DISTANCE_MATRIX, self.tr('Distance matrix')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         inLayer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_LAYER), context)
         inField = self.getParameterValue(self.INPUT_FIELD)
         targetLayer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.TARGET_LAYER), context)

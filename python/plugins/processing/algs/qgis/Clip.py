@@ -69,7 +69,7 @@ class Clip(GeoAlgorithm):
                                           self.tr('Clip layer'), [dataobjects.TYPE_VECTOR_POLYGON]))
         self.addOutput(OutputVector(Clip.OUTPUT, self.tr('Clipped')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         source_layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(Clip.INPUT), context)
         mask_layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(Clip.OVERLAY), context)
 

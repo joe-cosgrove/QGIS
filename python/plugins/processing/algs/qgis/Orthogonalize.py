@@ -76,7 +76,7 @@ class Orthogonalize(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Orthogonalized')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_LAYER), context)
         max_iterations = self.getParameterValue(self.MAX_ITERATIONS)
         angle_tolerance = self.getParameterValue(self.ANGLE_TOLERANCE)

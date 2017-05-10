@@ -66,7 +66,7 @@ class VectorSplit(GeoAlgorithm):
                                               self.tr('Unique ID field'), self.INPUT))
         self.addOutput(OutputDirectory(self.OUTPUT, self.tr('Output directory')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         fieldName = self.getParameterValue(self.FIELD)
         directory = self.getOutputValue(self.OUTPUT)

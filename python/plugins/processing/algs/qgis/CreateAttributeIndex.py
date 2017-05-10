@@ -65,7 +65,7 @@ class CreateAttributeIndex(GeoAlgorithm):
         self.addOutput(OutputVector(self.OUTPUT,
                                     self.tr('Indexed layer'), True))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         file_name = self.getParameterValue(self.INPUT)
         layer = QgsProcessingUtils.mapLayerFromString(file_name, context)
         field = self.getParameterValue(self.FIELD)

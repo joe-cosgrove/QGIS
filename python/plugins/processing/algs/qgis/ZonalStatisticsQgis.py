@@ -99,7 +99,7 @@ class ZonalStatisticsQgis(GeoAlgorithm):
                                     True,
                                     datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         rasterPath = self.getParameterValue(self.INPUT_RASTER)
         vectorPath = self.getParameterValue(self.INPUT_VECTOR)
         bandNumber = self.getParameterValue(self.RASTER_BAND)

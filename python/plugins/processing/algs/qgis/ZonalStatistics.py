@@ -90,9 +90,10 @@ class ZonalStatistics(GeoAlgorithm):
                                            self.tr('Load whole raster in memory')))
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Zonal statistics'), datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         """ Based on code by Matthew Perry
             https://gist.github.com/perrygeo/5667173
+            :param parameters:
             :param context:
         """
 

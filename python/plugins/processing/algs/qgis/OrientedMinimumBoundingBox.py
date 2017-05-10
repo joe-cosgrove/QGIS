@@ -72,7 +72,7 @@ class OrientedMinimumBoundingBox(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Oriented_MBBox'), datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_LAYER), context)
         byFeature = self.getParameterValue(self.BY_FEATURE)
 

@@ -74,7 +74,7 @@ class VectorLayerScatterplot(GeoAlgorithm):
 
         self.addOutput(OutputHTML(self.OUTPUT, self.tr('Scatterplot')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         xfieldname = self.getParameterValue(self.XFIELD)
         yfieldname = self.getParameterValue(self.YFIELD)

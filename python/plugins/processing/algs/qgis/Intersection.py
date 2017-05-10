@@ -78,7 +78,7 @@ class Intersection(GeoAlgorithm):
                                           self.tr('Intersect layer')))
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Intersection')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         vlayerA = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         vlayerB = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT2), context)
 

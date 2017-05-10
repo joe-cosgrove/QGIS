@@ -79,7 +79,7 @@ class ConcaveHull(GeoAlgorithm):
         self.addOutput(
             OutputVector(ConcaveHull.OUTPUT, self.tr('Concave hull'), datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(ConcaveHull.INPUT), context)
         alpha = self.getParameterValue(self.ALPHA)
         holes = self.getParameterValue(self.HOLES)

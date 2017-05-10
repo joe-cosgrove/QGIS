@@ -95,7 +95,7 @@ class HubDistanceLines(GeoAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Hub distance'), datatype=[dataobjects.TYPE_VECTOR_LINE]))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layerPoints = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.POINTS), context)
         layerHubs = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.HUBS), context)
         fieldName = self.getParameterValue(self.FIELD)

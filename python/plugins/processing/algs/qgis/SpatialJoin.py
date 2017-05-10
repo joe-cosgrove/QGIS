@@ -108,7 +108,7 @@ class SpatialJoin(GeoAlgorithm):
                                              self.tr('Joined table'), self.keeps))
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Joined layer')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         target = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.TARGET), context)
         join = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.JOIN), context)
         predicates = self.getParameterValue(self.PREDICATE)

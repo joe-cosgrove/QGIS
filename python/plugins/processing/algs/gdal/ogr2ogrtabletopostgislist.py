@@ -125,39 +125,39 @@ class Ogr2OgrTableToPostGisList(GdalAlgorithm):
         self.addParameter(ParameterString(self.OPTIONS,
                                           self.tr('Additional creation options'), '', optional=True))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         self.processing = True
-        GdalAlgorithm.processAlgorithm(self, context, feedback)
-        self.processing = False
+        GdalAlgorithm.processAlgorithm(, self, context
+        self.processing=False
 
     def getConsoleCommands(self):
-        connection = self.DB_CONNECTIONS[self.getParameterValue(self.DATABASE)]
-        uri = uri_from_name(connection)
+        connection=self.DB_CONNECTIONS[self.getParameterValue(self.DATABASE)]
+        uri=uri_from_name(connection)
         if self.processing:
             # to get credentials input when needed
-            uri = GeoDB(uri=uri).uri
+            uri=GeoDB(uri=uri).uri
 
-        inLayer = self.getParameterValue(self.INPUT_LAYER)
-        ogrLayer = ogrConnectionString(inLayer)[1:-1]
-        shapeEncoding = self.getParameterValue(self.SHAPE_ENCODING)
-        schema = str(self.getParameterValue(self.SCHEMA))
-        table = str(self.getParameterValue(self.TABLE))
-        pk = str(self.getParameterValue(self.PK))
-        pkstring = "-lco FID=" + pk
-        primary_key = self.getParameterValue(self.PRIMARY_KEY)
-        where = str(self.getParameterValue(self.WHERE))
-        wherestring = '-where "' + where + '"'
-        gt = str(self.getParameterValue(self.GT))
-        overwrite = self.getParameterValue(self.OVERWRITE)
-        append = self.getParameterValue(self.APPEND)
-        addfields = self.getParameterValue(self.ADDFIELDS)
-        launder = self.getParameterValue(self.LAUNDER)
-        launderstring = "-lco LAUNDER=NO"
-        skipfailures = self.getParameterValue(self.SKIPFAILURES)
-        precision = self.getParameterValue(self.PRECISION)
-        options = str(self.getParameterValue(self.OPTIONS))
+        inLayer=self.getParameterValue(self.INPUT_LAYER)
+        ogrLayer=ogrConnectionString(inLayer)[1:-1]
+        shapeEncoding=self.getParameterValue(self.SHAPE_ENCODING)
+        schema=str(self.getParameterValue(self.SCHEMA))
+        table=str(self.getParameterValue(self.TABLE))
+        pk=str(self.getParameterValue(self.PK))
+        pkstring="-lco FID=" + pk
+        primary_key=self.getParameterValue(self.PRIMARY_KEY)
+        where=str(self.getParameterValue(self.WHERE))
+        wherestring='-where "' + where + '"'
+        gt=str(self.getParameterValue(self.GT))
+        overwrite=self.getParameterValue(self.OVERWRITE)
+        append=self.getParameterValue(self.APPEND)
+        addfields=self.getParameterValue(self.ADDFIELDS)
+        launder=self.getParameterValue(self.LAUNDER)
+        launderstring="-lco LAUNDER=NO"
+        skipfailures=self.getParameterValue(self.SKIPFAILURES)
+        precision=self.getParameterValue(self.PRECISION)
+        options=str(self.getParameterValue(self.OPTIONS))
 
-        arguments = []
+        arguments=[]
         arguments.append('-progress')
         arguments.append('--config PG_USE_COPY YES')
         if len(shapeEncoding) > 0:
@@ -187,9 +187,9 @@ class Ogr2OgrTableToPostGisList(GdalAlgorithm):
         elif primary_key is not None:
             arguments.append("-lco FID=" + primary_key)
         if len(table) == 0:
-            table = ogrLayerName(inLayer).lower()
+            table=ogrLayerName(inLayer).lower()
         if schema:
-            table = '{}.{}'.format(schema, table)
+            table='{}.{}'.format(schema, table)
         arguments.append('-nln')
         arguments.append(table)
         if skipfailures:
@@ -204,12 +204,12 @@ class Ogr2OgrTableToPostGisList(GdalAlgorithm):
         if len(options) > 0:
             arguments.append(options)
 
-        commands = []
+        commands=[]
         if isWindows():
-            commands = ['cmd.exe', '/C ', 'ogr2ogr.exe',
+            commands=['cmd.exe', '/C ', 'ogr2ogr.exe',
                         GdalUtils.escapeAndJoin(arguments)]
         else:
-            commands = ['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
+            commands=['ogr2ogr', GdalUtils.escapeAndJoin(arguments)]
 
         return commands
 

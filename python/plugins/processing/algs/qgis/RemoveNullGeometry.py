@@ -61,7 +61,7 @@ class RemoveNullGeometry(GeoAlgorithm):
                                           self.tr('Input layer'), [dataobjects.TYPE_VECTOR_ANY]))
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Removed null geometry')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_LAYER), context)
         writer = self.getOutputFromName(
             self.OUTPUT_LAYER).getVectorWriter(layer.fields(), layer.wkbType(), layer.crs(), context)

@@ -58,7 +58,7 @@ class GdalAlgorithm(GeoAlgorithm):
     def getCustomParametersDialog(self):
         return GdalAlgorithmDialog(self)
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         commands = self.getConsoleCommands()
         layers = QgsProcessingUtils.compatibleVectorLayers(QgsProject.instance())
         supported = QgsVectorFileWriter.supportedFormatExtensions()

@@ -60,7 +60,7 @@ class SaveSelectedFeatures(GeoAlgorithm):
         self.addOutput(OutputVector(self.OUTPUT_LAYER,
                                     self.tr('Selection')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         inputFilename = self.getParameterValue(self.INPUT_LAYER)
         output = self.getOutputFromName(self.OUTPUT_LAYER)
 

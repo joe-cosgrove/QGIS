@@ -71,7 +71,7 @@ class SplitWithLines(GeoAlgorithm):
                                           self.tr('Split layer'), [dataobjects.TYPE_VECTOR_LINE]))
         self.addOutput(OutputVector(self.OUTPUT, self.tr('Split')))
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layerA = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_A), context)
         splitLayer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_B), context)
 
