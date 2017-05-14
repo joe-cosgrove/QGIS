@@ -71,7 +71,7 @@ class OffsetCurve(GdalAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Offset line')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         geometry = self.getParameterValue(self.GEOMETRY)
         distance = self.getParameterValue(self.RADIUS)

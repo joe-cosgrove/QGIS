@@ -88,7 +88,7 @@ class Ogr2OgrDissolve(GdalAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Dissolved'), datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         geometry = self.getParameterValue(self.GEOMETRY)
         field = self.getParameterValue(self.FIELD)

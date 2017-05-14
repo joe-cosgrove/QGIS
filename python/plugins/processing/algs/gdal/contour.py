@@ -78,7 +78,7 @@ class contour(GdalAlgorithm):
         self.addOutput(OutputVector(self.OUTPUT_VECTOR,
                                     self.tr('Contours')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         output = self.getOutputValue(self.OUTPUT_VECTOR)
         interval = str(self.getParameterValue(self.INTERVAL))
         fieldName = str(self.getParameterValue(self.FIELD_NAME))

@@ -88,7 +88,7 @@ class gdaladdo(GdalAlgorithm):
                                              self.tr('Overview format'), self.FORMATS, 0))
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Pyramidized'), True))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inFile = self.getParameterValue(self.INPUT)
         clearOverviews = self.getParameterValue(self.CLEAN)
         ovrFormat = self.getParameterValue(self.FORMAT)

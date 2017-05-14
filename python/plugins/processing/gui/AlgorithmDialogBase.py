@@ -49,6 +49,7 @@ WIDGET, BASE = uic.loadUiType(
 
 
 class AlgorithmDialogFeedback(QgsProcessingFeedback):
+
     """
     Directs algorithm feedback to an algorithm dialog
     """
@@ -213,7 +214,7 @@ class AlgorithmDialogBase(BASE, WIDGET):
         self.setInfo(text, False)
         QCoreApplication.processEvents()
 
-    def setParamValues(self):
+    def getParamValues(self):
         pass
 
     def setParamValue(self, param, widget, alg=None):

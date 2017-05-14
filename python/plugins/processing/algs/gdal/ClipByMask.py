@@ -101,7 +101,7 @@ class ClipByMask(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Clipped (mask)')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         out = self.getOutputValue(self.OUTPUT)
         mask = self.getParameterValue(self.MASK)
         context = dataobjects.createContext()

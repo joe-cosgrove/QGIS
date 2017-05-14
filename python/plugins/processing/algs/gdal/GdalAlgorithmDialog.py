@@ -107,11 +107,12 @@ class GdalParametersPanel(ParametersPanel):
 
     def parametersHaveChanged(self):
         try:
-            self.parent.setParamValues()
+            parameters = self.parent.getParamValues()
+            self.parent.setOutputValues()
             for output in self.alg.outputs:
                 if output.value is None:
                     output.value = self.tr("[temporary file]")
-            commands = self.alg.getConsoleCommands()
+            commands = self.alg.getConsoleCommands(parameters)
             commands = [c for c in commands if c not in ['cmd.exe', '/C ']]
             self.text.setPlainText(" ".join(commands))
         except AlgorithmDialogBase.InvalidParameterValue as e:

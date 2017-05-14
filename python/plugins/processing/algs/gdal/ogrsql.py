@@ -68,7 +68,7 @@ class OgrSql(GdalAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT, self.tr('SQL result')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         sql = self.getParameterValue(self.SQL)
         if sql == '':
             raise GeoAlgorithmExecutionException(

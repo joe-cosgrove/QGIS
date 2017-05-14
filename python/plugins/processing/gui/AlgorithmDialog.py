@@ -31,7 +31,8 @@ from qgis.PyQt.QtWidgets import QMessageBox, QApplication, QPushButton, QWidget,
 from qgis.PyQt.QtGui import QCursor, QColor, QPalette
 
 from qgis.core import (QgsProject,
-                       QgsProcessingUtils)
+                       QgsProcessingUtils,
+                       QgsProcessingParameterDefinition)
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
@@ -84,16 +85,23 @@ class AlgorithmDialog(AlgorithmDialogBase):
         dlg.show()
         dlg.exec_()
 
-    def setParamValues(self):
-        params = self.alg.parameters
-        outputs = self.alg.outputs
+    def getParamValues(self):
+        parameters = {}
 
-        for param in params:
-            if param.hidden:
+        for param in self.alg.parameterDefinitions():
+            if param.flags() & QgsProcessingParameterDefinition.FlagHidden:
                 continue
             wrapper = self.mainWidget.wrappers[param.name]
-            if not self.setParamValue(param, wrapper):
-                raise AlgorithmDialogBase.InvalidParameterValue(param, wrapper.widget)
+            if wrapper.widget:
+                value = wrapper.value()
+                parameters[param.name()] = value
+# TODO
+#            if not self.setParamValue(param, wrapper):
+#                raise AlgorithmDialogBase.InvalidParameterValue(param, wrapper.widget)
+        return parameters
+
+    def setOutputValues(self):
+        outputs = self.alg.outputs
 
         for output in outputs:
             if output.hidden:
@@ -150,7 +158,8 @@ class AlgorithmDialog(AlgorithmDialogBase):
 
         checkCRS = ProcessingConfig.getSetting(ProcessingConfig.WARN_UNMATCHING_CRS)
         try:
-            self.setParamValues()
+            parameters = self.getParamValues()
+            self.setOutputValues()
             if checkCRS and not self.alg.checkInputCRS():
                 reply = QMessageBox.question(self, self.tr("Unmatching CRS's"),
                                              self.tr('Layers do not all use the same CRS. This can '
@@ -202,7 +211,7 @@ class AlgorithmDialog(AlgorithmDialogBase):
                 self.tr('<b>Algorithm {0} starting...</b>').format(self.alg.displayName()))
 
             if self.iterateParam:
-                if executeIterating(self.alg, self.iterateParam, context, self.feedback):
+                if executeIterating(self.alg, parameters, self.iterateParam, context, self.feedback):
                     self.finish(context)
                 else:
                     QApplication.restoreOverrideCursor()
@@ -211,7 +220,7 @@ class AlgorithmDialog(AlgorithmDialogBase):
                 command = self.alg.getAsCommand()
                 if command:
                     ProcessingLog.addToLog(command)
-                if execute(self.alg, context, self.feedback):
+                if execute(self.alg, parameters, context, self.feedback):
                     self.finish(context)
                 else:
                     QApplication.restoreOverrideCursor()

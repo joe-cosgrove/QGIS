@@ -70,7 +70,7 @@ class Ogr2OgrPointsOnLines(GdalAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Points along lines'), datatype=[dataobjects.TYPE_VECTOR_POINT]))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         ogrLayer = ogrConnectionString(inLayer)[1:-1]
         layername = "'" + ogrLayerName(inLayer) + "'"

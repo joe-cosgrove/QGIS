@@ -74,7 +74,7 @@ class buildvrt(GdalAlgorithm):
                                            self.tr('Allow projection difference'), False))
         self.addOutput(OutputRaster(buildvrt.OUTPUT, self.tr('Virtual')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = []
         arguments.append('-resolution')
         arguments.append(self.RESOLUTION_OPTIONS[self.getParameterValue(self.RESOLUTION)])

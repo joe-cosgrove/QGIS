@@ -96,7 +96,7 @@ class GridDataMetrics(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Interpolated metrics')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['-l']
         arguments.append(
             os.path.basename(os.path.splitext(

@@ -64,7 +64,7 @@ class tri(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Terrain Ruggedness Index')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['TRI']
         arguments.append(str(self.getParameterValue(self.INPUT)))
         arguments.append(str(self.getOutputValue(self.OUTPUT)))

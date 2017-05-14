@@ -61,7 +61,7 @@ class ExtractProjection(GdalAlgorithm):
         self.addParameter(ParameterBoolean(self.PRJ_FILE,
                                            self.tr('Create also .prj file'), False))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         return ["extractprojection"]
 
     def processAlgorithm(self, parameters, context, feedback):

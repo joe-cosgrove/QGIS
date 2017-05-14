@@ -74,7 +74,7 @@ class sieve(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Sieved')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         output = self.getOutputValue(self.OUTPUT)
 
         arguments = []

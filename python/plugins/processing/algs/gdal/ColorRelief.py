@@ -69,7 +69,7 @@ class ColorRelief(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Color relief')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['color-relief']
         arguments.append(str(self.getParameterValue(self.INPUT)))
         arguments.append(str(self.getParameterValue(self.COLOR_TABLE)))

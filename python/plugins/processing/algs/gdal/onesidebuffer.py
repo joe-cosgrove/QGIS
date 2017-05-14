@@ -87,7 +87,7 @@ class OneSideBuffer(GdalAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Single sided buffer')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         geometry = self.getParameterValue(self.GEOMETRY)
         distance = self.getParameterValue(self.RADIUS)

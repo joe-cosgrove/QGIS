@@ -125,7 +125,7 @@ class gdal2tiles(GdalAlgorithm):
         self.addOutput(OutputDirectory(self.OUTPUTDIR,
                                        self.tr('The directory where the tile result is created')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
 
         arguments = []
 

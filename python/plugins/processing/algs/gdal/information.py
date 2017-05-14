@@ -68,7 +68,7 @@ class information(GdalAlgorithm):
         self.addOutput(OutputHTML(information.OUTPUT,
                                   self.tr('Layer information')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = []
         if self.getParameterValue(information.NOGCP):
             arguments.append('-nogcp')
@@ -78,7 +78,7 @@ class information(GdalAlgorithm):
         return ['gdalinfo', GdalUtils.escapeAndJoin(arguments)]
 
     def processAlgorithm(self, parameters, context, feedback):
-        GdalUtils.runGdal(self.getConsoleCommands(), feedback)
+        GdalUtils.runGdal(self.getConsoleCommands(parameters), feedback)
         output = self.getOutputValue(information.OUTPUT)
         with open(output, 'w') as f:
             f.write('<pre>')

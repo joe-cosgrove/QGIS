@@ -89,7 +89,7 @@ class GridAverage(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Interpolated moving average')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['-l']
         arguments.append(
             os.path.basename(os.path.splitext(

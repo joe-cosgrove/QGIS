@@ -117,7 +117,7 @@ class warp(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Reprojected')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         srccrs = self.getParameterValue(self.SOURCE_SRS)
         dstcrs = self.getParameterValue(self.DEST_SRS)
         rastext = self.getParameterValue(self.RAST_EXT)

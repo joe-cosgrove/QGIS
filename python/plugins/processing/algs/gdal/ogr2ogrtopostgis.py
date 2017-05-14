@@ -161,7 +161,7 @@ class Ogr2OgrToPostGis(GdalAlgorithm):
         self.addParameter(ParameterString(self.OPTIONS,
                                           self.tr('Additional creation options'), '', optional=True))
 
-    def getConnectionString(self):
+    def getConnectionString(self, parameters):
         host = self.getParameterValue(self.HOST)
         port = self.getParameterValue(self.PORT)
         user = self.getParameterValue(self.USER)
@@ -183,7 +183,7 @@ class Ogr2OgrToPostGis(GdalAlgorithm):
             arguments.append('user=' + user)
         return GdalUtils.escapeAndJoin(arguments)
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         ogrLayer = ogrConnectionString(inLayer)[1:-1]
         shapeEncoding = self.getParameterValue(self.SHAPE_ENCODING)
@@ -228,7 +228,7 @@ class Ogr2OgrToPostGis(GdalAlgorithm):
         arguments.append('-f')
         arguments.append('PostgreSQL')
         arguments.append('PG:"')
-        arguments.append(self.getConnectionString())
+        arguments.append(self.getConnectionString(parameters))
         arguments.append('"')
         arguments.append(dimstring)
         arguments.append(ogrLayer)

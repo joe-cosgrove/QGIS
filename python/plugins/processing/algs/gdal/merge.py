@@ -86,7 +86,7 @@ class merge(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Merged')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = []
         arguments.append('-ot')
         arguments.append(self.TYPE[self.getParameterValue(self.RTYPE)])

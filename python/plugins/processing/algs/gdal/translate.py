@@ -102,7 +102,7 @@ class translate(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Converted')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         out = self.getOutputValue(translate.OUTPUT)
         outsize = str(self.getParameterValue(self.OUTSIZE))
         outsizePerc = str(self.getParameterValue(self.OUTSIZE_PERC))

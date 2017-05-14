@@ -77,7 +77,7 @@ class fillnodata(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Filled')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         output = self.getOutputValue(self.OUTPUT)
 
         arguments = []

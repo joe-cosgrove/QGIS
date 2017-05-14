@@ -97,12 +97,13 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
             text = self._formatHelp(text)
         return text
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         """Here goes the algorithm itself.
 
         There is no return value from this method.
         A GeoAlgorithmExecutionException should be raised in case
         something goes wrong.
+        :param parameters:
         :param context:
         """
         pass
@@ -173,7 +174,7 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
 
     # =========================================================
 
-    def execute(self, context=None, feedback=None, model=None):
+    def execute(self, parameters, context=None, feedback=None, model=None):
         """The method to use to call a processing algorithm.
 
         Although the body of the algorithm is in processAlgorithm(),
@@ -182,6 +183,7 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
 
         Raises a GeoAlgorithmExecutionException in case anything goes
         wrong.
+        :param parameters:
         """
 
         if feedback is None:
@@ -195,7 +197,7 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
             self.resolveOutputs()
             self.evaluateParameterValues()
             self.runPreExecutionScript(feedback)
-            self.processAlgorithm(context, feedback)
+            self.processAlgorithm(parameters, context, feedback)
             feedback.setProgress(100)
             self.convertUnsupportedFormats(context, feedback)
             self.runPostExecutionScript(feedback)

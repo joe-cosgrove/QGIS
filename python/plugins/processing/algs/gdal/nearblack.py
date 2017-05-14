@@ -69,7 +69,7 @@ class nearblack(GdalAlgorithm):
                                            False))
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Nearblack')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = []
         arguments.append('-o')
         output = str(self.getOutputValue(self.OUTPUT))

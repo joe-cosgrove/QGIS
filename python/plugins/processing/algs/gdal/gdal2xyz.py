@@ -60,7 +60,7 @@ class gdal2xyz(GdalAlgorithm):
 
         self.addOutput(OutputTable(self.OUTPUT, self.tr('xyz')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = []
         arguments.append('-band')
         arguments.append(str(self.getParameterValue(self.BAND)))

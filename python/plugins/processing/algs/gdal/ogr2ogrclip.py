@@ -64,7 +64,7 @@ class Ogr2OgrClip(GdalAlgorithm):
 
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Clipped (polygon)'), datatype=[dataobjects.TYPE_VECTOR_POLYGON]))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         inLayer = self.getParameterValue(self.INPUT_LAYER)
         ogrLayer = ogrConnectionString(inLayer)[1:-1]
         clipLayer = self.getParameterValue(self.CLIP_LAYER)

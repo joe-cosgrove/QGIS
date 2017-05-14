@@ -75,7 +75,7 @@ class slope(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Slope')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['slope']
         arguments.append(str(self.getParameterValue(self.INPUT)))
         output = str(self.getOutputValue(self.OUTPUT))

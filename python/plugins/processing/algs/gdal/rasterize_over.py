@@ -70,7 +70,7 @@ class rasterize_over(GdalAlgorithm):
         self.addParameter(ParameterRaster(self.INPUT_RASTER,
                                           self.tr('Existing raster layer'), False))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         context = dataobjects.createContext()
         inLayer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
         inRasterLayer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT_RASTER), context)

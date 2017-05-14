@@ -65,7 +65,7 @@ class AssignProjection(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Layer with projection'), True))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         fileName = self.getParameterValue(self.INPUT)
         crs = self.getParameterValue(self.CRS)
         output = self.getOutputValue(self.OUTPUT)  # NOQA

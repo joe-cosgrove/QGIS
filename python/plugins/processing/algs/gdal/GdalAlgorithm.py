@@ -58,8 +58,11 @@ class GdalAlgorithm(GeoAlgorithm):
     def getCustomParametersDialog(self):
         return GdalAlgorithmDialog(self)
 
+    def getConsoleCommands(self, parameters):
+        return None
+
     def processAlgorithm(self, parameters, context, feedback):
-        commands = self.getConsoleCommands()
+        commands = self.getConsoleCommands(parameters)
         layers = QgsProcessingUtils.compatibleVectorLayers(QgsProject.instance())
         supported = QgsVectorFileWriter.supportedFormatExtensions()
         for i, c in enumerate(commands):
@@ -97,7 +100,7 @@ class GdalAlgorithm(GeoAlgorithm):
             output.setValue("dummy")
         for param in alg.parameters:
             param.setValue("1")
-        name = alg.getConsoleCommands()[0]
+        name = alg.getConsoleCommands(parameters)[0]
         if name.endswith(".py"):
             name = name[:-3]
         return name

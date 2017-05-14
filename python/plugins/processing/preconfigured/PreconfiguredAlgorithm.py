@@ -66,11 +66,11 @@ class PreconfiguredAlgorithm(GeoAlgorithm):
         self._name = self.description["name"]
         self._group = self.description["group"]
 
-    def execute(self, context=None, feedback=None, model=None):
+    def execute(self, parameters, context=None, feedback=None, model=None):
         self.alg = QgsApplication.processingRegistry().algorithmById(self.description["algname"]).getCopy()
         for name, value in list(self.description["parameters"].items()):
             self.alg.setParameterValue(name, value)
         for name, value in list(self.description["outputs"].items()):
             self.alg.setOutputValue(name, value)
-        self.alg.execute(feedback)
+        self.alg.execute(parameters, feedback)
         self.outputs = self.alg.outputs

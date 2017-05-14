@@ -64,7 +64,7 @@ class tpi(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Topographic Position Index')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['TPI']
         arguments.append(str(self.getParameterValue(self.INPUT)))
         arguments.append(str(self.getOutputValue(self.OUTPUT)))

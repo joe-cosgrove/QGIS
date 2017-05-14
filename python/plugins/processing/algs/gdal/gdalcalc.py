@@ -105,7 +105,7 @@ class gdalcalc(GdalAlgorithm):
                                           self.tr('Additional creation parameters'), '', optional=True))
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Calculated')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         out = self.getOutputValue(self.OUTPUT)
         extra = self.getParameterValue(self.EXTRA)
         if extra is not None:

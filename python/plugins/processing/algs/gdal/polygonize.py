@@ -65,7 +65,7 @@ class polygonize(GdalAlgorithm):
                                           self.tr('Output field name'), 'DN'))
         self.addOutput(OutputVector(polygonize.OUTPUT, self.tr('Vectorized')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         output = self.getOutputValue(polygonize.OUTPUT)
 
         arguments = []

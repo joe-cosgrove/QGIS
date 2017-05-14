@@ -70,7 +70,7 @@ class gdaltindex(GdalAlgorithm):
                                            self.tr('Skip files with different projection reference'), False))
         self.addOutput(OutputVector(gdaltindex.OUTPUT, self.tr('Tile index')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         fieldName = str(self.getParameterValue(self.FIELD_NAME))
 
         arguments = []

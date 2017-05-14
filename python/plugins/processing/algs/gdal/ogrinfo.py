@@ -60,7 +60,7 @@ class OgrInfo(GdalAlgorithm):
 
         self.addOutput(OutputHTML(self.OUTPUT, self.tr('Layer information')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ["ogrinfo"]
         arguments.append('-al')
         if self.getParameterValue(self.SUMMARY_ONLY):
@@ -71,7 +71,7 @@ class OgrInfo(GdalAlgorithm):
         return arguments
 
     def processAlgorithm(self, parameters, context, feedback):
-        GdalUtils.runGdal(self.getConsoleCommands(), feedback)
+        GdalUtils.runGdal(self.getConsoleCommands(parameters), feedback)
         output = self.getOutputValue(self.OUTPUT)
         with open(output, 'w') as f:
             f.write('<pre>')

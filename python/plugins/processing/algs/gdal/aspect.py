@@ -73,7 +73,7 @@ class aspect(GdalAlgorithm):
 
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Aspect')))
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         arguments = ['aspect']
         arguments.append(str(self.getParameterValue(self.INPUT)))
         output = str(self.getOutputValue(self.OUTPUT))
