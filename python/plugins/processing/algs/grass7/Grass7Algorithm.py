@@ -386,8 +386,10 @@ class Grass7Algorithm(GeoAlgorithm):
             command += ' -a'
         self.commands.append(command)
 
-    def processCommand(self):
-        """Prepare the GRASS algorithm command"""
+    def processCommand(self, parameters):
+        """Prepare the GRASS algorithm command
+        :param parameters:
+        """
         command = self.grass7Name
         command += ' ' + ' '.join(self.hardcodedStrings)
 

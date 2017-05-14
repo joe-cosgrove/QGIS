@@ -114,7 +114,7 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
 
     # =========================================================
 
-    def execute(self, context=None, feedback=None, model=None):
+    def execute(self, parameters, context=None, feedback=None, model=None):
         """The method to use to call a processing algorithm.
 
         Although the body of the algorithm is in processAlgorithm(),
@@ -123,6 +123,7 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
 
         Raises a GeoAlgorithmExecutionException in case anything goes
         wrong.
+        :param parameters:
         """
 
         if feedback is None:

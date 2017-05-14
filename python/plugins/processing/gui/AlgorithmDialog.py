@@ -212,7 +212,7 @@ class AlgorithmDialog(AlgorithmDialogBase):
                 self.tr('<b>Algorithm {0} starting...</b>').format(self.alg.displayName()))
 
             if self.iterateParam:
-                if executeIterating(self.alg, self.iterateParam, context, self.feedback):
+                if executeIterating(self.alg, parameters, self.iterateParam, context, self.feedback):
                     self.finish(context)
                 else:
                     QApplication.restoreOverrideCursor()
@@ -221,7 +221,7 @@ class AlgorithmDialog(AlgorithmDialogBase):
                 command = self.alg.getAsCommand()
                 if command:
                     ProcessingLog.addToLog(command)
-                if execute(self.alg, context, self.feedback):
+                if execute(self.alg, parameters, context, self.feedback):
                     self.finish(context)
                 else:
                     QApplication.restoreOverrideCursor()

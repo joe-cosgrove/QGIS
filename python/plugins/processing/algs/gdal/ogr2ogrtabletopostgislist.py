@@ -131,7 +131,7 @@ class Ogr2OgrTableToPostGisList(GdalAlgorithm):
         GdalAlgorithm.processAlgorithm(parameters, self, context)
         self.processing = False
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         connection = self.DB_CONNECTIONS[self.getParameterValue(self.DATABASE)]
         uri = uri_from_name(connection)
         if self.processing:

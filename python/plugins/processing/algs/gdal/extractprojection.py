@@ -62,7 +62,7 @@ class ExtractProjection(GdalAlgorithm):
     def group(self):
         return self.tr('Raster projections')
 
-    def getConsoleCommands(self):
+    def getConsoleCommands(self, parameters):
         return ["extractprojection"]
 
     def processAlgorithm(self, parameters, context, feedback):
