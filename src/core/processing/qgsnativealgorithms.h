@@ -21,8 +21,27 @@
 #include "qgis_core.h"
 #include "qgis.h"
 #include "qgsprocessingalgorithm.h"
+#include "qgsprocessingprovider.h"
 
 ///@cond PRIVATE
+
+class QgsNativeAlgorithms: public QgsProcessingProvider
+{
+  public:
+
+    QgsNativeAlgorithms( QObject *parent = nullptr );
+
+    QIcon icon() const override;
+    QString svgIconPath() const override;
+    QString id() const override;
+    QString name() const override;
+    bool supportsNonFileBasedOutput() const override;
+
+  protected:
+
+    void loadAlgorithms() override;
+
+};
 
 /**
  * Native centroid algorithm.

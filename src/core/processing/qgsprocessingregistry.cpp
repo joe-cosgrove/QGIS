@@ -17,10 +17,13 @@
 
 #include "qgsprocessingregistry.h"
 #include "qgsvectorfilewriter.h"
+#include "qgsnativealgorithms.h"
 
 QgsProcessingRegistry::QgsProcessingRegistry( QObject *parent SIP_TRANSFERTHIS )
   : QObject( parent )
-{}
+{
+  addProvider( new QgsNativeAlgorithms( this ) );
+}
 
 QgsProcessingRegistry::~QgsProcessingRegistry()
 {
