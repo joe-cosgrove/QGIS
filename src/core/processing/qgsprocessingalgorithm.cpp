@@ -35,6 +35,21 @@ QString QgsProcessingAlgorithm::id() const
     return name();
 }
 
+QString QgsProcessingAlgorithm::shortHelpString() const
+{
+  return QString();
+}
+
+QString QgsProcessingAlgorithm::helpString() const
+{
+  return QString();
+}
+
+QString QgsProcessingAlgorithm::helpUrl() const
+{
+  return QString();
+}
+
 QIcon QgsProcessingAlgorithm::icon() const
 {
   return QgsApplication::getThemeIcon( "/processingAlgorithm.svg" );
