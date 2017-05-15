@@ -119,8 +119,6 @@ class QgsProcessingAlgorithm
  :rtype: QgsProcessingProvider
 %End
 
-    void setProvider( QgsProcessingProvider *provider );
-
     QgsProcessingParameterDefinitions parameterDefinitions() const;
 %Docstring
  Returns an ordered list of parameter definitions utilized by the algorithm.
