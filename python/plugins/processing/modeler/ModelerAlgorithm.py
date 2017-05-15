@@ -474,7 +474,7 @@ class ModelerAlgorithm(GeoAlgorithm):
             v = value
         return param.evaluateForModeler(v, self)
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         executed = []
         toExecute = [alg for alg in list(self.algs.values()) if alg.active]
         while len(executed) < len(toExecute):

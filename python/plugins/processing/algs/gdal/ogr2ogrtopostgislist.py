@@ -178,9 +178,9 @@ class Ogr2OgrToPostGisList(GdalAlgorithm):
     def group(self):
         return self.tr('Vector miscellaneous')
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         self.processing = True
-        GdalAlgorithm.processAlgorithm(None, self)
+        GdalAlgorithm.processAlgorithm(parameters, None, self)
         self.processing = False
 
     def getConsoleCommands(self):

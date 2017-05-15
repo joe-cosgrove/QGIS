@@ -71,7 +71,7 @@ class VoronoiPolygons(GeoAlgorithm):
     def displayName(self):
         return self.tr('Voronoi polygons')
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         layer = QgsProcessingUtils.mapLayerFromString(self.getParameterValue(self.INPUT), context)
 
         buf = self.getParameterValue(self.BUFFER)

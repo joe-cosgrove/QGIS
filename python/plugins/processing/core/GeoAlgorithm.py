@@ -76,12 +76,13 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
     def shortHelpString(self):
         return shortHelp.get(self.id(), None)
 
-    def processAlgorithm(self, context, feedback):
+    def processAlgorithm(self, parameters, context, feedback):
         """Here goes the algorithm itself.
 
         There is no return value from this method.
         A GeoAlgorithmExecutionException should be raised in case
         something goes wrong.
+        :param parameters:
         :param context:
         """
         pass
@@ -135,7 +136,7 @@ class GeoAlgorithm(QgsProcessingAlgorithm):
             self.resolveOutputs()
             self.evaluateParameterValues()
             self.runPreExecutionScript(feedback)
-            self.processAlgorithm(context, feedback)
+            self.processAlgorithm(parameters, context, feedback)
             feedback.setProgress(100)
             self.convertUnsupportedFormats(context, feedback)
             self.runPostExecutionScript(feedback)
