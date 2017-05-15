@@ -24,6 +24,7 @@
 QgsProcessingAlgorithm::~QgsProcessingAlgorithm()
 {
   qDeleteAll( mParameters );
+  qDeleteAll( mOutputs );
 }
 
 QString QgsProcessingAlgorithm::id() const
@@ -82,6 +83,19 @@ bool QgsProcessingAlgorithm::addParameter( QgsProcessingParameterDefinition *def
   return true;
 }
 
+bool QgsProcessingAlgorithm::addOutput( QgsProcessingOutputDefinition *definition )
+{
+  if ( !definition )
+    return false;
+
+  // check for duplicate named outputs
+  if ( QgsProcessingAlgorithm::outputDefinition( definition->name() ) )
+    return false;
+
+  mOutputs << definition;
+  return true;
+}
+
 const QgsProcessingParameterDefinition *QgsProcessingAlgorithm::parameterDefinition( const QString &name ) const
 {
   Q_FOREACH ( const QgsProcessingParameterDefinition *def, mParameters )
@@ -96,6 +110,27 @@ int QgsProcessingAlgorithm::countVisibleParameters() const
 {
   int count = 0;
   Q_FOREACH ( const QgsProcessingParameterDefinition *def, mParameters )
+  {
+    if ( !( def->flags() & QgsProcessingParameterDefinition::FlagHidden ) )
+      count++;
+  }
+  return count;
+}
+
+const QgsProcessingOutputDefinition *QgsProcessingAlgorithm::outputDefinition( const QString &name ) const
+{
+  Q_FOREACH ( const QgsProcessingOutputDefinition *def, mOutputs )
+  {
+    if ( def->name().compare( name, Qt::CaseInsensitive ) == 0 )
+      return def;
+  }
+  return nullptr;
+}
+
+int QgsProcessingAlgorithm::countVisibleOutputs() const
+{
+  int count = 0;
+  Q_FOREACH ( const QgsProcessingParameterDefinition *def, mOutputs )
   {
     if ( !( def->flags() & QgsProcessingParameterDefinition::FlagHidden ) )
       count++;

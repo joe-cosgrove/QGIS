@@ -89,6 +89,7 @@ SET(QGIS_CORE_SRCS
 
   processing/qgsnativealgorithms.cpp
   processing/qgsprocessingalgorithm.cpp
+  processing/qgsprocessingoutputs.cpp
   processing/qgsprocessingparameters.cpp
   processing/qgsprocessingprovider.cpp
   processing/qgsprocessingregistry.cpp
@@ -879,6 +880,7 @@ SET(QGIS_CORE_HDRS
   processing/qgsnativealgorithms.h
   processing/qgsprocessingalgorithm.h
   processing/qgsprocessingcontext.h
+  processing/qgsprocessingoutputs.h
   processing/qgsprocessingparameters.h
   processing/qgsprocessingutils.h
 

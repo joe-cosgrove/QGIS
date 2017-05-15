@@ -142,6 +142,21 @@ class QgsProcessingAlgorithm
  :rtype: int
 %End
 
+    const QgsProcessingOutputDefinition *outputDefinition( const QString &name ) const;
+%Docstring
+ Returns a matching output by ``name``. Matching is done in a case-insensitive
+ manner.
+.. seealso:: outputDefinitions()
+ :rtype: QgsProcessingOutputDefinition
+%End
+
+    int countVisibleOutputs() const;
+%Docstring
+ Returns the number of visible (non-hidden) outputs defined by this
+ algorithm.
+ :rtype: int
+%End
+
     virtual QVariantMap run( const QVariantMap &parameters,
                              QgsProcessingContext &context, QgsProcessingFeedback *feedback ) const;
 %Docstring
@@ -166,6 +181,16 @@ class QgsProcessingAlgorithm
  Adds a parameter ``definition`` to the algorithm. Ownership of the definition is transferred to the algorithm.
  Returns true if parameter could be successfully added, or false if the parameter could not be added (e.g.
  as a result of a duplicate name).
+.. seealso:: addOutput()
+ :rtype: bool
+%End
+
+    bool addOutput( QgsProcessingOutputDefinition *outputDefinition /Transfer/ );
+%Docstring
+ Adds an output ``definition`` to the algorithm. Ownership of the definition is transferred to the algorithm.
+ Returns true if the output could be successfully added, or false if the output could not be added (e.g.
+ as a result of a duplicate name).
+.. seealso:: addParameter()
  :rtype: bool
 %End
 
