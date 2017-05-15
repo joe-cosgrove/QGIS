@@ -27,6 +27,51 @@ class QgsProcessingParameterDefinition
 %TypeHeaderCode
 #include "qgsprocessingparameters.h"
 %End
+
+%ConvertToSubClassCode
+    if ( sipCpp->type() == "crs" )
+      sipType = sipType_QgsProcessingParameterCrs;
+    else if ( sipCpp->type() == "layer" )
+      sipType = sipType_QgsProcessingParameterMapLayer;
+    else if ( sipCpp->type() == "extent" )
+      sipType = sipType_QgsProcessingParameterExtent;
+    else if ( sipCpp->type() == "point" )
+      sipType = sipType_QgsProcessingParameterPoint;
+    else if ( sipCpp->type() == "file" )
+      sipType = sipType_QgsProcessingParameterFile;
+    else if ( sipCpp->type() == "matrix" )
+      sipType = sipType_QgsProcessingParameterMatrix;
+    else if ( sipCpp->type() == "multilayer" )
+      sipType = sipType_QgsProcessingParameterMultipleLayers;
+    else if ( sipCpp->type() == "number" )
+      sipType = sipType_QgsProcessingParameterNumber;
+    else if ( sipCpp->type() == "range" )
+      sipType = sipType_QgsProcessingParameterRange;
+    else if ( sipCpp->type() == "raster" )
+      sipType = sipType_QgsProcessingParameterRasterLayer;
+    else if ( sipCpp->type() == "enum" )
+      sipType = sipType_QgsProcessingParameterEnum;
+    else if ( sipCpp->type() == "string" )
+      sipType = sipType_QgsProcessingParameterString;
+    else if ( sipCpp->type() == "expression" )
+      sipType = sipType_QgsProcessingParameterExpression;
+    else if ( sipCpp->type() == "string" )
+      sipType = sipType_QgsProcessingParameterString;
+    else if ( sipCpp->type() == "expression" )
+      sipType = sipType_QgsProcessingParameterExpression;
+    else if ( sipCpp->type() == "table" )
+      sipType = sipType_QgsProcessingParameterTable;
+    else if ( sipCpp->type() == "field" )
+      sipType = sipType_QgsProcessingParameterTableField;
+    else if ( sipCpp->type() == "vector" )
+      sipType = sipType_QgsProcessingParameterVectorLayer;
+    else if ( sipCpp->type() == "outputVector" )
+      sipType = sipType_QgsProcessingOutputVectorLayer;
+
+    // last!
+    else if ( dynamic_cast < QgsProcessingOutputDefinition * >( sipCpp ) )
+      sipType = sipType_QgsProcessingOutputDefinition;
+%End
   public:
 
     enum Flag
@@ -906,7 +951,7 @@ class QgsProcessingParameterTableField : QgsProcessingParameterDefinition
 
 };
 
-class QgsProcessingParameterVector : QgsProcessingParameterDefinition
+class QgsProcessingParameterVectorLayer : QgsProcessingParameterDefinition
 {
 %Docstring
  A vector layer parameter for processing algorithms.
@@ -918,10 +963,10 @@ class QgsProcessingParameterVector : QgsProcessingParameterDefinition
 %End
   public:
 
-    QgsProcessingParameterVector( const QString &name, const QString &description = QString(), QgsProcessingParameterDefinition::LayerType type = QgsProcessingParameterDefinition::TypeVectorAny, const QVariant &defaultValue = QVariant(),
-                                  bool optional = false );
+    QgsProcessingParameterVectorLayer( const QString &name, const QString &description = QString(), QgsProcessingParameterDefinition::LayerType type = QgsProcessingParameterDefinition::TypeVectorAny, const QVariant &defaultValue = QVariant(),
+                                       bool optional = false );
 %Docstring
- Constructor for QgsProcessingParameterVector.
+ Constructor for QgsProcessingParameterVectorLayer.
 %End
 
     virtual QString type() const;

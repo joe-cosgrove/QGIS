@@ -65,7 +65,7 @@ void QgsNativeAlgorithms::loadAlgorithms()
 
 QgsCentroidAlgorithm::QgsCentroidAlgorithm()
 {
-  addParameter( new QgsProcessingParameterVector( QStringLiteral( "INPUT" ), QObject::tr( "Input layer" ) ) );
+  addParameter( new QgsProcessingParameterVectorLayer( QStringLiteral( "INPUT" ), QObject::tr( "Input layer" ) ) );
   addOutput( new QgsProcessingOutputVectorLayer( QStringLiteral( "OUTPUT_LAYER" ), QObject::tr( "Centroids" ) ) );
 }
 
@@ -126,7 +126,7 @@ QVariantMap QgsCentroidAlgorithm::run( const QVariantMap &parameters, QgsProcess
 
 QgsBufferAlgorithm::QgsBufferAlgorithm()
 {
-  addParameter( new QgsProcessingParameterVector( QStringLiteral( "INPUT" ), QObject::tr( "Input layer" ) ) );
+  addParameter( new QgsProcessingParameterVectorLayer( QStringLiteral( "INPUT" ), QObject::tr( "Input layer" ) ) );
   addParameter( new QgsProcessingParameterNumber( QStringLiteral( "DISTANCE" ), QObject::tr( "Distance" ), QgsProcessingParameterNumber::Double, 10 ) );
   addParameter( new QgsProcessingParameterNumber( QStringLiteral( "SEGMENTS" ), QObject::tr( "Segments" ), QgsProcessingParameterNumber::Integer, 5, false, 1 ) );
   addParameter( new QgsProcessingParameterBoolean( QStringLiteral( "DISSOLVE" ), QObject::tr( "Dissolve result" ), false ) );

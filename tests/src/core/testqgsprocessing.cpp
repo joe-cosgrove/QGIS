@@ -1711,7 +1711,7 @@ void TestQgsProcessing::parameterVectorLayer()
   context.setProject( &p );
 
   // not optional!
-  QgsProcessingParameterVector *def = new QgsProcessingParameterVector( "non_optional", QString(), QgsProcessingParameterDefinition::TypeVectorAny, QString( "EPSG:3113" ), false );
+  QgsProcessingParameterVectorLayer *def = new QgsProcessingParameterVectorLayer( "non_optional", QString(), QgsProcessingParameterDefinition::TypeVectorAny, QString( "EPSG:3113" ), false );
 
   // using existing map layer ID
   QVariantMap params;
@@ -1732,7 +1732,7 @@ void TestQgsProcessing::parameterVectorLayer()
 
   // optional
   delete def;
-  def = new QgsProcessingParameterVector( "optional", QString(), QgsProcessingParameterDefinition::TypeVectorAny, v1->id(), true );
+  def = new QgsProcessingParameterVectorLayer( "optional", QString(), QgsProcessingParameterDefinition::TypeVectorAny, v1->id(), true );
   params.insert( "optional",  QVariant() );
   QCOMPARE( QgsProcessingParameters::parameterAsVectorLayer( def, params, QStringLiteral( "optional" ), context )->id(), v1->id() );
 }
