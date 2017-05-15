@@ -50,7 +50,9 @@ class CORE_EXPORT QgsProcessingParameterDefinition
 
 #ifdef SIP_RUN
     SIP_CONVERT_TO_SUBCLASS_CODE
-    if ( sipCpp->type() == "crs" )
+    if ( sipCpp->type() == "boolean" )
+      sipType = sipType_QgsProcessingParameterBoolean;
+    else if ( sipCpp->type() == "crs" )
       sipType = sipType_QgsProcessingParameterCrs;
     else if ( sipCpp->type() == "layer" )
       sipType = sipType_QgsProcessingParameterMapLayer;
@@ -72,10 +74,6 @@ class CORE_EXPORT QgsProcessingParameterDefinition
       sipType = sipType_QgsProcessingParameterRasterLayer;
     else if ( sipCpp->type() == "enum" )
       sipType = sipType_QgsProcessingParameterEnum;
-    else if ( sipCpp->type() == "string" )
-      sipType = sipType_QgsProcessingParameterString;
-    else if ( sipCpp->type() == "expression" )
-      sipType = sipType_QgsProcessingParameterExpression;
     else if ( sipCpp->type() == "string" )
       sipType = sipType_QgsProcessingParameterString;
     else if ( sipCpp->type() == "expression" )
