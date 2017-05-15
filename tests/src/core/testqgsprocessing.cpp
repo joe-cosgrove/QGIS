@@ -447,19 +447,18 @@ void TestQgsProcessing::context()
   QgsVectorLayer *v1 = new QgsVectorLayer( "Polygon", "V1", "memory" );
   QgsVectorLayer *v2 = new QgsVectorLayer( "Polygon", "V2", "memory" );
   QVERIFY( context.layersToLoadOnCompletion().isEmpty() );
-  context.setLayersToLoadOnCompletion( QList< QgsMapLayer *>() << v1 );
+  context.setLayersToLoadOnCompletion( QStringList() << v1->id() );
   QCOMPARE( context.layersToLoadOnCompletion().count(), 1 );
-  QCOMPARE( context.layersToLoadOnCompletion().at( 0 ), v1 );
-  context.addLayerToLoadOnCompletion( v2 );
+  QCOMPARE( context.layersToLoadOnCompletion().at( 0 ), v1->id() );
+  context.addLayerToLoadOnCompletion( v2->id() );
   QCOMPARE( context.layersToLoadOnCompletion().count(), 2 );
-  QCOMPARE( context.layersToLoadOnCompletion().at( 0 ), v1 );
-  QCOMPARE( context.layersToLoadOnCompletion().at( 1 ), v2 );
-  context.setLayersToLoadOnCompletion( QList< QgsMapLayer *>() << v2 );
+  QCOMPARE( context.layersToLoadOnCompletion().at( 0 ), v1->id() );
+  QCOMPARE( context.layersToLoadOnCompletion().at( 1 ), v2->id() );
+  context.setLayersToLoadOnCompletion( QStringList() << v2->id() );
   QCOMPARE( context.layersToLoadOnCompletion().count(), 1 );
-  QCOMPARE( context.layersToLoadOnCompletion().at( 0 ), v2 );
+  QCOMPARE( context.layersToLoadOnCompletion().at( 0 ), v2->id() );
   delete v1;
   delete v2;
-  QVERIFY( context.layersToLoadOnCompletion().isEmpty() );
 }
 
 void TestQgsProcessing::mapLayers()

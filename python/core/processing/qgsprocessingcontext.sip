@@ -83,24 +83,24 @@ class QgsProcessingContext
  :rtype: QgsMapLayerStore
 %End
 
-    QList< QgsMapLayer *> layersToLoadOnCompletion() const;
+    QStringList layersToLoadOnCompletion() const;
 %Docstring
- Returns a list of layers to load into the canvas upon completion of the algorithm or model.
+ Returns a list of layers (by ID or datasource) to load into the canvas upon completion of the algorithm or model.
 .. seealso:: setLayersToLoadOnCompletion()
 .. seealso:: addLayerToLoadOnCompletion()
- :rtype: list of QgsMapLayer
+ :rtype: list of str
 %End
 
-    void setLayersToLoadOnCompletion( const QList< QgsMapLayer *> &layers );
+    void setLayersToLoadOnCompletion( const QStringList &layers );
 %Docstring
- Sets the list of ``layers`` to load into the canvas upon completion of the algorithm or model.
+ Sets the list of ``layers`` (by ID or datasource) to load into the canvas upon completion of the algorithm or model.
 .. seealso:: addLayerToLoadOnCompletion()
 .. seealso:: layersToLoadOnCompletion()
 %End
 
-    void addLayerToLoadOnCompletion( QgsMapLayer *layer );
+    void addLayerToLoadOnCompletion( const QString &layer );
 %Docstring
- Adds a ``layer`` to load into the canvas upon completion of the algorithm or model.
+ Adds a ``layer`` to load (by ID or datasource) into the canvas upon completion of the algorithm or model.
 .. seealso:: setLayersToLoadOnCompletion()
 .. seealso:: layersToLoadOnCompletion()
 %End
