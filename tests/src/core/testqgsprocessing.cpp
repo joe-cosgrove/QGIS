@@ -73,6 +73,36 @@ class DummyAlgorithm : public QgsProcessingAlgorithm
       QCOMPARE( countVisibleParameters(), 2 );
     }
 
+    void runOutputChecks()
+    {
+      QVERIFY( outputDefinitions().isEmpty() );
+      QVERIFY( addOutput( new QgsProcessingOutputVectorLayer( "p1" ) ) );
+      QCOMPARE( outputDefinitions().count(), 1 );
+      QCOMPARE( outputDefinitions().at( 0 )->name(), QString( "p1" ) );
+
+      QVERIFY( !addOutput( nullptr ) );
+      QCOMPARE( outputDefinitions().count(), 1 );
+      // duplicate name!
+      QgsProcessingOutputVectorLayer *p2 = new QgsProcessingOutputVectorLayer( "p1" );
+      QVERIFY( !addOutput( p2 ) );
+      delete p2;
+      QCOMPARE( outputDefinitions().count(), 1 );
+
+      QCOMPARE( outputDefinition( "p1" ), outputDefinitions().at( 0 ) );
+      // parameterDefinition should be case insensitive
+      QCOMPARE( outputDefinition( "P1" ), outputDefinitions().at( 0 ) );
+      QVERIFY( !outputDefinition( "invalid" ) );
+
+      QCOMPARE( countVisibleOutputs(), 1 );
+      QgsProcessingOutputVectorLayer *p3 = new QgsProcessingOutputVectorLayer( "p3" );
+      QVERIFY( addOutput( p3 ) );
+      QCOMPARE( countVisibleOutputs(), 2 );
+      QgsProcessingOutputVectorLayer *p4 = new QgsProcessingOutputVectorLayer( "p4" );
+      p4->setFlags( QgsProcessingParameterDefinition::FlagHidden );
+      QVERIFY( addOutput( p4 ) );
+      QCOMPARE( countVisibleOutputs(), 2 );
+    }
+
 };
 
 //dummy provider for testing
@@ -149,6 +179,7 @@ class TestQgsProcessing: public QObject
     void createFeatureSink();
     void parameters();
     void algorithmParameters();
+    void algorithmOutputs();
     void parameterGeneral();
     void parameterBoolean();
     void parameterCrs();
@@ -979,6 +1010,12 @@ void TestQgsProcessing::algorithmParameters()
 {
   DummyAlgorithm alg( "test" );
   alg.runParameterChecks();
+}
+
+void TestQgsProcessing::algorithmOutputs()
+{
+  DummyAlgorithm alg( "test" );
+  alg.runOutputChecks();
 }
 
 void TestQgsProcessing::parameterGeneral()

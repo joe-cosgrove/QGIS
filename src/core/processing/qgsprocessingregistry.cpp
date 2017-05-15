@@ -21,9 +21,7 @@
 
 QgsProcessingRegistry::QgsProcessingRegistry( QObject *parent SIP_TRANSFERTHIS )
   : QObject( parent )
-{
-  addProvider( new QgsNativeAlgorithms( this ) );
-}
+{}
 
 QgsProcessingRegistry::~QgsProcessingRegistry()
 {

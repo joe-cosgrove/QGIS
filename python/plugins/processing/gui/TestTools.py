@@ -239,7 +239,7 @@ def createTest(text):
     definition['params'] = params
 
     for i, out in enumerate([out for out in alg.outputs if not out.hidden]):
-        token = tokens[i - alg.getVisibleOutputsCount()]
+        token = tokens[i - alg.countVisibleOutputs()]
 
         if isinstance(out, (OutputNumber, OutputString)):
             results[out.name] = str(out)

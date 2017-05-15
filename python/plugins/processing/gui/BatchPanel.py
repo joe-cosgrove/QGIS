@@ -97,7 +97,7 @@ class BatchPanel(BASE, WIDGET):
                 break
 
         # Determine column count
-        nOutputs = self.alg.getVisibleOutputsCount() + 1
+        nOutputs = self.alg.countVisibleOutputs() + 1
         if nOutputs == 1:
             nOutputs = 0
 
@@ -120,7 +120,7 @@ class BatchPanel(BASE, WIDGET):
                 column += 1
 
         # Last column for indicating if output will be added to canvas
-        if self.alg.getVisibleOutputsCount():
+        if self.alg.countVisibleOutputs():
             self.tblParameters.setHorizontalHeaderItem(
                 column, QTableWidgetItem(self.tr('Load in QGIS')))
 
@@ -251,7 +251,7 @@ class BatchPanel(BASE, WIDGET):
                     out, self.alg, row, column, self))
             column += 1
 
-        if self.alg.getVisibleOutputsCount():
+        if self.alg.countVisibleOutputs():
             item = QComboBox()
             item.addItem(self.tr('Yes'))
             item.addItem(self.tr('No'))

@@ -102,7 +102,7 @@ class BatchAlgorithmDialog(AlgorithmDialogBase):
                     return
 
             self.algs.append(alg)
-            if self.alg.getVisibleOutputsCount():
+            if self.alg.countVisibleOutputs():
                 widget = self.mainWidget.tblParameters.cellWidget(row, col)
                 self.load.append(widget.currentIndex() == 0)
             else:

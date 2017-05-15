@@ -152,6 +152,13 @@ class CORE_EXPORT QgsProcessingAlgorithm
     int countVisibleParameters() const;
 
     /**
+     * Returns an ordered list of output definitions utilized by the algorithm.
+     * \see addOutput()
+     * \see outputDefinition()
+     */
+    QgsProcessingOutputDefinitions outputDefinitions() const { return mOutputs; }
+
+    /**
      * Returns a matching output by \a name. Matching is done in a case-insensitive
      * manner.
      * \see outputDefinitions()

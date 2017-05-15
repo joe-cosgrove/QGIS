@@ -142,6 +142,14 @@ class QgsProcessingAlgorithm
  :rtype: int
 %End
 
+    QgsProcessingOutputDefinitions outputDefinitions() const;
+%Docstring
+ Returns an ordered list of output definitions utilized by the algorithm.
+.. seealso:: addOutput()
+.. seealso:: outputDefinition()
+ :rtype: QgsProcessingOutputDefinitions
+%End
+
     const QgsProcessingOutputDefinition *outputDefinition( const QString &name ) const;
 %Docstring
  Returns a matching output by ``name``. Matching is done in a case-insensitive
