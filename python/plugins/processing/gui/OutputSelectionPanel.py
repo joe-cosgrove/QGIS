@@ -36,7 +36,8 @@ from qgis.PyQt.QtGui import QCursor
 from qgis.gui import QgsEncodingFileDialog, QgsExpressionBuilderDialog
 from qgis.core import (QgsDataSourceUri,
                        QgsCredentials,
-                       QgsSettings)
+                       QgsSettings,
+                       QgsProcessingOutputVectorLayer)
 from processing.core.ProcessingConfig import ProcessingConfig
 from processing.core.outputs import OutputVector
 from processing.core.outputs import OutputDirectory
@@ -62,7 +63,7 @@ class OutputSelectionPanel(BASE, WIDGET):
         self.alg = alg
 
         if hasattr(self.leText, 'setPlaceholderText'):
-            if isinstance(output, OutputVector) \
+            if isinstance(output, QgsProcessingOutputVectorLayer) \
                     and alg.provider().supportsNonFileBasedOutput():
                 # use memory layers for temporary files if supported
                 self.leText.setPlaceholderText(self.SAVE_TO_TEMP_LAYER)
@@ -77,7 +78,7 @@ class OutputSelectionPanel(BASE, WIDGET):
         else:
             popupMenu = QMenu()
 
-            if isinstance(self.output, OutputVector) \
+            if isinstance(self.output, QgsProcessingOutputVectorLayer) \
                     and self.alg.provider().supportsNonFileBasedOutput():
                 # use memory layers for temporary layers if supported
                 actionSaveToTemp = QAction(
@@ -98,7 +99,7 @@ class OutputSelectionPanel(BASE, WIDGET):
             actionShowExpressionsBuilder.triggered.connect(self.showExpressionsBuilder)
             popupMenu.addAction(actionShowExpressionsBuilder)
 
-            if isinstance(self.output, OutputVector) \
+            if isinstance(self.output, QgsProcessingOutputVectorLayer) \
                     and self.alg.provider().supportsNonFileBasedOutput():
                 actionSaveToSpatialite = QAction(
                     self.tr('Save to Spatialite table...'), self.btnSelect)
@@ -127,7 +128,7 @@ class OutputSelectionPanel(BASE, WIDGET):
         self.leText.setText('')
 
     def saveToPostGIS(self):
-        dlg = PostgisTableSelector(self, self.output.name.lower())
+        dlg = PostgisTableSelector(self, self.output.name().lower())
         dlg.exec_()
         if dlg.connection:
             settings = QgsSettings()

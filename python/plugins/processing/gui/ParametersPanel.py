@@ -34,7 +34,8 @@ import os
 from qgis.core import (QgsProcessingParameterDefinition,
                        QgsProcessingParameterExtent,
                        QgsProcessingParameterPoint,
-                       QgsProcessingParameterVectorLayer)
+                       QgsProcessingParameterVectorLayer,
+                       QgsProcessingOutputVectorLayer)
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtWidgets import (QWidget, QHBoxLayout, QToolButton,
@@ -148,17 +149,17 @@ class ParametersPanel(BASE, WIDGET):
             if output.flags() & QgsProcessingParameterDefinition.FlagHidden:
                 continue
 
-            #label = QLabel(output.description())
-            #widget = OutputSelectionPanel(output, self.alg)
-            #self.layoutMain.insertWidget(self.layoutMain.count() - 1, label)
-            #self.layoutMain.insertWidget(self.layoutMain.count() - 1, widget)
-            #if isinstance(output, (OutputRaster, OutputVector, OutputTable)):
-            #    check = QCheckBox()
-            #    check.setText(self.tr('Open output file after running algorithm'))
-            #    check.setChecked(True)
-            #    self.layoutMain.insertWidget(self.layoutMain.count() - 1, check)
-            #    self.checkBoxes[output.name()] = check
-            #self.outputWidgets[output.name()] = widget
+            label = QLabel(output.description())
+            widget = OutputSelectionPanel(output, self.alg)
+            self.layoutMain.insertWidget(self.layoutMain.count() - 1, label)
+            self.layoutMain.insertWidget(self.layoutMain.count() - 1, widget)
+            if isinstance(output, (OutputRaster, QgsProcessingOutputVectorLayer, OutputTable)):
+                check = QCheckBox()
+                check.setText(self.tr('Open output file after running algorithm'))
+                check.setChecked(True)
+                self.layoutMain.insertWidget(self.layoutMain.count() - 1, check)
+                self.checkBoxes[output.name()] = check
+            self.outputWidgets[output.name()] = widget
         for wrapper in list(self.wrappers.values()):
             wrapper.postInitialize(list(self.wrappers.values()))
 
