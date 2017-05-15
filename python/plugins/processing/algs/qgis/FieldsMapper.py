@@ -62,13 +62,8 @@ class FieldsMapper(GeoAlgorithm):
     def group(self):
         return self.tr('Vector table tools')
 
-    def name(self):
-        return 'refactorfields'
-
-    def displayName(self):
-        return self.tr('Refactor fields')
-
-    def defineCharacteristics(self):
+    def __init__(self):
+        super().__init__()
         self.addParameter(ParameterTable(self.INPUT_LAYER,
                                          self.tr('Input layer'),
                                          False))
@@ -78,6 +73,12 @@ class FieldsMapper(GeoAlgorithm):
             default_metadata = {
                 'widget_wrapper': 'processing.algs.qgis.ui.FieldsMappingPanel.FieldsMappingWidgetWrapper'
             }
+
+    def name(self):
+        return 'refactorfields'
+
+    def displayName(self):
+        return self.tr('Refactor fields')
 
             def __init__(self, name='', description='', parent=None):
                 Parameter.__init__(self, name, description)

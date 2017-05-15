@@ -59,13 +59,8 @@ class RasterCalculator(GeoAlgorithm):
     def group(self):
         return self.tr('Raster')
 
-    def name(self):
-        return 'rastercalculator'
-
-    def displayName(self):
-        return self.tr('Raster calculator')
-
-    def defineCharacteristics(self):
+    def __init__(self):
+        super().__init__()
         self.addParameter(ParameterMultipleInput(self.LAYERS,
                                                  self.tr('Input layers'),
                                                  datatype=dataobjects.TYPE_RASTER,
@@ -73,6 +68,12 @@ class RasterCalculator(GeoAlgorithm):
                                                  metadata={'widget_wrapper': LayersListWidgetWrapper}))
 
         class ParameterRasterCalculatorExpression(ParameterString):
+
+    def name(self):
+        return 'rastercalculator'
+
+    def displayName(self):
+        return self.tr('Raster calculator')
 
             def evaluateForModeler(self, value, model):
                 for i in list(model.inputs.values()):

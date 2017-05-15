@@ -78,13 +78,8 @@ class Heatmap(GeoAlgorithm):
     def group(self):
         return self.tr('Interpolation')
 
-    def name(self):
-        return 'heatmapkerneldensityestimation'
-
-    def displayName(self):
-        return self.tr('Heatmap (Kernel Density Estimation)')
-
-    def defineCharacteristics(self):
+    def __init__(self):
+        super().__init__()
         self.addParameter(ParameterVector(self.INPUT_LAYER,
                                           self.tr('Point layer'), [dataobjects.TYPE_VECTOR_POINT]))
         self.addParameter(ParameterNumber(self.RADIUS,
@@ -97,6 +92,12 @@ class Heatmap(GeoAlgorithm):
         self.addParameter(radius_field_param)
 
         class ParameterHeatmapPixelSize(ParameterNumber):
+
+    def name(self):
+        return 'heatmapkerneldensityestimation'
+
+    def displayName(self):
+        return self.tr('Heatmap (Kernel Density Estimation)')
 
             def __init__(self, name='', description='', parent_layer=None, radius_param=None, radius_field_param=None, minValue=None, maxValue=None,
                          default=None, optional=False, metadata={}):

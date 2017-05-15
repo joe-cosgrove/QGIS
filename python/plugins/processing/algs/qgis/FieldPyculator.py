@@ -65,13 +65,8 @@ class FieldsPyculator(GeoAlgorithm):
     def group(self):
         return self.tr('Vector table tools')
 
-    def name(self):
-        return 'advancedpythonfieldcalculator'
-
-    def displayName(self):
-        return self.tr('Advanced Python field calculator')
-
-    def defineCharacteristics(self):
+    def __init__(self):
+        super().__init__()
         self.type_names = [self.tr('Integer'),
                            self.tr('Float'),
                            self.tr('String')]
@@ -91,6 +86,12 @@ class FieldsPyculator(GeoAlgorithm):
         self.addParameter(ParameterString(self.FORMULA,
                                           self.tr('Formula'), 'value = ', multiline=True))
         self.addOutput(OutputVector(self.OUTPUT_LAYER, self.tr('Calculated')))
+
+    def name(self):
+        return 'advancedpythonfieldcalculator'
+
+    def displayName(self):
+        return self.tr('Advanced Python field calculator')
 
     def processAlgorithm(self, context, feedback):
         fieldName = self.getParameterValue(self.FIELD_NAME)

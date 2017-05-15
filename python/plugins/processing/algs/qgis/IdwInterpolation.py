@@ -65,17 +65,19 @@ class IdwInterpolation(GeoAlgorithm):
     def group(self):
         return self.tr('Interpolation')
 
+    def __init__(self):
+        super().__init__()
+
+        class ParameterInterpolationData(Parameter):
+            default_metadata = {
+                'widget_wrapper': 'processing.algs.qgis.ui.InterpolationDataWidget.InterpolationDataWidgetWrapper'
+            }
+
     def name(self):
         return 'idwinterpolation'
 
     def displayName(self):
         return self.tr('IDW interpolation')
-
-    def defineCharacteristics(self):
-        class ParameterInterpolationData(Parameter):
-            default_metadata = {
-                'widget_wrapper': 'processing.algs.qgis.ui.InterpolationDataWidget.InterpolationDataWidgetWrapper'
-            }
 
             def __init__(self, name='', description=''):
                 Parameter.__init__(self, name, description)

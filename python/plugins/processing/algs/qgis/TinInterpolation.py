@@ -70,13 +70,8 @@ class TinInterpolation(GeoAlgorithm):
     def group(self):
         return self.tr('Interpolation')
 
-    def name(self):
-        return 'tininterpolation'
-
-    def displayName(self):
-        return self.tr('TIN interpolation')
-
-    def defineCharacteristics(self):
+    def __init__(self):
+        super().__init__()
         self.METHODS = [self.tr('Linear'),
                         self.tr('Clough-Toucher (cubic)')
                         ]
@@ -85,6 +80,12 @@ class TinInterpolation(GeoAlgorithm):
             default_metadata = {
                 'widget_wrapper': 'processing.algs.qgis.ui.InterpolationDataWidget.InterpolationDataWidgetWrapper'
             }
+
+    def name(self):
+        return 'tininterpolation'
+
+    def displayName(self):
+        return self.tr('TIN interpolation')
 
             def __init__(self, name='', description=''):
                 Parameter.__init__(self, name, description)

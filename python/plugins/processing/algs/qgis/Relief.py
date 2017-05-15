@@ -60,17 +60,19 @@ class Relief(GeoAlgorithm):
     def group(self):
         return self.tr('Raster terrain analysis')
 
+    def __init__(self):
+        super().__init__()
+
+        class ParameterReliefColors(Parameter):
+            default_metadata = {
+                'widget_wrapper': 'processing.algs.qgis.ui.ReliefColorsWidget.ReliefColorsWidgetWrapper'
+            }
+
     def name(self):
         return 'relief'
 
     def displayName(self):
         return self.tr('Relief')
-
-    def defineCharacteristics(self):
-        class ParameterReliefColors(Parameter):
-            default_metadata = {
-                'widget_wrapper': 'processing.algs.qgis.ui.ReliefColorsWidget.ReliefColorsWidgetWrapper'
-            }
 
             def __init__(self, name='', description='', parent=None, optional=True):
                 Parameter.__init__(self, name, description, None, optional)
