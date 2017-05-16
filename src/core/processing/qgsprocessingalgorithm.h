@@ -363,6 +363,8 @@ class CORE_EXPORT QgsProcessingAlgorithm
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS( QgsProcessingAlgorithm::Flags )
 
+
+
 #endif // QGSPROCESSINGALGORITHM_H
 
 
