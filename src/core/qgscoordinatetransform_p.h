@@ -68,6 +68,10 @@ class QgsCoordinateTransformPrivate : public QSharedData
 
     bool initialize();
 
+    /**
+     * Returns a pair of proj source/destination projections, which are safe
+     * for use within the current thread.
+     */
     QPair< projPJ, projPJ > threadLocalProjData();
 
     //! Flag to indicate whether the transform is valid (ie has a valid
@@ -98,7 +102,13 @@ class QgsCoordinateTransformPrivate : public QSharedData
      */
     static thread_local QgsProjContextStore mProjContext;
 
+    //! Locker for mProjProjections
     QReadWriteLock mProjLock;
+
+    /**
+     * Map of thread local projCtx to pair of source/destination projPJ projections.
+     * Populated during calls to threadLocalProjData() from individual threads.
+     */
     QMap < uintptr_t, QPair< projPJ, projPJ > > mProjProjections;
 
     static QString datumTransformString( int datumTransform );
