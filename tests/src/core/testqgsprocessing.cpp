@@ -197,6 +197,8 @@ class TestQgsProcessing: public QObject
     void parameterExpression();
     void parameterField();
     void parameterVectorLayer();
+    void combineLayerExtent();
+
 
   private:
 
@@ -1752,6 +1754,38 @@ void TestQgsProcessing::parameterVectorLayer()
   def = new QgsProcessingParameterVectorLayer( "optional", QString(), QgsProcessingParameterDefinition::TypeVectorAny, v1->id(), true );
   params.insert( "optional",  QVariant() );
   QCOMPARE( QgsProcessingParameters::parameterAsVectorLayer( def, params, QStringLiteral( "optional" ), context )->id(), v1->id() );
+}
+
+void TestQgsProcessing::combineLayerExtent()
+{
+  QgsRectangle ext = QgsProcessingUtils::combineLayerExtents( QList< QgsMapLayer *>() );
+  QVERIFY( ext.isNull() );
+
+  QString raster1 = testDataDir + "tenbytenraster.asc";
+  QString raster2 = testDataDir + "landsat.tif";
+  QFileInfo fi1( raster1 );
+  QgsRasterLayer *r1 = new QgsRasterLayer( fi1.filePath(), "R1" );
+  QFileInfo fi2( raster2 );
+  QgsRasterLayer *r2 = new QgsRasterLayer( fi2.filePath(), "R2" );
+
+  ext = QgsProcessingUtils::combineLayerExtents( QList< QgsMapLayer *>() << r1 );
+  QGSCOMPARENEAR( ext.xMinimum(), 1, 1 );
+  QGSCOMPARENEAR( ext.xMaximum(), 1, 1 );
+  QGSCOMPARENEAR( ext.yMinimum(), 1, 1 );
+  QGSCOMPARENEAR( ext.yMaximum(), 1, 1 );
+
+  ext = QgsProcessingUtils::combineLayerExtents( QList< QgsMapLayer *>() << r1 << r2 );
+  QGSCOMPARENEAR( ext.xMinimum(), 1, 1 );
+  QGSCOMPARENEAR( ext.xMaximum(), 1, 1 );
+  QGSCOMPARENEAR( ext.yMinimum(), 1, 1 );
+  QGSCOMPARENEAR( ext.yMaximum(), 1, 1 );
+
+  // with reprojection
+  ext = QgsProcessingUtils::combineLayerExtents( QList< QgsMapLayer *>() << r1 << r2, QgsCoordinateReferenceSystem::fromEpsgId( 3785 ) );
+  QGSCOMPARENEAR( ext.xMinimum(), 1, 1 );
+  QGSCOMPARENEAR( ext.xMaximum(), 1, 1 );
+  QGSCOMPARENEAR( ext.yMinimum(), 1, 1 );
+  QGSCOMPARENEAR( ext.yMaximum(), 1, 1 );
 }
 
 QGSTEST_MAIN( TestQgsProcessing )
