@@ -445,6 +445,17 @@ QgsProcessingParameterDefinition::QgsProcessingParameterDefinition( const QStrin
   , mFlags( optional ? FlagOptional : 0 )
 {}
 
+bool QgsProcessingParameterDefinition::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.type() == QVariant::String && input.toString().isEmpty() )
+    return mFlags & FlagOptional;
+
+  return true;
+}
+
 QgsProcessingParameterBoolean::QgsProcessingParameterBoolean( const QString &name, const QString &description, const QVariant &defaultValue, bool optional )
   : QgsProcessingParameterDefinition( name, description, defaultValue, optional )
 {}
@@ -473,12 +484,62 @@ QgsProcessingParameterPoint::QgsProcessingParameterPoint( const QString &name, c
 
 }
 
+bool QgsProcessingParameterPoint::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.type() == QVariant::String )
+  {
+    if ( input.toString().isEmpty() )
+      return mFlags & FlagOptional;
+  }
+
+  QStringList parts = input.toString().split( ',' );
+  if ( parts.count() == 2 )
+  {
+    bool xOk = false;
+    ( void )parts.at( 0 ).toDouble( &xOk );
+    bool yOk = false;
+    ( void )parts.at( 1 ).toDouble( &yOk );
+    return xOk && yOk;
+  }
+  else
+    return false;
+}
+
 QgsProcessingParameterFile::QgsProcessingParameterFile( const QString &name, const QString &description, Behavior behavior, const QString &extension, const QVariant &defaultValue, bool optional )
   : QgsProcessingParameterDefinition( name, description, defaultValue, optional )
   , mBehavior( behavior )
   , mExtension( extension )
 {
 
+}
+
+bool QgsProcessingParameterFile::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.type() == QVariant::String )
+  {
+    if ( input.toString().isEmpty() )
+      return mFlags & FlagOptional;
+  }
+
+  switch ( mBehavior )
+  {
+    case File:
+    {
+      if ( !mExtension.isEmpty() )
+        return input.toString().endsWith( mExtension, Qt::CaseInsensitive );
+      return true;
+    }
+
+    case Folder:
+      return true;
+  }
+  return true;
 }
 
 QgsProcessingParameterMatrix::QgsProcessingParameterMatrix( const QString &name, const QString &description, int numberRows, bool fixedNumberRows, const QStringList &headers, const QVariant &defaultValue, bool optional )
@@ -488,6 +549,25 @@ QgsProcessingParameterMatrix::QgsProcessingParameterMatrix( const QString &name,
   , mFixedNumberRows( fixedNumberRows )
 {
 
+}
+
+bool QgsProcessingParameterMatrix::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.type() == QVariant::String )
+  {
+    if ( input.toString().isEmpty() )
+      return mFlags & FlagOptional;
+  }
+  else if ( input.type() == QVariant::List )
+  {
+    if ( input.toList().isEmpty() )
+      return mFlags & FlagOptional;
+  }
+
+  return true;
 }
 
 QStringList QgsProcessingParameterMatrix::headers() const
@@ -527,6 +607,29 @@ QgsProcessingParameterMultipleLayers::QgsProcessingParameterMultipleLayers( cons
 
 }
 
+bool QgsProcessingParameterMultipleLayers::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.type() == QVariant::String )
+  {
+    if ( input.toString().isEmpty() )
+      return mFlags & FlagOptional;
+  }
+  else if ( input.type() == QVariant::List )
+  {
+    if ( input.toList().count() < mMinimumNumberInputs )
+      return mFlags & FlagOptional;
+  }
+  else if ( input.type() == QVariant::StringList )
+  {
+    if ( input.toStringList().count() < mMinimumNumberInputs )
+      return mFlags & FlagOptional;
+  }
+  return true;
+}
+
 QgsProcessingParameterDefinition::LayerType QgsProcessingParameterMultipleLayers::layerType() const
 {
   return mLayerType;
@@ -537,6 +640,17 @@ void QgsProcessingParameterMultipleLayers::setLayerType( LayerType type )
   mLayerType = type;
 }
 
+int QgsProcessingParameterMultipleLayers::minimumNumberInputs() const
+{
+  return mMinimumNumberInputs;
+}
+
+void QgsProcessingParameterMultipleLayers::setMinimumNumberInputs( int minimumNumberInputs )
+{
+  if ( mMinimumNumberInputs >= 1 || !( flags() & QgsProcessingParameterDefinition::FlagOptional ) )
+    mMinimumNumberInputs = minimumNumberInputs;
+}
+
 QgsProcessingParameterNumber::QgsProcessingParameterNumber( const QString &name, const QString &description, Type type, const QVariant &defaultValue, bool optional, double minValue, double maxValue )
   : QgsProcessingParameterDefinition( name, description, defaultValue, optional )
   , mMin( minValue )
@@ -544,6 +658,27 @@ QgsProcessingParameterNumber::QgsProcessingParameterNumber( const QString &name,
   , mDataType( type )
 {
 
+}
+
+bool QgsProcessingParameterNumber::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.canConvert<QgsProperty>() )
+  {
+    return true;
+  }
+
+  bool ok = false;
+  double res = input.toDouble( &ok );
+  if ( !ok )
+    return mFlags & FlagOptional;
+
+  if ( res < mMin || res > mMax )
+    return false;
+
+  return true;
 }
 
 double QgsProcessingParameterNumber::minimum() const
@@ -583,6 +718,44 @@ QgsProcessingParameterRange::QgsProcessingParameterRange( const QString &name, c
 
 }
 
+bool QgsProcessingParameterRange::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.canConvert<QgsProperty>() )
+  {
+    return true;
+  }
+
+  if ( input.type() == QVariant::String )
+  {
+    QStringList list = input.toString().split( ',' );
+    if ( list.count() != 2 )
+      return mFlags & FlagOptional;
+    bool ok = false;
+    list.at( 0 ).toDouble( &ok );
+    bool ok2 = false;
+    list.at( 1 ).toDouble( &ok2 );
+    if ( !ok || !ok2 )
+      return mFlags & FlagOptional;
+  }
+  else if ( input.type() == QVariant::List )
+  {
+    if ( input.toList().count() != 2 )
+      return mFlags & FlagOptional;
+
+    bool ok = false;
+    input.toList().at( 0 ).toDouble( &ok );
+    bool ok2 = false;
+    input.toList().at( 1 ).toDouble( &ok2 );
+    if ( !ok || !ok2 )
+      return mFlags & FlagOptional;
+  }
+
+  return true;
+}
+
 QgsProcessingParameterNumber::Type QgsProcessingParameterRange::dataType() const
 {
   return mDataType;
@@ -605,6 +778,59 @@ QgsProcessingParameterEnum::QgsProcessingParameterEnum( const QString &name, con
   , mAllowMultiple( allowMultiple )
 {
 
+}
+
+bool QgsProcessingParameterEnum::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.canConvert<QgsProperty>() )
+  {
+    return true;
+  }
+
+  if ( input.type() == QVariant::List )
+  {
+    if ( !mAllowMultiple )
+      return false;
+
+    Q_FOREACH ( const QVariant &val, input.toList() )
+    {
+      bool ok = false;
+      int res = val.toInt( &ok );
+      if ( !ok )
+        return false;
+      else if ( res < 0 || res >= mOptions.count() )
+        return false;
+    }
+  }
+  else if ( input.type() == QVariant::String )
+  {
+    QStringList parts = input.toString().split( ',' );
+    if ( parts.count() > 1 && !mAllowMultiple )
+      return false;
+
+    Q_FOREACH ( const QString &part, parts )
+    {
+      bool ok = false;
+      int res = part.toInt( &ok );
+      if ( !ok )
+        return false;
+      else if ( res < 0 || res >= mOptions.count() )
+        return false;
+    }
+  }
+  else
+  {
+    bool ok = false;
+    int res = input.toInt( &ok );
+    if ( !ok )
+      return false;
+    else if ( res < 0 || res >= mOptions.count() )
+      return false;
+  }
+  return true;
 }
 
 QStringList QgsProcessingParameterEnum::options() const
@@ -674,6 +900,35 @@ QgsProcessingParameterTableField::QgsProcessingParameterTableField( const QStrin
   , mAllowMultiple( allowMultiple )
 {
 
+}
+
+bool QgsProcessingParameterTableField::checkValueIsAcceptable( const QVariant &input ) const
+{
+  if ( !input.isValid() )
+    return mFlags & FlagOptional;
+
+  if ( input.canConvert<QgsProperty>() )
+  {
+    return true;
+  }
+
+  if ( input.type() == QVariant::List )
+  {
+    if ( !mAllowMultiple )
+      return false;
+  }
+  else if ( input.type() == QVariant::String )
+  {
+    QStringList parts = input.toString().split( ';' );
+    if ( parts.count() > 1 && !mAllowMultiple )
+      return false;
+  }
+  else
+  {
+    if ( input.toString().isEmpty() )
+      return mFlags & FlagOptional;
+  }
+  return true;
 }
 
 QString QgsProcessingParameterTableField::parentLayerParameter() const

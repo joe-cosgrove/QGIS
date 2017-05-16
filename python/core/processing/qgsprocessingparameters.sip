@@ -164,6 +164,13 @@ class QgsProcessingParameterDefinition
  @see flags()
 %End
 
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+%Docstring
+ Checks whether the specified ``input`` value is acceptable for the
+ parameter. Returns true if the value can be accepted.
+ :rtype: bool
+%End
+
   protected:
 
 
@@ -352,7 +359,6 @@ class QgsProcessingParameterBoolean : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
-
 };
 
 class QgsProcessingParameterCrs : QgsProcessingParameterDefinition
@@ -417,7 +423,6 @@ class QgsProcessingParameterExtent : QgsProcessingParameterDefinition
 
     virtual QString type() const;
 
-
 };
 
 
@@ -440,6 +445,8 @@ class QgsProcessingParameterPoint : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
 };
 
@@ -468,6 +475,8 @@ class QgsProcessingParameterFile : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     Behavior behavior() const;
 %Docstring
@@ -518,6 +527,8 @@ class QgsProcessingParameterMatrix : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     QStringList headers() const;
 %Docstring
@@ -586,6 +597,8 @@ class QgsProcessingParameterMultipleLayers : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     QgsProcessingParameterDefinition::LayerType layerType() const;
 %Docstring
@@ -598,6 +611,21 @@ class QgsProcessingParameterMultipleLayers : QgsProcessingParameterDefinition
 %Docstring
  Sets the layer ``type`` for layers acceptable by the parameter.
 .. seealso:: layerType()
+%End
+
+    int minimumNumberInputs() const;
+%Docstring
+ Returns the minimum number of layers required for the parameter. If the return value is < 1
+ then the parameter accepts any number of layers.
+.. seealso:: setMinimumNumberInputs()
+ :rtype: int
+%End
+
+    void setMinimumNumberInputs( int minimum );
+%Docstring
+ Sets the ``minimum`` number of layers required for the parameter. The minimum must be >= 1
+ if the parameter is not optional.
+.. seealso:: minimumNumberInputs()
 %End
 
 };
@@ -632,6 +660,8 @@ class QgsProcessingParameterNumber : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     double minimum() const;
 %Docstring
@@ -695,6 +725,8 @@ class QgsProcessingParameterRange : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     QgsProcessingParameterNumber::Type dataType() const;
 %Docstring
@@ -754,6 +786,8 @@ class QgsProcessingParameterEnum : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     QStringList options() const;
 %Docstring
@@ -907,6 +941,8 @@ class QgsProcessingParameterTableField : QgsProcessingParameterDefinition
 %End
 
     virtual QString type() const;
+    virtual bool checkValueIsAcceptable( const QVariant &input ) const;
+
 
     QString parentLayerParameter() const;
 %Docstring

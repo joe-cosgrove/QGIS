@@ -81,9 +81,9 @@ class BatchAlgorithmDialog(AlgorithmDialogBase):
                     continue
                 wrapper = self.mainWidget.wrappers[row][col]
                 parameters[param.name()] = wrapper.value()
-                if not self.mainWidget.setParamValue(param, wrapper, alg):
+                if not param.checkValueIsAcceptable(wrapper.value()):
                     self.bar.pushMessage("", self.tr('Wrong or missing parameter value: {0} (row {1})').format(
-                                         param.description, row + 1),
+                                         param.description(), row + 1),
                                          level=QgsMessageBar.WARNING, duration=5)
                     self.algs = None
                     return
