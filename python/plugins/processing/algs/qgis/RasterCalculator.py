@@ -69,18 +69,12 @@ class RasterCalculator(GeoAlgorithm):
 
         class ParameterRasterCalculatorExpression(ParameterString):
 
-    def name(self):
-        return 'rastercalculator'
-
-    def displayName(self):
-        return self.tr('Raster calculator')
-
             def evaluateForModeler(self, value, model):
                 for i in list(model.inputs.values()):
                     param = i.param
                     if isinstance(param, ParameterRaster):
                         new = "{}@".format(os.path.basename(param.value))
-                        old = "{}@".format(param.name)
+                        old = "{}@".format(param.name())
                         value = value.replace(old, new)
 
                     for alg in list(model.algs.values()):
@@ -102,6 +96,12 @@ class RasterCalculator(GeoAlgorithm):
                                           self.tr('Output extent'),
                                           optional=True))
         self.addOutput(OutputRaster(self.OUTPUT, self.tr('Output')))
+
+    def name(self):
+        return 'rastercalculator'
+
+    def displayName(self):
+        return self.tr('Raster calculator')
 
     def processAlgorithm(self, parameters, context, feedback):
         expression = self.getParameterValue(self.EXPRESSION)
@@ -164,7 +164,7 @@ class RasterCalculator(GeoAlgorithm):
         for i in list(model.inputs.values()):
             param = i.param
             if isinstance(param, ParameterRaster) and "{}@".format(param.name) in expression:
-                values.append(ValueFromInput(param.name))
+                values.append(ValueFromInput(param.name()))
 
         if algorithm.name:
             dependent = model.getDependentAlgorithms(algorithm.name)

@@ -30,7 +30,8 @@ import os
 from qgis.PyQt.QtGui import QIcon
 
 from qgis.core import (QgsRectangle,
-                       QgsProcessingUtils)
+                       QgsProcessingUtils,
+                       QgsProcessingParameterDefinition)
 from qgis.analysis import (QgsInterpolator,
                            QgsTINInterpolator,
                            QgsGridFileWriter
@@ -81,24 +82,18 @@ class TinInterpolation(GeoAlgorithm):
                 'widget_wrapper': 'processing.algs.qgis.ui.InterpolationDataWidget.InterpolationDataWidgetWrapper'
             }
 
-    def name(self):
-        return 'tininterpolation'
-
-    def displayName(self):
-        return self.tr('TIN interpolation')
-
             def __init__(self, name='', description=''):
                 Parameter.__init__(self, name, description)
 
             def setValue(self, value):
                 if value is None:
-                    if not self.optional:
+                    if not self.flags() & QgsProcessingParameterDefinition.FlagOptional:
                         return False
                     self.value = None
                     return True
 
                 if value == '':
-                    if not self.optional:
+                    if not self.flags() & QgsProcessingParameterDefinition.FlagOptional:
                         return False
 
                 if isinstance(value, str):
@@ -158,6 +153,12 @@ class TinInterpolation(GeoAlgorithm):
         self.addOutput(OutputVector(self.TRIANULATION_FILE,
                                     self.tr('Triangulation'),
                                     ))  # datatype=dataobjects.TYPE_VECTOR_LINE))
+
+    def name(self):
+        return 'tininterpolation'
+
+    def displayName(self):
+        return self.tr('TIN interpolation')
 
     def processAlgorithm(self, parameters, context, feedback):
         interpolationData = self.getParameterValue(self.INTERPOLATION_DATA)

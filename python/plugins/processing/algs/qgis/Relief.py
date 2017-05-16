@@ -30,7 +30,7 @@ import os
 from qgis.PyQt.QtGui import QIcon, QColor
 
 from qgis.analysis import QgsRelief
-
+from qgis.core import QgsProcessingParameterDefinition
 from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.core.parameters import (Parameter,
                                         ParameterRaster,
@@ -68,25 +68,19 @@ class Relief(GeoAlgorithm):
                 'widget_wrapper': 'processing.algs.qgis.ui.ReliefColorsWidget.ReliefColorsWidgetWrapper'
             }
 
-    def name(self):
-        return 'relief'
-
-    def displayName(self):
-        return self.tr('Relief')
-
             def __init__(self, name='', description='', parent=None, optional=True):
                 Parameter.__init__(self, name, description, None, optional)
                 self.parent = parent
 
             def setValue(self, value):
                 if value is None:
-                    if not self.optional:
+                    if not self.flags() & QgsProcessingParameterDefinition.FlagOptional:
                         return False
                     self.value = None
                     return True
 
                 if value == '':
-                    if not self.optional:
+                    if not self.flags() & QgsProcessingParameterDefinition.FlagOptional:
                         return False
 
                 if isinstance(value, str):
@@ -137,6 +131,12 @@ class Relief(GeoAlgorithm):
                                     self.tr('Relief')))
         self.addOutput(OutputTable(self.FREQUENCY_DISTRIBUTION,
                                    self.tr('Frequency distribution')))
+
+    def name(self):
+        return 'relief'
+
+    def displayName(self):
+        return self.tr('Relief')
 
     def processAlgorithm(self, parameters, context, feedback):
         inputFile = self.getParameterValue(self.INPUT_LAYER)

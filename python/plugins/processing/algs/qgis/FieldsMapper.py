@@ -74,12 +74,6 @@ class FieldsMapper(GeoAlgorithm):
                 'widget_wrapper': 'processing.algs.qgis.ui.FieldsMappingPanel.FieldsMappingWidgetWrapper'
             }
 
-    def name(self):
-        return 'refactorfields'
-
-    def displayName(self):
-        return self.tr('Refactor fields')
-
             def __init__(self, name='', description='', parent=None):
                 Parameter.__init__(self, name, description)
                 self.parent = parent
@@ -110,6 +104,12 @@ class FieldsMapper(GeoAlgorithm):
         self.addOutput(OutputVector(self.OUTPUT_LAYER,
                                     self.tr('Refactored'),
                                     base_input=self.INPUT_LAYER))
+
+    def name(self):
+        return 'refactorfields'
+
+    def displayName(self):
+        return self.tr('Refactor fields')
 
     def processAlgorithm(self, parameters, context, feedback):
         layer = self.getParameterValue(self.INPUT_LAYER)
