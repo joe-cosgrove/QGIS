@@ -413,7 +413,7 @@ QgsRectangle QgsProcessingUtils::combineLayerExtents( const QList<QgsMapLayer *>
     if ( crs.isValid() )
     {
       //transform layer extent to target CRS
-      QgsCoordinateTransform ct( layer->crs(), crs() );
+      QgsCoordinateTransform ct( layer->crs(), crs );
       try
       {
         QgsRectangle reprojExtent = ct.transformBoundingBox( layer->extent() );
