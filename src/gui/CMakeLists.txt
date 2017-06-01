@@ -226,6 +226,7 @@ SET(QGIS_GUI_SRCS
   qgsfilterlineedit.cpp
   qgsfloatingwidget.cpp
   qgsfocuswatcher.cpp
+  qgsfontbutton.cpp
   qgsformannotation.cpp
   qgsgeometryrubberband.cpp
   qgsgradientcolorrampdialog.cpp
@@ -386,6 +387,7 @@ SET(QGIS_GUI_MOC_HDRS
   qgsfilterlineedit.h
   qgsfloatingwidget.h
   qgsfocuswatcher.h
+  qgsfontbutton.h
   qgsformannotation.h
   qgsgradientcolorrampdialog.h
   qgsgradientstopeditor.h

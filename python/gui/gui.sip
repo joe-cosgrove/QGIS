@@ -81,6 +81,7 @@
 %Include qgsfilterlineedit.sip
 %Include qgsfloatingwidget.sip
 %Include qgsfocuswatcher.sip
+%Include qgsfontbutton.sip
 %Include qgsformannotation.sip
 %Include qgsgui.sip
 %Include qgsgeometryrubberband.sip
