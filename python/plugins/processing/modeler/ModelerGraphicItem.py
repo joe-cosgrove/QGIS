@@ -35,7 +35,6 @@ from qgis.PyQt.QtWidgets import QGraphicsItem, QMessageBox, QMenu
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.core import (QgsProcessingParameterDefinition,
                        QgsProcessingModelAlgorithm)
-from processing.modeler.ModelerAlgorithm import ModelerParameter, Algorithm, ModelerOutput
 from processing.modeler.ModelerParameterDefinitionDialog import ModelerParameterDefinitionDialog
 from processing.modeler.ModelerParametersDialog import ModelerParametersDialog
 
@@ -52,21 +51,21 @@ class ModelerGraphicItem(QGraphicsItem):
         self.controls = controls
         self.model = model
         self.element = element
-        if isinstance(element, ModelerParameter):
+        if isinstance(element, QgsProcessingModelAlgorithm.ModelParameter):
             svg = QSvgRenderer(os.path.join(pluginPath, 'images', 'input.svg'))
             self.picture = QPicture()
             painter = QPainter(self.picture)
             svg.render(painter)
             self.pixmap = None
-            self.text = element.param.description()
-        elif isinstance(element, ModelerOutput):
+            self.text = self.model.parameterDefinition(element.parameterName()).description()
+        elif isinstance(element, QgsProcessingModelAlgorithm.ModelOutput):
             # Output name
             svg = QSvgRenderer(os.path.join(pluginPath, 'images', 'output.svg'))
             self.picture = QPicture()
             painter = QPainter(self.picture)
             svg.render(painter)
             self.pixmap = None
-            self.text = element.description
+            self.text = element.description()
         else:
             self.text = element.description()
             self.pixmap = element.algorithm().icon().pixmap(15, 15)
@@ -76,7 +75,7 @@ class ModelerGraphicItem(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
         self.setZValue(1000)
 
-        if not isinstance(element, ModelerOutput) and controls:
+        if not isinstance(element, QgsProcessingModelAlgorithm.ModelOutput) and controls:
             svg = QSvgRenderer(os.path.join(pluginPath, 'images', 'edit.svg'))
             picture = QPicture()
             painter = QPainter(picture)
@@ -156,7 +155,7 @@ class ModelerGraphicItem(QGraphicsItem):
         self.editElement()
 
     def contextMenuEvent(self, event):
-        if isinstance(self.element, ModelerOutput):
+        if isinstance(self.element, QgsProcessingModelAlgorithm.ModelOutput):
             return
         popupmenu = QMenu()
         removeAction = popupmenu.addAction('Remove')
@@ -185,13 +184,13 @@ class ModelerGraphicItem(QGraphicsItem):
                                 'Activate them them before trying to activate it.')
 
     def editElement(self):
-        if isinstance(self.element, ModelerParameter):
+        if isinstance(self.element, QgsProcessingModelAlgorithm.ModelParameter):
             dlg = ModelerParameterDefinitionDialog(self.model,
-                                                   param=self.element.param)
+                                                   param=self.model.parameterDefinition(self.element.parameterName()))
             dlg.exec_()
             if dlg.param is not None:
-                self.model.updateParameter(dlg.param)
-                self.element.param = dlg.param
+                self.model.updateModelParameter(dlg.param)
+                self.element.setParameterName(dlg.param.name())
                 self.text = dlg.param.description()
                 self.update()
         elif isinstance(self.element, QgsProcessingModelAlgorithm.ChildAlgorithm):
@@ -209,8 +208,8 @@ class ModelerGraphicItem(QGraphicsItem):
                 self.model.updateModelerView()
 
     def removeElement(self):
-        if isinstance(self.element, ModelerParameter):
-            if not self.model.removeParameter(self.element.param.name):
+        if isinstance(self.element, QgsProcessingModelAlgorithm.ModelParameter):
+            if not self.model.removeParameter(self.element.parameterName()):
                 QMessageBox.warning(None, 'Could not remove element',
                                     'Other elements depend on the selected one.\n'
                                     'Remove them before trying to remove it.')
@@ -245,7 +244,7 @@ class ModelerGraphicItem(QGraphicsItem):
                       ModelerGraphicItem.BOX_WIDTH + 2,
                       ModelerGraphicItem.BOX_HEIGHT + 2)
 
-        if isinstance(self.element, ModelerParameter):
+        if isinstance(self.element, QgsProcessingModelAlgorithm.ModelParameter):
             color = QColor(238, 242, 131)
             stroke = QColor(234, 226, 118)
             selected = QColor(116, 113, 68)
@@ -346,7 +345,7 @@ class ModelerGraphicItem(QGraphicsItem):
         if change == QGraphicsItem.ItemPositionHasChanged:
             for arrow in self.arrows:
                 arrow.updatePath()
-            self.element.pos = self.pos()
+            self.element.setPosition(self.pos())
 
         return value
 

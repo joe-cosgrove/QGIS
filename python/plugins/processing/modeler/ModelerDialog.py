@@ -40,12 +40,13 @@ from qgis.core import (QgsApplication,
                        QgsProcessingAlgorithm,
                        QgsSettings,
                        QgsMessageLog,
-                       QgsProcessingUtils)
+                       QgsProcessingUtils,
+                       QgsProcessingModelAlgorithm)
 from qgis.gui import QgsMessageBar
 from processing.gui.HelpEditionDialog import HelpEditionDialog
 from processing.gui.AlgorithmDialog import AlgorithmDialog
 from processing.modeler.ModelerParameterDefinitionDialog import ModelerParameterDefinitionDialog
-from processing.modeler.ModelerAlgorithm import ModelerAlgorithm, ModelerParameter
+from processing.modeler.ModelerAlgorithm import ModelerAlgorithm
 from processing.modeler.ModelerParametersDialog import ModelerParametersDialog
 from processing.modeler.ModelerUtils import ModelerUtils
 from processing.modeler.ModelerScene import ModelerScene
@@ -516,7 +517,9 @@ class ModelerDialog(BASE, WIDGET):
                     pos = self.getPositionForParameterItem()
                 if isinstance(pos, QPoint):
                     pos = QPointF(pos)
-                self.alg.addParameter(ModelerParameter(dlg.param, pos))
+                component = QgsProcessingModelAlgorithm.ModelParameter(dlg.param.name())
+                component.setPosition(pos)
+                self.alg.addModelParameter(dlg.param, component)
                 self.repaintModel()
                 # self.view.ensureVisible(self.scene.getLastParameterItem())
                 self.hasChanged = True
@@ -566,9 +569,9 @@ class ModelerDialog(BASE, WIDGET):
             else:
                 dlg.alg.setPosition(pos)
             from processing.modeler.ModelerGraphicItem import ModelerGraphicItem
-            for i, out in enumerate(dlg.alg.outputs):
-                dlg.alg.outputs[out].pos = dlg.alg.pos + QPointF(ModelerGraphicItem.BOX_WIDTH, (i + 1.5) *
-                                                                 ModelerGraphicItem.BOX_HEIGHT)
+            for i, out in enumerate(dlg.alg.modelOutputs()):
+                dlg.alg.modelOutput(out).setPosition(dlg.alg.position() + QPointF(ModelerGraphicItem.BOX_WIDTH, (i + 1.5) *
+                                                                                  ModelerGraphicItem.BOX_HEIGHT))
             self.alg.addChildAlgorithm(dlg.alg)
             self.repaintModel()
             self.hasChanged = True

@@ -145,11 +145,118 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
     };
 
     /**
+     * Represents a component of a model algorithm.
+     * \since QGIS 3.0
+     * \ingroup core
+     */
+    class CORE_EXPORT Component
+    {
+      public:
+
+        /**
+         * Returns the friendly description text for the component.
+         * \see setDescription()
+         */
+        QString description() const;
+
+        /**
+         * Sets the friendly \a description text for the component.
+         * \see description()
+         */
+        void setDescription( const QString &description );
+
+        /**
+         * Returns the position of the model component within the graphical modeler.
+         * \see setPosition()
+         */
+        QPointF position() const;
+
+        /**
+         * Sets the \a position of the model component within the graphical modeler.
+         * \see position()
+         */
+        void setPosition( const QPointF &position );
+
+      protected:
+
+        //! Only subclasses can be created
+        Component( const QString &description = QString() );
+
+        //! Copies are protected to avoid slicing
+        Component( const QgsProcessingModelAlgorithm::Component &other ) = default;
+
+        //! Copies are protected to avoid slicing
+        Component &operator=( const QgsProcessingModelAlgorithm::Component &other ) = default;
+
+      private:
+
+        //! Position of component within model
+        QPointF mPosition;
+
+        QString mDescription;
+
+    };
+
+    /**
+     * Represents an input parameter used by the model.
+     * \since QGIS 3.0
+     * \ingroup core
+     */
+    class CORE_EXPORT ModelParameter : public QgsProcessingModelAlgorithm::Component
+    {
+      public:
+
+        /**
+         * Constructor for ModelParameter. The parameter name should match one of the
+         * parameters from the parent model.
+         */
+        ModelParameter( const QString &parameterName = QString() );
+
+        /**
+         * Returns the associated parameter name. The parameter name should match one of the
+         * parameters from the parent model.
+         * \see parameterName()
+         */
+        QString parameterName() const { return mParameterName; }
+
+        /**
+         * Sets the associated parameter name. The parameter name should match one of the
+         * parameters from the parent model.
+         * \see parameterName()
+         */
+        void setParameterName( const QString &name ) { mParameterName = name; }
+
+      private:
+
+        QString mParameterName;
+
+    };
+
+
+    /**
+     * Represents a final output created by the model.
+     * \since QGIS 3.0
+     * \ingroup core
+     */
+    class CORE_EXPORT ModelOutput : public QgsProcessingModelAlgorithm::Component
+    {
+      public:
+
+        /**
+         * Constructor for ModelOutput with the specified \a description.
+         */
+        ModelOutput( const QString &description = QString() );
+
+      private:
+
+    };
+
+    /**
      * Child algorithm representing a single component of a QgsProcessingModelAlgorithm.
      * \since QGIS 3.0
      * \ingroup core
      */
-    class CORE_EXPORT ChildAlgorithm
+    class CORE_EXPORT ChildAlgorithm : public QgsProcessingModelAlgorithm::Component
     {
       public:
 
@@ -206,18 +313,6 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
         const QgsProcessingAlgorithm *algorithm() const;
 
         /**
-         * Returns the friendly description text for the child algorithm.
-         * \see setDescription()
-         */
-        QString description() const;
-
-        /**
-         * Sets the friendly \a description text for the child algorithm.
-         * \see description()
-         */
-        void setDescription( const QString &description );
-
-        /**
          * Returns a map of parameter sources. The keys are the child algorithm
          * parameter names, the values are the source for that parameter.
          * \see setParameterSources()
@@ -255,18 +350,6 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
          * \see isActive()
          */
         void setActive( bool active );
-
-        /**
-         * Returns the position of the child algorithm within the graphical modeler.
-         * \see setPosition()
-         */
-        QPointF position() const;
-
-        /**
-         * Sets the \a position of the child algorithm within the graphical modeler.
-         * \see position()
-         */
-        void setPosition( const QPointF &position );
 
         /**
          * Returns the list of child algorithms from the parent model on which this
@@ -316,21 +399,44 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
          */
         void setOutputsCollapsed( bool collapsed );
 
+        /**
+         * Returns the map of final model outputs which are generated by this child algorithm.
+         * The keys are the output names from this child algorithm. Only outputs which are
+         * part of the final outputs from the model are included in this map.
+         * \see setModelOutputs()
+         * \see modelOutput()
+         */
+        QMap<QString, QgsProcessingModelAlgorithm::ModelOutput> modelOutputs() const;
+
+        /**
+         * Returns the final model output with matching \a name. If no output
+         * exists with the name, a new one will be created and returned.
+         * \see modelOutputs()
+         * \see setModelOutputs()
+         */
+        QgsProcessingModelAlgorithm::ModelOutput &modelOutput( const QString &name );
+
+        /**
+         * Sets the map of final model \a outputs which are generated by this child algorithm.
+         * The keys are the output names from this child algorithm. Only outputs which are
+         * part of the final outputs from the model should be included in this map.
+         * \see modelOutputs()
+         */
+        void setModelOutputs( const QMap<QString, QgsProcessingModelAlgorithm::ModelOutput> &outputs );
+
       private:
 
         QString mId;
 
         QString mAlgorithmId;
 
-        QString mDescription;
-
         //! A map of parameter sources. Keys are algorithm parameter names.
         QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > mParams;
 
-        bool mActive = true;
+        //! A map of ModelOutput for final model outputs generated by this child algorithm. Keys are output names from the child algorithm.
+        QMap< QString, QgsProcessingModelAlgorithm::ModelOutput > mModelOutputs;
 
-        //! Position of child algorithm within model
-        QPointF mPosition;
+        bool mActive = true;
 
         //! List of child algorithms from the parent model on which this algorithm is dependent
         QStringList mDependencies;
@@ -371,9 +477,18 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
      * All existing child algorithms will be replaced.
      * \see childAlgorithms()
      * \see childAlgorithm()
+     * \see setChildAlgorithm()
      * \see addChildAlgorithm()
      */
     void setChildAlgorithms( const QMap<QString, QgsProcessingModelAlgorithm::ChildAlgorithm> &childAlgorithms );
+
+    /**
+     * Sets the child \a algorithm within the model. If a child algorithm already
+     * exists in the model with the same child ID then that algorithm will be replaced.
+     * \see addChildAlgorithm()
+     * \see setChildAlgorithms()
+     */
+    void setChildAlgorithm( const QgsProcessingModelAlgorithm::ChildAlgorithm &algorithm );
 
     /**
      * Adds a new child \a algorithm to the model. If a child algorithm already exists
@@ -382,6 +497,7 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
      * The assigned child ID will be returned.
      * \see childAlgorithms()
      * \see childAlgorithm()
+     * \see setChildAlgorithm()
      * \see setChildAlgorithms()
      */
     QString addChildAlgorithm( QgsProcessingModelAlgorithm::ChildAlgorithm &algorithm );
@@ -394,6 +510,67 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
      */
     QgsProcessingModelAlgorithm::ChildAlgorithm &childAlgorithm( const QString &id );
 
+    /**
+     * Adds a new parameter to the model, with the specified \a definition and graphical \a component.
+     * Ownership of \a definition is transferred to the model.
+     * \see updateModelParameter()
+     * \see removeModelParameter()
+     */
+    void addModelParameter( QgsProcessingParameterDefinition *definition SIP_TRANSFER, const QgsProcessingModelAlgorithm::ModelParameter &component );
+
+    /**
+     * Replaces the definition of an existing parameter (by parameter name) with a new \a definition. Ownership of
+     * \a definition is transferred to the model, and any existing parameter is deleted.
+     * \see addModelParameter()
+     * \see removeModelParameter()
+     */
+    void updateModelParameter( QgsProcessingParameterDefinition *definition SIP_TRANSFER );
+
+    /**
+     * Removes an existing model parameter by \a name. The definition of the matching parameter
+     * is deleted.
+     * \see addModelParameter()
+     * \see updateModelParameter()
+     */
+    void removeModelParameter( const QString &name );
+
+    /**
+     * Returns the map of parameter components used by the model. The keys
+     * should match the algorithm's parameter names (see parameterDefinitions() ).
+     * \see setParameterComponent()
+     * \see parameterComponent()
+     */
+    QMap<QString, QgsProcessingModelAlgorithm::ModelParameter> parameterComponents() const;
+
+    /**
+     * Sets the map of parameter components used by the model. The keys
+     * should match the algorithm's parameter names (see parameterDefinitions() ).
+     * All existing parameter components will be replaced.
+     * \see parameterComponents()
+     * \see setParameterComponent()
+     * \see parameterComponent()
+     */
+    void setParameterComponents( const QMap<QString, QgsProcessingModelAlgorithm::ModelParameter> &parameterComponents );
+
+    /**
+     * Sets a parameter \a component for the model. If a parameter component already
+     * exists in the model with the same parameter name then that component will be replaced.
+     * \see parameterComponents()
+     * \see setParameterComponents()
+     * \see parameterComponent()
+     */
+    void setParameterComponent( const QgsProcessingModelAlgorithm::ModelParameter &component );
+
+    /**
+     * Returns the parameter component with matching \a name. If no parameter component exists with
+     * this name a new component will be added to the model and returned.
+     * \see parameterComponents()
+     * \see setParameterComponents()
+     * \see setParameterComponent()
+     */
+    QgsProcessingModelAlgorithm::ModelParameter &parameterComponent( const QString &name );
+
+
 
     QStringList dependentChildAlgorithms( const QString &childId ) const;
 
@@ -403,6 +580,9 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
     QString mModelGroup;
 
     QMap< QString, ChildAlgorithm > mChildAlgorithms;
+
+//! Map of parameter name to model parameter component
+    QMap< QString, ModelParameter > mParameterComponents;
 };
 
 #endif // QGSPROCESSINGMODELALGORITHM_H

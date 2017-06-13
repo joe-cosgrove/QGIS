@@ -66,38 +66,10 @@ from processing.gui.Help2Html import getHtmlFromDescriptionsDict
 pluginPath = os.path.split(os.path.dirname(__file__))[0]
 
 
-class ModelerParameter(object):
-
-    def __init__(self, param=None, pos=None):
-        self.param = param
-        self.pos = pos
-
-    def todict(self):
-        return self.__dict__
-
-    @staticmethod
-    def fromdict(d):
-        return ModelerParameter(d["param"], d["pos"])
-
-
-class ModelerOutput(object):
-
-    def __init__(self, description=""):
-        self.description = description
-        self.pos = None
-
-    def todict(self):
-        return self.__dict__
-
-
 class Algorithm(QgsProcessingModelAlgorithm.ChildAlgorithm):
 
     def __init__(self, consoleName=None):
         super().__init__(consoleName)
-
-        # A dict of ModelerOutput with final output descriptions. Keys are output names.
-        # Outputs not final are not stored in this dict
-        self.outputs = {}
 
     def todict(self):
         return {k: v for k, v in list(self.__dict__.items()) if not k.startswith("_")}
@@ -215,46 +187,16 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
         # Geoalgorithms in this model. A dict of Algorithm objects, with names as keys
         self.algs = {}
 
-        # Input parameters. A dict of Input objects, with names as keys
-        self.inputs = {}
-
-        classes = [c for c in QgsProcessingParameterDefinition.__subclasses__()]
-        self.parameters = []
-        for c in classes:
-            for inp in list(self.inputs.values()):
-                if isinstance(inp.param, c):
-                    self.parameters.append(inp.param)
-        for inp in list(self.inputs.values()):
-            if inp.param not in self.parameters:
-                self.parameters.append(inp.param)
-        self.parameters.sort(key=attrgetter("description"))
-
-        self.outputs = []
-        for alg in list(self.algs.values()):
-            if alg.isActive():
-                for out in alg.outputs:
-                    modelOutput = copy.deepcopy(alg.algorithm().outputDefinition(out))
-                    modelOutput.name = self.getSafeNameForOutput(alg.childId(), out)
-                    modelOutput.description = alg.outputs[out].description()
-                    self.outputs.append(modelOutput)
-        self.outputs.sort(key=attrgetter("description"))
-
-    def addParameter(self, param):
-        self.inputs[param.param.name()] = param
-
-    def updateParameter(self, param):
-        self.inputs[param.name()].param = param
-
     def updateAlgorithm(self, alg):
-        alg.setPosition(self.algs[alg.childId()].position())
-        alg.setParametersCollapsed(self.algs[alg.childId()].parametersCollapsed())
-        alg.setOutputsCollapsed(self.algs[alg.childId()].outputsCollapsed())
-        self.algs[alg.childId()] = alg
+        alg.setPosition(self.childAlgorithm(alg.childId()).position())
+        alg.setParametersCollapsed(self.childAlgorithm(alg.childId()).parametersCollapsed())
+        alg.setOutputsCollapsed(self.childAlgorithm(alg.childId()).outputsCollapsed())
+        self.setChildAlgorithm(alg)
 
         from processing.modeler.ModelerGraphicItem import ModelerGraphicItem
-        for i, out in enumerate(alg.outputs):
-            alg.outputs[out].pos = (alg.outputs[out].pos or
-                                    alg.position() + QPointF(
+        for i, out in enumerate(alg.modelOutputs().keys()):
+            alg.modelOutput(out).setPosition(alg.modelOutput(out).position() or
+                                             alg.position() + QPointF(
                 ModelerGraphicItem.BOX_WIDTH,
                 (i + 1.5) * ModelerGraphicItem.BOX_HEIGHT))
 
@@ -274,7 +216,7 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
         """
         if self.hasDependencies(name):
             return False
-        del self.inputs[name]
+        self.removeModelParameter(name)
         self.modelerdialog.hasChanged = True
         return True
 
@@ -358,10 +300,10 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
             self.algs[alg].setPosition(pos)
         for alg, positions in list(outputsPos.items()):
             for output, pos in list(positions.items()):
-                self.algs[alg].outputs[output].pos = pos
+                self.algs[alg].modelOutput(output).setPosition(pos)
 
     def prepareAlgorithm(self, alg):
-        algInstance = alg.algorithm
+        algInstance = alg.algorithm()
         for param in algInstance.parameterDefinitions():
             if not param.flags() & QgsProcessingParameterDefinition.FlagHidden:
                 if param.name() in alg.params:
@@ -384,7 +326,8 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
                 #        )
                 #    )
 
-        for out in algInstance.outputs:
+        # note to self - these are parameters, not outputs
+        for out in algInstance.outputDefinitions():
             if not out.flags() & QgsProcessingParameterDefinition.FlagHidden:
                 if out.name() in alg.outputs:
                     name = self.getSafeNameForOutput(alg.childId(), out.name())
@@ -455,14 +398,14 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
                             # copy algorithm output value(s) back to model in case the algorithm modified those
                             for out in alg.algorithm().outputs:
                                 if not out.flags() & QgsProcessingParameterDefinition.FlagHidden:
-                                    if out.name() in alg.outputs:
+                                    if out.name() in alg.modelOutputs():
                                         modelOut = self.getOutputFromName(self.getSafeNameForOutput(alg.childId(), out.name()))
                                         if modelOut:
                                             modelOut.value = out.value
 
                             executed.append(alg.childId())
                             feedback.pushDebugInfo(
-                                self.tr('OK. Execution took %{0:.3f} ms ({1} outputs).', 'ModelerAlgorithm').format(dt, len(alg.algorithm.outputs)))
+                                self.tr('OK. Execution took %{0:.3f} ms ({1} outputs).', 'ModelerAlgorithm').format(dt, len(alg.algorithm.modelOutputs())))
                         except GeoAlgorithmExecutionException as e:
                             feedback.pushDebugInfo(self.tr('Failed', 'ModelerAlgorithm'))
                             raise GeoAlgorithmExecutionException(
@@ -581,7 +524,7 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
         for param in list(self.inputs.values()):
             s.append(param.param.getAsScriptCode())
         for alg in list(self.algs.values()):
-            for name, out in list(alg.outputs.items()):
+            for name, out in list(alg.modelOutputs().items()):
                 s.append('##%s=%s' % (safeName(out.description()).lower(), alg.getOutputType(name)))
 
         executed = []

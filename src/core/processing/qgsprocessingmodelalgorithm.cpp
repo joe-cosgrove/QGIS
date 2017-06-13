@@ -29,12 +29,12 @@ const QgsProcessingAlgorithm *QgsProcessingModelAlgorithm::ChildAlgorithm::algor
   return QgsApplication::processingRegistry()->algorithmById( mAlgorithmId );
 }
 
-QString QgsProcessingModelAlgorithm::ChildAlgorithm::description() const
+QString QgsProcessingModelAlgorithm::Component::description() const
 {
   return mDescription;
 }
 
-void QgsProcessingModelAlgorithm::ChildAlgorithm::setDescription( const QString &description )
+void QgsProcessingModelAlgorithm::Component::setDescription( const QString &description )
 {
   mDescription = description;
 }
@@ -64,15 +64,19 @@ void QgsProcessingModelAlgorithm::ChildAlgorithm::setActive( bool active )
   mActive = active;
 }
 
-QPointF QgsProcessingModelAlgorithm::ChildAlgorithm::position() const
+QPointF QgsProcessingModelAlgorithm::Component::position() const
 {
   return mPosition;
 }
 
-void QgsProcessingModelAlgorithm::ChildAlgorithm::setPosition( const QPointF &position )
+void QgsProcessingModelAlgorithm::Component::setPosition( const QPointF &position )
 {
   mPosition = position;
 }
+
+QgsProcessingModelAlgorithm::Component::Component( const QString &description )
+  : mDescription( description )
+{}
 
 QStringList QgsProcessingModelAlgorithm::ChildAlgorithm::dependencies() const
 {
@@ -92,6 +96,21 @@ bool QgsProcessingModelAlgorithm::ChildAlgorithm::outputsCollapsed() const
 void QgsProcessingModelAlgorithm::ChildAlgorithm::setOutputsCollapsed( bool outputsCollapsed )
 {
   mOutputsCollapsed = outputsCollapsed;
+}
+
+QMap<QString, QgsProcessingModelAlgorithm::ModelOutput> QgsProcessingModelAlgorithm::ChildAlgorithm::modelOutputs() const
+{
+  return mModelOutputs;
+}
+
+QgsProcessingModelAlgorithm::ModelOutput &QgsProcessingModelAlgorithm::ChildAlgorithm::modelOutput( const QString &name )
+{
+  return mModelOutputs[ name ];
+}
+
+void QgsProcessingModelAlgorithm::ChildAlgorithm::setModelOutputs( const QMap<QString, QgsProcessingModelAlgorithm::ModelOutput> &modelOutputs )
+{
+  mModelOutputs = modelOutputs;
 }
 
 bool QgsProcessingModelAlgorithm::ChildAlgorithm::parametersCollapsed() const
@@ -187,9 +206,35 @@ QMap<QString, QgsProcessingModelAlgorithm::ChildAlgorithm> QgsProcessingModelAlg
   return mChildAlgorithms;
 }
 
+void QgsProcessingModelAlgorithm::setParameterComponents( const QMap<QString, QgsProcessingModelAlgorithm::ModelParameter> &parameterComponents )
+{
+  mParameterComponents = parameterComponents;
+}
+
+void QgsProcessingModelAlgorithm::setParameterComponent( const QgsProcessingModelAlgorithm::ModelParameter &component )
+{
+  mParameterComponents.insert( component.parameterName(), component );
+}
+
+QgsProcessingModelAlgorithm::ModelParameter &QgsProcessingModelAlgorithm::parameterComponent( const QString &name )
+{
+  if ( !mParameterComponents.contains( name ) )
+  {
+    QgsProcessingModelAlgorithm::ModelParameter &component = mParameterComponents[ name ];
+    component.setParameterName( name );
+    return component;
+  }
+  return mParameterComponents[ name ];
+}
+
 void QgsProcessingModelAlgorithm::setChildAlgorithms( const QMap<QString, ChildAlgorithm> &childAlgorithms )
 {
   mChildAlgorithms = childAlgorithms;
+}
+
+void QgsProcessingModelAlgorithm::setChildAlgorithm( const QgsProcessingModelAlgorithm::ChildAlgorithm &algorithm )
+{
+  mChildAlgorithms.insert( algorithm.childId(), algorithm );
 }
 
 QString QgsProcessingModelAlgorithm::addChildAlgorithm( ChildAlgorithm &algorithm )
@@ -204,6 +249,29 @@ QString QgsProcessingModelAlgorithm::addChildAlgorithm( ChildAlgorithm &algorith
 QgsProcessingModelAlgorithm::ChildAlgorithm &QgsProcessingModelAlgorithm::childAlgorithm( const QString &childId )
 {
   return mChildAlgorithms[ childId ];
+}
+
+void QgsProcessingModelAlgorithm::addModelParameter( QgsProcessingParameterDefinition *definition, const QgsProcessingModelAlgorithm::ModelParameter &component )
+{
+  addParameter( definition );
+  mParameterComponents.insert( definition->name(), component );
+}
+
+void QgsProcessingModelAlgorithm::updateModelParameter( QgsProcessingParameterDefinition *definition )
+{
+  removeParameter( definition->name() );
+  addParameter( definition );
+}
+
+void QgsProcessingModelAlgorithm::removeModelParameter( const QString &name )
+{
+  removeParameter( name );
+  mParameterComponents.remove( name );
+}
+
+QMap<QString, QgsProcessingModelAlgorithm::ModelParameter> QgsProcessingModelAlgorithm::parameterComponents() const
+{
+  return mParameterComponents;
 }
 
 QStringList QgsProcessingModelAlgorithm::dependentChildAlgorithms( const QString &childId ) const
@@ -271,4 +339,15 @@ QgsProcessingModelAlgorithm::ChildParameterSource QgsProcessingModelAlgorithm::C
 QgsProcessingModelAlgorithm::ChildParameterSource::Source QgsProcessingModelAlgorithm::ChildParameterSource::source() const
 {
   return mSource;
+}
+
+QgsProcessingModelAlgorithm::ModelOutput::ModelOutput( const QString &description )
+  : QgsProcessingModelAlgorithm::Component( description )
+{}
+
+QgsProcessingModelAlgorithm::ModelParameter::ModelParameter( const QString &parameterName )
+  : QgsProcessingModelAlgorithm::Component()
+  , mParameterName( parameterName )
+{
+
 }

@@ -67,7 +67,7 @@ class ModelerScene(QGraphicsScene):
         if isinstance(value, list):
             for v in value:
                 items.extend(self.getItemsFromParamValue(v))
-        elif isistance(value, QgsProcessingModelAlgorithm.ChildParameterSource):
+        elif isinstance(value, QgsProcessingModelAlgorithm.ChildParameterSource):
             if value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ModelParameter:
                 items.append((self.paramItems[value.parameterName()], 0))
             elif value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ChildOutput:
@@ -129,21 +129,20 @@ class ModelerScene(QGraphicsScene):
 
         # And finally the outputs
         for alg in list(model.childAlgorithms().values()):
-            outputs = alg.outputs
+            outputs = alg.modelOutputs()
             outputItems = {}
             idx = 0
-            for key in outputs:
-                out = outputs[key]
+            for key, out in outputs.items():
                 if out is not None:
                     item = ModelerGraphicItem(out, model, controls)
                     item.setFlag(QGraphicsItem.ItemIsMovable, True)
                     item.setFlag(QGraphicsItem.ItemIsSelectable, True)
                     self.addItem(item)
-                    pos = alg.outputs[key].pos
+                    pos = out.position()
                     if pos is None:
                         pos = (alg.position() + QPointF(ModelerGraphicItem.BOX_WIDTH, 0) +
                                self.algItems[alg.childId()].getLinkPointForOutput(idx))
-                    item.setPos(pos)
+                    item.setPosition(pos)
                     outputItems[key] = item
                     arrow = ModelerArrowItem(self.algItems[alg.childId()], idx, item,
                                              -1)

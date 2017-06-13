@@ -290,7 +290,7 @@ class ModelerParameterDefinitionDialog(QDialog):
             safeName = ''.join(c for c in description if c in validChars)
             name = safeName.lower()
             i = 2
-            while name in self.alg.inputs:
+            while self.alg.parameterDefinition(name):
                 name = safeName.lower() + str(i)
         else:
             name = self.param.name()

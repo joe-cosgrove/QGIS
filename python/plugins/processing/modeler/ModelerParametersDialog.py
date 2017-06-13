@@ -53,8 +53,6 @@ from processing.core.outputs import (OutputRaster,
                                      OutputDirectory)
 from processing.core.parameters import ParameterPoint, ParameterExtent
 
-from processing.modeler.ModelerAlgorithm import (ModelerOutput)
-
 
 class ModelerParametersDialog(QDialog):
 
@@ -272,7 +270,7 @@ class ModelerParametersDialog(QDialog):
                 return self.model.inputs[value.parameterName()].param.description()
             elif value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ChildOutput:
                 alg = self.model.childAlgorithm(value.outputChildId())
-                return self.tr("'{0}' from algorithm '{1}'").format(alg.algorithm().outputDefinition(value.output).description(), alg.description())
+                return self.tr("'{0}' from algorithm '{1}'").format(alg.algorithm().outputDefinition(value.outputName()).description(), alg.description())
 
         return value
 
@@ -288,7 +286,7 @@ class ModelerParametersDialog(QDialog):
                 else:
                     value = param.defaultValue()
                 self.wrappers[param.name()].setValue(value)
-            for name, out in list(alg.outputs.items()):
+            for name, out in list(alg.modelOutputs().items()):
                 self.valueItems[name].setText(out.description())
 
             selected = []
@@ -302,7 +300,7 @@ class ModelerParametersDialog(QDialog):
     def createAlgorithm(self):
         alg = QgsProcessingModelAlgorithm.ChildAlgorithm(self._alg.id())
         alg.generateChildId(self.model)
-        alg.description = self.descriptionBox.text()
+        alg.setDescription(self.descriptionBox.text())
         for param in self._alg.parameterDefinitions():
             if param.isDestination() or param.flags() & QgsProcessingParameterDefinition.FlagHidden:
                 continue
@@ -319,7 +317,7 @@ class ModelerParametersDialog(QDialog):
         #    if not output.flags() & QgsProcessingParameterDefinition.FlagHidden:
         #        name = str(self.valueItems[output.name()].text())
         #        if name.strip() != '' and name != ModelerParametersDialog.ENTER_NAME:
-         #           alg.outputs[output.name()] = ModelerOutput(name)
+         #           alg.outputs[output.name()] = QgsProcessingModelAlgorithm.ModelOutput(name)
 
         selectedOptions = self.dependenciesPanel.selectedoptions
         availableDependencies = self.getAvailableDependencies()  # spellok

@@ -104,6 +104,13 @@ class DummyAlgorithm : public QgsProcessingAlgorithm
       QgsProcessingParameterFeatureSink *p6 = new QgsProcessingParameterFeatureSink( "p6" );
       QVERIFY( addParameter( p6 ) );
       QCOMPARE( destinationParameterDefinitions(), QgsProcessingParameterDefinitions() << p5 << p6 );
+
+      // remove parameter
+      removeParameter( "non existent" );
+      removeParameter( "p6" );
+      QCOMPARE( destinationParameterDefinitions(), QgsProcessingParameterDefinitions() << p5 );
+      removeParameter( "p5" );
+      QVERIFY( destinationParameterDefinitions().isEmpty() );
     }
 
     void runOutputChecks()
@@ -3004,6 +3011,26 @@ void TestQgsProcessing::modelerAlgorithm()
   QCOMPARE( child.parameterSources().value( QStringLiteral( "a" ) ).staticValue().toInt(), 5 );
   QCOMPARE( child.parameterSources().value( QStringLiteral( "b" ) ).staticValue().toInt(), 7 );
 
+  QMap<QString, QgsProcessingModelAlgorithm::ModelOutput> outputs;
+  QgsProcessingModelAlgorithm::ModelOutput out1;
+  out1.setDescription( QStringLiteral( "my output" ) );
+  outputs.insert( QStringLiteral( "a" ), out1 );
+  child.setModelOutputs( outputs );
+  QCOMPARE( child.modelOutputs().count(), 1 );
+  QCOMPARE( child.modelOutputs().value( QStringLiteral( "a" ) ).description(), QStringLiteral( "my output" ) );
+  QCOMPARE( child.modelOutput( "a" ).description(), QStringLiteral( "my output" ) );
+  child.modelOutput( "a" ).setDescription( QStringLiteral( "my output 2" ) );
+  QCOMPARE( child.modelOutput( "a" ).description(), QStringLiteral( "my output 2" ) );
+  // no existent
+  child.modelOutput( "b" ).setDescription( QStringLiteral( "my output 3" ) );
+  QCOMPARE( child.modelOutput( "b" ).description(), QStringLiteral( "my output 3" ) );
+  QCOMPARE( child.modelOutputs().count(), 2 );
+
+
+
+  // model algorithm tests
+
+
   QgsProcessingModelAlgorithm alg( "test", "testGroup" );
   QCOMPARE( alg.name(), QStringLiteral( "test" ) );
   QCOMPARE( alg.displayName(), QStringLiteral( "test" ) );
@@ -3036,6 +3063,12 @@ void TestQgsProcessing::modelerAlgorithm()
   QVERIFY( alg.childAlgorithm( "d" ).description().isEmpty() );
   alg.childAlgorithm( "d" ).setDescription( QStringLiteral( "alg4" ) );
   QCOMPARE( alg.childAlgorithm( "d" ).description(), QStringLiteral( "alg4" ) );
+  // overwrite existing
+  QgsProcessingModelAlgorithm::ChildAlgorithm a4a;
+  a4a.setChildId( "d" );
+  a4a.setDescription( "new" );
+  alg.setChildAlgorithm( a4a );
+  QCOMPARE( alg.childAlgorithm( "d" ).description(), QStringLiteral( "new" ) );
 
   // generating child ids
   QgsProcessingModelAlgorithm::ChildAlgorithm c1;
@@ -3058,6 +3091,42 @@ void TestQgsProcessing::modelerAlgorithm()
   c4.setChildId( QStringLiteral( "centroid_1" ) );// dupe id
   QCOMPARE( alg.addChildAlgorithm( c4 ), QStringLiteral( "centroid_2" ) );
   QCOMPARE( alg.childAlgorithm( QStringLiteral( "centroid_2" ) ).childId(), QStringLiteral( "centroid_2" ) );
+
+  // parameter components
+  QMap<QString, QgsProcessingModelAlgorithm::ModelParameter> pComponents;
+  QgsProcessingModelAlgorithm::ModelParameter pc1;
+  pc1.setParameterName( QStringLiteral( "my_param" ) );
+  QCOMPARE( pc1.parameterName(), QStringLiteral( "my_param" ) );
+  pComponents.insert( QStringLiteral( "my_param" ), pc1 );
+  alg.setParameterComponents( pComponents );
+  QCOMPARE( alg.parameterComponents().count(), 1 );
+  QCOMPARE( alg.parameterComponents().value( QStringLiteral( "my_param" ) ).parameterName(), QStringLiteral( "my_param" ) );
+  QCOMPARE( alg.parameterComponent( "my_param" ).parameterName(), QStringLiteral( "my_param" ) );
+  alg.parameterComponent( "my_param" ).setDescription( QStringLiteral( "my param 2" ) );
+  QCOMPARE( alg.parameterComponent( "my_param" ).description(), QStringLiteral( "my param 2" ) );
+  // no existent
+  alg.parameterComponent( "b" ).setDescription( QStringLiteral( "my param 3" ) );
+  QCOMPARE( alg.parameterComponent( "b" ).description(), QStringLiteral( "my param 3" ) );
+  QCOMPARE( alg.parameterComponent( "b" ).parameterName(), QStringLiteral( "b" ) );
+  QCOMPARE( alg.parameterComponents().count(), 2 );
+
+  // parameter definitions
+  QgsProcessingModelAlgorithm alg1a( "test", "testGroup" );
+  QgsProcessingModelAlgorithm::ModelParameter bool1;
+  bool1.setPosition( QPointF( 1, 2 ) );
+  alg1a.addModelParameter( new QgsProcessingParameterBoolean( "p1", "desc" ), bool1 );
+  QCOMPARE( alg1a.parameterDefinitions().count(), 1 );
+  QCOMPARE( alg1a.parameterDefinition( "p1" )->type(), QStringLiteral( "boolean" ) );
+  QCOMPARE( alg1a.parameterComponent( "p1" ).position().x(), 1.0 );
+  QCOMPARE( alg1a.parameterComponent( "p1" ).position().y(), 2.0 );
+  alg1a.updateModelParameter( new QgsProcessingParameterBoolean( "p1", "descx" ) );
+  QCOMPARE( alg1a.parameterDefinition( "p1" )->description(), QStringLiteral( "descx" ) );
+  alg1a.removeModelParameter( "bad" );
+  QCOMPARE( alg1a.parameterDefinitions().count(), 1 );
+  alg1a.removeModelParameter( "p1" );
+  QVERIFY( alg1a.parameterDefinitions().isEmpty() );
+  QVERIFY( alg1a.parameterComponents().isEmpty() );
+
 
   // test canExecute
   QgsProcessingModelAlgorithm alg2( "test", "testGroup" );
