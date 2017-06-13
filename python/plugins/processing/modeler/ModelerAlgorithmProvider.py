@@ -91,7 +91,7 @@ class ModelerAlgorithmProvider(QgsProcessingProvider):
         for f in folders:
             self.loadFromFolder(f)
         for a in self.algs:
-            self.addChildAlgorithm(a)
+            self.addAlgorithm(a)
 
     def loadFromFolder(self, folder):
         if not os.path.exists(folder):

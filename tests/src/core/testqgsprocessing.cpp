@@ -2996,13 +2996,13 @@ void TestQgsProcessing::modelerAlgorithm()
   child.setDependencies( QStringList() << "a" << "b" );
   QCOMPARE( child.dependencies(), QStringList() << "a" << "b" );
 
-  QVariantMap params;
-  params.insert( QStringLiteral( "a" ), 5 );
-  child.setParameterInputs( params );
-  QCOMPARE( child.parameterInputs().value( QStringLiteral( "a" ) ).toInt(), 5 );
-  child.addParameterInput( QStringLiteral( "b" ), 7 );
-  QCOMPARE( child.parameterInputs().value( QStringLiteral( "a" ) ).toInt(), 5 );
-  QCOMPARE( child.parameterInputs().value( QStringLiteral( "b" ) ).toInt(), 7 );
+  QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > sources;
+  sources.insert( QStringLiteral( "a" ), QgsProcessingModelAlgorithm::ChildParameterSource::fromStaticValue( 5 ) );
+  child.setParameterSources( sources );
+  QCOMPARE( child.parameterSources().value( QStringLiteral( "a" ) ).staticValue().toInt(), 5 );
+  child.addParameterSource( QStringLiteral( "b" ), QgsProcessingModelAlgorithm::ChildParameterSource::fromStaticValue( 7 ) );
+  QCOMPARE( child.parameterSources().value( QStringLiteral( "a" ) ).staticValue().toInt(), 5 );
+  QCOMPARE( child.parameterSources().value( QStringLiteral( "b" ) ).staticValue().toInt(), 7 );
 
   QgsProcessingModelAlgorithm alg( "test", "testGroup" );
   QCOMPARE( alg.name(), QStringLiteral( "test" ) );

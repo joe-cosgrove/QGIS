@@ -28,10 +28,11 @@ __revision__ = '$Format:%H$'
 
 from qgis.PyQt.QtCore import QPointF, Qt
 from qgis.PyQt.QtWidgets import QGraphicsItem, QGraphicsScene
-from qgis.core import QgsProcessingParameterDefinition
+from qgis.core import (QgsProcessingParameterDefinition,
+                       QgsProcessingModelAlgorithm)
 from processing.modeler.ModelerGraphicItem import ModelerGraphicItem
 from processing.modeler.ModelerArrowItem import ModelerArrowItem
-from processing.modeler.ModelerAlgorithm import ValueFromInput, ValueFromOutput, CompoundValue
+from processing.modeler.ModelerAlgorithm import CompoundValue
 
 
 class ModelerScene(QGraphicsScene):
@@ -66,18 +67,19 @@ class ModelerScene(QGraphicsScene):
         if isinstance(value, list):
             for v in value:
                 items.extend(self.getItemsFromParamValue(v))
+        elif isistance(value, QgsProcessingModelAlgorithm.ChildParameterSource):
+            if value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ModelParameter:
+                items.append((self.paramItems[value.parameterName()], 0))
+            elif value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ChildOutput:
+                outputs = self.model.childAlgorithm(value.outputChildId()).algorithm().outputDefinitions()
+                for i, out in enumerate(outputs):
+                    if out.name() == value.outputName():
+                        break
+                if value.outputChildId() in self.algItems:
+                    items.append((self.algItems[value.outputChildId()], i))
         elif isinstance(value, CompoundValue):
             for v in value.values:
                 items.extend(self.getItemsFromParamValue(v))
-        elif isinstance(value, ValueFromInput):
-            items.append((self.paramItems[value.name], 0))
-        elif isinstance(value, ValueFromOutput):
-            outputs = self.model.algs[value.alg].algorithm.outputDefinitions()
-            for i, out in enumerate(outputs):
-                if out.name() == value.output:
-                    break
-            if value.alg in self.algItems:
-                items.append((self.algItems[value.alg], i))
         return items
 
     def paintModel(self, model, controls=True):
@@ -92,21 +94,21 @@ class ModelerScene(QGraphicsScene):
             self.paramItems[inp.param.name()] = item
 
         # We add the algs
-        for alg in list(model.algs.values()):
+        for alg in list(model.childAlgorithms().values()):
             item = ModelerGraphicItem(alg, model, controls)
             item.setFlag(QGraphicsItem.ItemIsMovable, True)
             item.setFlag(QGraphicsItem.ItemIsSelectable, True)
             self.addItem(item)
-            item.setPos(alg.pos.x(), alg.pos.y())
+            item.setPos(alg.position().x(), alg.position().y())
             self.algItems[alg.childId()] = item
 
         # And then the arrows
-        for alg in list(model.algs.values()):
+        for alg in list(model.childAlgorithms().values()):
             idx = 0
-            for parameter in alg.algorithm.parameterDefinitions():
+            for parameter in alg.algorithm().parameterDefinitions():
                 if not parameter.isDestination() and not parameter.flags() & QgsProcessingParameterDefinition.FlagHidden:
-                    if parameter.name() in alg.params:
-                        value = alg.params[parameter.name()]
+                    if parameter.name() in alg.parameterSources():
+                        value = alg.parameterSources()[parameter.name()]
                     else:
                         value = None
                     sourceItems = self.getItemsFromParamValue(value)
@@ -126,7 +128,7 @@ class ModelerScene(QGraphicsScene):
                 self.addItem(arrow)
 
         # And finally the outputs
-        for alg in list(model.algs.values()):
+        for alg in list(model.childAlgorithms().values()):
             outputs = alg.outputs
             outputItems = {}
             idx = 0

@@ -39,19 +39,19 @@ void QgsProcessingModelAlgorithm::ChildAlgorithm::setDescription( const QString 
   mDescription = description;
 }
 
-QVariantMap QgsProcessingModelAlgorithm::ChildAlgorithm::parameterInputs() const
+QMap<QString, QgsProcessingModelAlgorithm::ChildParameterSource> QgsProcessingModelAlgorithm::ChildAlgorithm::parameterSources() const
 {
   return mParams;
 }
 
-void QgsProcessingModelAlgorithm::ChildAlgorithm::setParameterInputs( const QVariantMap &params )
+void QgsProcessingModelAlgorithm::ChildAlgorithm::setParameterSources( const QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > &params )
 {
   mParams = params;
 }
 
-void QgsProcessingModelAlgorithm::ChildAlgorithm::addParameterInput( const QString &name, const QVariant &value )
+void QgsProcessingModelAlgorithm::ChildAlgorithm::addParameterSource( const QString &name, const ChildParameterSource &source )
 {
-  mParams.insert( name, value );
+  mParams.insert( name, source );
 }
 
 bool QgsProcessingModelAlgorithm::ChildAlgorithm::isActive() const

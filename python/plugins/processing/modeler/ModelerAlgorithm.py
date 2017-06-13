@@ -103,7 +103,7 @@ class Algorithm(QgsProcessingModelAlgorithm.ChildAlgorithm):
         return {k: v for k, v in list(self.__dict__.items()) if not k.startswith("_")}
 
     def getOutputType(self, outputName):
-        output = self.algorithm.getOutputFromName(outputName)
+        output = self.algorithm().outputDefinition(outputName)
         return "output " + output.__class__.__name__.split(".")[-1][6:].lower()
 
     def toPython(self):
@@ -113,7 +113,7 @@ class Algorithm(QgsProcessingModelAlgorithm.ChildAlgorithm):
             return None
 
         for param in self.algorithm().parameterDefinitions():
-            value = self.parameterInputs(param.name())
+            value = self.parameterSources()[param.name()]
 
             def _toString(v):
                 if isinstance(v, (ValueFromInput, ValueFromOutput)):
@@ -233,7 +233,7 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
         for alg in list(self.algs.values()):
             if alg.isActive():
                 for out in alg.outputs:
-                    modelOutput = copy.deepcopy(alg.algorithm.getOutputFromName(out))
+                    modelOutput = copy.deepcopy(alg.algorithm().outputDefinition(out))
                     modelOutput.name = self.getSafeNameForOutput(alg.childId(), out)
                     modelOutput.description = alg.outputs[out].description()
                     self.outputs.append(modelOutput)
@@ -422,7 +422,7 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
         elif isinstance(value, ValueFromInput):
             v = self.getParameterFromName(value.name).value
         elif isinstance(value, ValueFromOutput):
-            v = self.algs[value.alg].algorithm.getOutputFromName(value.output).value
+            v = self.algs[value.alg].algorithm().outputDefinition(value.output).value
         else:
             v = value
         return param.evaluateForModeler(v, self)
@@ -449,11 +449,11 @@ class ModelerAlgorithm(QgsProcessingModelAlgorithm):
                             feedback.pushDebugInfo('Parameters: ' + ', '.join([str(p).strip() +
                                                                                '=' + str(p.value) for p in alg.algorithm.parameters]))
                             t0 = time.time()
-                            alg.algorithm.execute(parameters, context, feedback)
+                            alg.algorithm().execute(parameters, context, feedback)
                             dt = time.time() - t0
 
                             # copy algorithm output value(s) back to model in case the algorithm modified those
-                            for out in alg.algorithm.outputs:
+                            for out in alg.algorithm().outputs:
                                 if not out.flags() & QgsProcessingParameterDefinition.FlagHidden:
                                     if out.name() in alg.outputs:
                                         modelOut = self.getOutputFromName(self.getSafeNameForOutput(alg.childId(), out.name()))

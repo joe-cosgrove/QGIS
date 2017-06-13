@@ -277,7 +277,7 @@ class ModelerDialog(BASE, WIDGET):
             self.hasChanged = True
 
     def runModel(self):
-        if len(self.alg.algs) == 0:
+        if len(self.alg.childAlgorithms()) == 0:
             self.bar.pushMessage("", "Model doesn't contain any algorithm and/or parameter and can't be executed", level=QgsMessageBar.WARNING, duration=5)
             return
 
@@ -565,8 +565,6 @@ class ModelerDialog(BASE, WIDGET):
                 dlg.alg.setPosition(self.getPositionForAlgorithmItem())
             else:
                 dlg.alg.setPosition(pos)
-            if not dlg.alg.position().isNull():
-                dlg.alg.setPosition(QPointF(pos))
             from processing.modeler.ModelerGraphicItem import ModelerGraphicItem
             for i, out in enumerate(dlg.alg.outputs):
                 dlg.alg.outputs[out].pos = dlg.alg.pos + QPointF(ModelerGraphicItem.BOX_WIDTH, (i + 1.5) *
@@ -579,9 +577,9 @@ class ModelerDialog(BASE, WIDGET):
         MARGIN = 20
         BOX_WIDTH = 200
         BOX_HEIGHT = 80
-        if self.alg.algs:
-            maxX = max([alg.position().x() for alg in list(self.alg.algs.values())])
-            maxY = max([alg.position().y() for alg in list(self.alg.algs.values())])
+        if self.alg.childAlgorithms():
+            maxX = max([alg.position().x() for alg in list(self.alg.childAlgorithms().values())])
+            maxY = max([alg.position().y() for alg in list(self.alg.childAlgorithms().values())])
             newX = min(MARGIN + BOX_WIDTH + maxX, self.CANVAS_SIZE - BOX_WIDTH)
             newY = min(MARGIN + BOX_HEIGHT + maxY, self.CANVAS_SIZE -
                        BOX_HEIGHT)

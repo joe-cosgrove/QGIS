@@ -41,6 +41,12 @@ class QgsProcessingModelAlgorithm : QgsProcessingAlgorithm
           StaticValue,
         };
 
+        ChildParameterSource();
+%Docstring
+ Constructor for ChildParameterSource. It is recommended that the static methods
+ fromStaticValue(), fromModelParameter() and fromChildOutput() are used instead.
+%End
+
         static QgsProcessingModelAlgorithm::ChildParameterSource fromStaticValue( const QVariant &value );
 %Docstring
  Returns a new ChildParameterSource which takes its value from a static ``value``.
@@ -127,8 +133,6 @@ class QgsProcessingModelAlgorithm : QgsProcessingAlgorithm
 .. seealso:: setOutputChildId()
 %End
 
-      private:
-        ChildParameterSource();
     };
 
     class ChildAlgorithm
@@ -211,32 +215,32 @@ class QgsProcessingModelAlgorithm : QgsProcessingAlgorithm
 .. seealso:: description()
 %End
 
-        QVariantMap parameterInputs() const;
+        QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > parameterSources() const;
 %Docstring
- Returns a map of parameter inputs. The keys are the child algorithm
- parameter names, the values are the input for that parameter.
-.. seealso:: setParameterInputs()
-.. seealso:: addParameterInput()
- :rtype: QVariantMap
+ Returns a map of parameter sources. The keys are the child algorithm
+ parameter names, the values are the source for that parameter.
+.. seealso:: setParameterSources()
+.. seealso:: addParameterSource()
+ :rtype: QMap< str, QgsProcessingModelAlgorithm.ChildParameterSource >
 %End
 
-        void setParameterInputs( const QVariantMap &inputs );
+        void setParameterSources( const QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > &sources );
 %Docstring
- Sets the map of parameter ``inputs``. The keys are the child algorithm
- parameter names, the values are the input for that parameter.
-.. seealso:: parameterInputs()
-.. seealso:: addParameterInput()
+ Sets the map of parameter ``sources``. The keys are the child algorithm
+ parameter names, the values are the source for that parameter.
+.. seealso:: parameterSources()
+.. seealso:: addParameterSource()
 %End
 
-        void addParameterInput( const QString &name, const QVariant &value );
+        void addParameterSource( const QString &name, const QgsProcessingModelAlgorithm::ChildParameterSource &source );
 %Docstring
- Adds a parameter input. The ``name`` argument should match
- one of the child algorithm's parameter names, and the ``value``
- argument is used to set the input for that parameter.
+ Adds a parameter source. The ``name`` argument should match
+ one of the child algorithm's parameter names, and the ``source``
+ argument is used to set the source for that parameter.
 
- Any existing parameter input with matching name will be replaced.
-.. seealso:: parameterInputs()
-.. seealso:: setParameterInputs()
+ Any existing parameter source with matching name will be replaced.
+.. seealso:: parameterSources()
+.. seealso:: setParameterSources()
 %End
 
         bool isActive() const;

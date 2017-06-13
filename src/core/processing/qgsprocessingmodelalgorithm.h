@@ -51,6 +51,12 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
         };
 
         /**
+         * Constructor for ChildParameterSource. It is recommended that the static methods
+         * fromStaticValue(), fromModelParameter() and fromChildOutput() are used instead.
+         */
+        ChildParameterSource() = default;
+
+        /**
          * Returns a new ChildParameterSource which takes its value from a static \a value.
          * \see fromModelParameter()
          * \see fromChildOutput()
@@ -129,11 +135,6 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
         void setOutputName( const QString &name ) { mOutputName = name; mSource = ChildOutput; }
 
       private:
-
-        ChildParameterSource() = default;
-#ifdef SIP_RUN
-        ChildParameterSource();
-#endif
 
         Source mSource = StaticValue;
         QVariant mStaticValue;
@@ -217,31 +218,31 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
         void setDescription( const QString &description );
 
         /**
-         * Returns a map of parameter inputs. The keys are the child algorithm
-         * parameter names, the values are the input for that parameter.
-         * \see setParameterInputs()
-         * \see addParameterInput()
+         * Returns a map of parameter sources. The keys are the child algorithm
+         * parameter names, the values are the source for that parameter.
+         * \see setParameterSources()
+         * \see addParameterSource()
          */
-        QVariantMap parameterInputs() const;
+        QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > parameterSources() const;
 
         /**
-         * Sets the map of parameter \a inputs. The keys are the child algorithm
-         * parameter names, the values are the input for that parameter.
-         * \see parameterInputs()
-         * \see addParameterInput()
+         * Sets the map of parameter \a sources. The keys are the child algorithm
+         * parameter names, the values are the source for that parameter.
+         * \see parameterSources()
+         * \see addParameterSource()
          */
-        void setParameterInputs( const QVariantMap &inputs );
+        void setParameterSources( const QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > &sources );
 
         /**
-         * Adds a parameter input. The \a name argument should match
-         * one of the child algorithm's parameter names, and the \a value
-         * argument is used to set the input for that parameter.
+         * Adds a parameter source. The \a name argument should match
+         * one of the child algorithm's parameter names, and the \a source
+         * argument is used to set the source for that parameter.
          *
-         * Any existing parameter input with matching name will be replaced.
-         * \see parameterInputs()
-         * \see setParameterInputs()
+         * Any existing parameter source with matching name will be replaced.
+         * \see parameterSources()
+         * \see setParameterSources()
          */
-        void addParameterInput( const QString &name, const QVariant &value );
+        void addParameterSource( const QString &name, const QgsProcessingModelAlgorithm::ChildParameterSource &source );
 
         /**
          * Returns true if the child algorithm is active.
@@ -323,8 +324,8 @@ class CORE_EXPORT QgsProcessingModelAlgorithm : public QgsProcessingAlgorithm
 
         QString mDescription;
 
-        //! A map of input objects. Keys are algorithm parameter names.
-        QVariantMap mParams;
+        //! A map of parameter sources. Keys are algorithm parameter names.
+        QMap< QString, QgsProcessingModelAlgorithm::ChildParameterSource > mParams;
 
         bool mActive = true;
 
