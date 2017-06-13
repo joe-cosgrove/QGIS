@@ -562,16 +562,16 @@ class ModelerDialog(BASE, WIDGET):
         dlg.exec_()
         if dlg.alg is not None:
             if pos is None:
-                dlg.alg.pos = self.getPositionForAlgorithmItem()
+                dlg.alg.setPosition(self.getPositionForAlgorithmItem())
             else:
-                dlg.alg.pos = pos
-            if isinstance(dlg.alg.pos, QPoint):
-                dlg.alg.pos = QPointF(pos)
+                dlg.alg.setPosition(pos)
+            if not dlg.alg.position().isNull():
+                dlg.alg.setPosition(QPointF(pos))
             from processing.modeler.ModelerGraphicItem import ModelerGraphicItem
             for i, out in enumerate(dlg.alg.outputs):
                 dlg.alg.outputs[out].pos = dlg.alg.pos + QPointF(ModelerGraphicItem.BOX_WIDTH, (i + 1.5) *
                                                                  ModelerGraphicItem.BOX_HEIGHT)
-            self.alg.addAlgorithm(dlg.alg)
+            self.alg.addChildAlgorithm(dlg.alg)
             self.repaintModel()
             self.hasChanged = True
 
@@ -580,8 +580,8 @@ class ModelerDialog(BASE, WIDGET):
         BOX_WIDTH = 200
         BOX_HEIGHT = 80
         if self.alg.algs:
-            maxX = max([alg.pos.x() for alg in list(self.alg.algs.values())])
-            maxY = max([alg.pos.y() for alg in list(self.alg.algs.values())])
+            maxX = max([alg.position().x() for alg in list(self.alg.algs.values())])
+            maxY = max([alg.position().y() for alg in list(self.alg.algs.values())])
             newX = min(MARGIN + BOX_WIDTH + maxX, self.CANVAS_SIZE - BOX_WIDTH)
             newY = min(MARGIN + BOX_HEIGHT + maxY, self.CANVAS_SIZE -
                        BOX_HEIGHT)

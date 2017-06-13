@@ -207,7 +207,7 @@ class ModelerParametersDialog(QDialog):
             dependent = self.model.getDependentAlgorithms(self._algName)
         opts = []
         for alg in list(self.model.algs.values()):
-            if alg.modeler_name not in dependent:
+            if alg.childId() not in dependent:
                 opts.append(alg)
         return opts
 
@@ -255,14 +255,14 @@ class ModelerParametersDialog(QDialog):
         else:
             dependent = self.model.getDependentAlgorithms(self._algName)
         for alg in list(self.model.algs.values()):
-            if alg.modeler_name not in dependent:
+            if alg.childId() not in dependent:
                 for out in alg.algorithm.outputDefinitions():
                     for t in outTypes:
                         if isinstance(out, t):
                             if dataType is not None and out.datatype in dataType:
-                                values.append(ValueFromOutput(alg.modeler_name, out.name()))
+                                values.append(ValueFromOutput(alg.childId(), out.name()))
                             else:
-                                values.append(ValueFromOutput(alg.modeler_name, out.name()))
+                                values.append(ValueFromOutput(alg.childId(), out.name()))
 
         return values
 
@@ -280,8 +280,8 @@ class ModelerParametersDialog(QDialog):
             for param in alg.algorithm.parameterDefinitions():
                 if param.isDestination() or param.flags() & QgsProcessingParameterDefinition.FlagHidden:
                     continue
-                if param.name() in alg.params:
-                    value = alg.params[param.name()]
+                if param.name() in alg.parameterInputs():
+                    value = alg.parameterInputs(param.name())
                 else:
                     value = param.defaultValue()
                 self.wrappers[param.name()].setValue(value)
@@ -291,14 +291,14 @@ class ModelerParametersDialog(QDialog):
             selected = []
             dependencies = self.getAvailableDependencies()  # spellok
             for idx, dependency in enumerate(dependencies):
-                if dependency.modeler_name in alg.dependencies:
+                if dependency.childId() in alg.dependencies():
                     selected.append(idx)
 
             self.dependenciesPanel.setSelectedItems(selected)
 
     def createAlgorithm(self):
         alg = Algorithm(self._alg.id())
-        alg.setName(self.model)
+        alg.generateChildId(self.model)
         alg.description = self.descriptionBox.text()
         for param in self._alg.parameterDefinitions():
             if param.isDestination() or param.flags() & QgsProcessingParameterDefinition.FlagHidden:
@@ -308,7 +308,7 @@ class ModelerParametersDialog(QDialog):
                 self.bar.pushMessage("Error", "Wrong or missing value for parameter '%s'" % param.description(),
                                      level=QgsMessageBar.WARNING)
                 return None
-            alg.params[param.name()] = val
+            alg.addParameterInput(param.name(), val)
 
         # outputs = self._alg.outputDefinitions()
         #for output in outputs:
@@ -319,8 +319,10 @@ class ModelerParametersDialog(QDialog):
 
         selectedOptions = self.dependenciesPanel.selectedoptions
         availableDependencies = self.getAvailableDependencies()  # spellok
+        dep_ids = []
         for selected in selectedOptions:
-            alg.dependencies.append(availableDependencies[selected].modeler_name)  # spellok
+            dep_ids.append(availableDependencies[selected].childId())  # spellok
+        alg.setDependencies(dep_ids)
 
         try:
             self._alg.processBeforeAddingToModeler(alg, self.model)

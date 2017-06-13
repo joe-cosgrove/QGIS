@@ -104,17 +104,17 @@ class ModelerGraphicItem(QGraphicsItem):
                 pt = self.getLinkPointForParameter(-1)
                 pt = QPointF(0, pt.y())
                 if controls:
-                    self.inButton = FoldButtonGraphicItem(pt, self.foldInput, self.element.paramsFolded)
+                    self.inButton = FoldButtonGraphicItem(pt, self.foldInput, self.element.parametersCollapsed())
                     self.inButton.setParentItem(self)
             if alg.outputDefinitions():
                 pt = self.getLinkPointForOutput(-1)
                 pt = QPointF(0, pt.y())
                 if controls:
-                    self.outButton = FoldButtonGraphicItem(pt, self.foldOutput, self.element.outputsFolded)
+                    self.outButton = FoldButtonGraphicItem(pt, self.foldOutput, self.element.outputsCollapsed())
                     self.outButton.setParentItem(self)
 
     def foldInput(self, folded):
-        self.element.paramsFolded = folded
+        self.element.setParametersCollapsed(folded)
         self.prepareGeometryChange()
         if self.element.algorithm.outputDefinitions():
             pt = self.getLinkPointForOutput(-1)
@@ -125,7 +125,7 @@ class ModelerGraphicItem(QGraphicsItem):
         self.update()
 
     def foldOutput(self, folded):
-        self.element.outputsFolded = folded
+        self.element.setOutputsCollapsed(folded)
         self.prepareGeometryChange()
         for arrow in self.arrows:
             arrow.updatePath()
@@ -138,9 +138,9 @@ class ModelerGraphicItem(QGraphicsItem):
         font = QFont('Verdana', 8)
         font.setPixelSize(12)
         fm = QFontMetricsF(font)
-        unfolded = isinstance(self.element, Algorithm) and not self.element.paramsFolded
+        unfolded = isinstance(self.element, Algorithm) and not self.element.parametersCollapsed()
         numParams = len([a for a in self.element.algorithm.parameterDefinitions() if not a.isDestination()]) if unfolded else 0
-        unfolded = isinstance(self.element, Algorithm) and not self.element.outputsFolded
+        unfolded = isinstance(self.element, Algorithm) and not self.element.outputsCollapsed()
         numOutputs = len(self.element.algorithm.outputDefinitions()) if unfolded else 0
 
         hUp = fm.height() * 1.2 * (numParams + 2)
@@ -163,7 +163,7 @@ class ModelerGraphicItem(QGraphicsItem):
         editAction = popupmenu.addAction('Edit')
         editAction.triggered.connect(self.editElement)
         if isinstance(self.element, Algorithm):
-            if not self.element.active:
+            if not self.element.isActive():
                 removeAction = popupmenu.addAction('Activate')
                 removeAction.triggered.connect(self.activateAlgorithm)
             else:
@@ -172,11 +172,11 @@ class ModelerGraphicItem(QGraphicsItem):
         popupmenu.exec_(event.screenPos())
 
     def deactivateAlgorithm(self):
-        self.model.deactivateAlgorithm(self.element.modeler_name)
+        self.model.deactivateAlgorithm(self.element.childId())
         self.model.updateModelerView()
 
     def activateAlgorithm(self):
-        if self.model.activateAlgorithm(self.element.modeler_name):
+        if self.model.activateAlgorithm(self.element.childId()):
             self.model.updateModelerView()
         else:
             QMessageBox.warning(None, 'Could not activate Algorithm',
@@ -196,14 +196,14 @@ class ModelerGraphicItem(QGraphicsItem):
         elif isinstance(self.element, Algorithm):
             dlg = None
             try:
-                dlg = self.element.algorithm.getCustomModelerParametersDialog(self.model, self.element.modeler_name)
+                dlg = self.element.algorithm.getCustomModelerParametersDialog(self.model, self.element.childId())
             except:
                 pass
             if not dlg:
-                dlg = ModelerParametersDialog(self.element.algorithm, self.model, self.element.modeler_name)
+                dlg = ModelerParametersDialog(self.element.algorithm, self.model, self.element.childId())
             dlg.exec_()
             if dlg.alg is not None:
-                dlg.alg.modeler_name = self.element.modeler_name
+                dlg.alg.setChildId(self.element.childId())
                 self.model.updateAlgorithm(dlg.alg)
                 self.model.updateModelerView()
 
@@ -216,7 +216,7 @@ class ModelerGraphicItem(QGraphicsItem):
             else:
                 self.model.updateModelerView()
         elif isinstance(self.element, Algorithm):
-            if not self.model.removeAlgorithm(self.element.modeler_name):
+            if not self.model.removeAlgorithm(self.element.childId()):
                 QMessageBox.warning(None, 'Could not remove element',
                                     'Other elements depend on the selected one.\n'
                                     'Remove them before trying to remove it.')
@@ -267,7 +267,7 @@ class ModelerGraphicItem(QGraphicsItem):
         painter.setFont(font)
         painter.setPen(QPen(Qt.black))
         text = self.getAdjustedText(self.text)
-        if isinstance(self.element, Algorithm) and not self.element.active:
+        if isinstance(self.element, Algorithm) and not self.element.isActive():
             painter.setPen(QPen(Qt.gray))
             text = text + "\n(deactivated)"
         fm = QFontMetricsF(font)
@@ -282,7 +282,7 @@ class ModelerGraphicItem(QGraphicsItem):
             pt = QPointF(-ModelerGraphicItem.BOX_WIDTH / 2 + 25, h)
             painter.drawText(pt, 'In')
             i = 1
-            if not self.element.paramsFolded:
+            if not self.element.parametersCollapsed():
                 for param in [p for p in self.element.algorithm.parameterDefinitions() if not p.isDestination()]:
                     if not param.flags() & QgsProcessingParameterDefinition.FlagHidden:
                         text = self.getAdjustedText(param.description())
@@ -295,7 +295,7 @@ class ModelerGraphicItem(QGraphicsItem):
             h = h + ModelerGraphicItem.BOX_HEIGHT / 2.0
             pt = QPointF(-ModelerGraphicItem.BOX_WIDTH / 2 + 25, h)
             painter.drawText(pt, 'Out')
-            if not self.element.outputsFolded:
+            if not self.element.outputsCollapsed():
                 for i, out in enumerate(self.element.algorithm.outputDefinitions()):
                     text = self.getAdjustedText(out.description())
                     h = fm.height() * 1.2 * (i + 2)
@@ -311,7 +311,7 @@ class ModelerGraphicItem(QGraphicsItem):
 
     def getLinkPointForParameter(self, paramIndex):
         offsetX = 25
-        if isinstance(self.element, Algorithm) and self.element.paramsFolded:
+        if isinstance(self.element, Algorithm) and self.element.parametersCollapsed():
             paramIndex = -1
             offsetX = 17
         font = QFont('Verdana', 8)
@@ -326,7 +326,7 @@ class ModelerGraphicItem(QGraphicsItem):
 
     def getLinkPointForOutput(self, outputIndex):
         if isinstance(self.element, Algorithm) and self.element.algorithm.outputDefinitions():
-            outputIndex = (outputIndex if not self.element.outputsFolded else -1)
+            outputIndex = (outputIndex if not self.element.outputsCollapsed() else -1)
             text = self.getAdjustedText(self.element.algorithm.outputDefinitions()[outputIndex].description())
             font = QFont('Verdana', 8)
             font.setPixelSize(12)
@@ -335,7 +335,7 @@ class ModelerGraphicItem(QGraphicsItem):
             h = fm.height() * 1.2 * (outputIndex + 1) + fm.height() / 2.0
             y = h + ModelerGraphicItem.BOX_HEIGHT / 2.0 + 5
             x = (-ModelerGraphicItem.BOX_WIDTH / 2 + 33 + w + 5
-                 if not self.element.outputsFolded
+                 if not self.element.outputsCollapsed()
                  else 10)
             return QPointF(x, y)
         else:
