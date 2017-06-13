@@ -233,9 +233,9 @@ class ModelerParametersDialog(QDialog):
             outTypes = [outTypes]
 
         values = []
-        inputs = self.model.inputs
+        inputs = self.model.parameterComponents()
         for i in list(inputs.values()):
-            param = i.param
+            param = self.model.parameterDefinition(i.parameterName())
             for t in paramType:
                 if isinstance(param, t):
                     if dataType is not None:
@@ -267,7 +267,7 @@ class ModelerParametersDialog(QDialog):
             if value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.StaticValue:
                 return value.staticValue()
             elif value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ModelParameter:
-                return self.model.inputs[value.parameterName()].param.description()
+                return self.model.parameterDefinition(value.parameterName()).description()
             elif value.source() == QgsProcessingModelAlgorithm.ChildParameterSource.ChildOutput:
                 alg = self.model.childAlgorithm(value.outputChildId())
                 return self.tr("'{0}' from algorithm '{1}'").format(alg.algorithm().outputDefinition(value.outputName()).description(), alg.description())

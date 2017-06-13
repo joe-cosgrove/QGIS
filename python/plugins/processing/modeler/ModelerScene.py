@@ -85,13 +85,13 @@ class ModelerScene(QGraphicsScene):
     def paintModel(self, model, controls=True):
         self.model = model
         # Inputs
-        for inp in list(model.inputs.values()):
+        for inp in list(model.parameterComponents().values()):
             item = ModelerGraphicItem(inp, model, controls)
             item.setFlag(QGraphicsItem.ItemIsMovable, True)
             item.setFlag(QGraphicsItem.ItemIsSelectable, True)
             self.addItem(item)
-            item.setPos(inp.pos.x(), inp.pos.y())
-            self.paramItems[inp.param.name()] = item
+            item.setPos(inp.position().x(), inp.position().y())
+            self.paramItems[inp.parameterName()] = item
 
         # We add the algs
         for alg in list(model.childAlgorithms().values()):
