@@ -36,6 +36,7 @@ from qgis.PyQt.QtCore import QPointF
 from operator import attrgetter
 
 from qgis.core import (QgsApplication,
+                       QgsProcessingAlgorithm,
                        QgsProcessingParameterDefinition,
                        QgsProcessingParameterBoolean,
                        QgsProcessingParameterCrs,
@@ -56,7 +57,6 @@ from qgis.core import (QgsApplication,
                        QgsProcessingParameterFeatureSource)
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
-from processing.core.GeoAlgorithm import GeoAlgorithm
 from processing.modeler.WrongModelException import WrongModelException
 from processing.core.GeoAlgorithmExecutionException import GeoAlgorithmExecutionException
 
@@ -230,11 +230,13 @@ class CompoundValue(object):
         return ""  # TODO
 
 
-class ModelerAlgorithm(GeoAlgorithm):
+class ModelerAlgorithm(QgsProcessingAlgorithm):
 
     CANVAS_SIZE = 4000
 
     def __init__(self):
+        super().__init__()
+
         self._name = self.tr('Model', 'ModelerAlgorithm')
         # The dialog where this model is being edited
         self.modelerdialog = None
