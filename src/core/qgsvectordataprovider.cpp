@@ -721,7 +721,7 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
     return QgsGeometry();
   }
 
-  QgsAbstractGeometry *outputGeom = nullptr;
+  std::unique_ptr< QgsAbstractGeometry > outputGeom;
 
   //convert compoundcurve to circularstring (possible if compoundcurve consists of one circular string)
   if ( QgsWkbTypes::flatType( providerGeomType ) == QgsWkbTypes::CircularString && QgsWkbTypes::flatType( geometry->wkbType() ) == QgsWkbTypes::CompoundCurve )
@@ -734,7 +734,7 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
         const QgsCircularString *circularString = dynamic_cast<const QgsCircularString *>( compoundCurve->curveAt( 0 ) );
         if ( circularString )
         {
-          outputGeom = circularString->clone();
+          outputGeom.reset( circularString->clone() );
         }
       }
     }
@@ -744,7 +744,7 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
   if ( QgsWkbTypes::isMultiType( providerGeomType ) && !QgsWkbTypes::isMultiType( geometry->wkbType() ) )
   {
     outputGeom = QgsGeometryFactory::geomFromWkbType( providerGeomType );
-    QgsGeometryCollection *geomCollection = dynamic_cast<QgsGeometryCollection *>( outputGeom );
+    QgsGeometryCollection *geomCollection = dynamic_cast<QgsGeometryCollection *>( outputGeom.get() );
     if ( geomCollection )
     {
       geomCollection->addGeometry( geometry->clone() );
@@ -757,8 +757,7 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
     QgsAbstractGeometry *curveGeom = outputGeom ? outputGeom->toCurveType() : geometry->toCurveType();
     if ( curveGeom )
     {
-      delete outputGeom;
-      outputGeom = curveGeom;
+      outputGeom.reset( curveGeom );
     }
   }
 
@@ -769,8 +768,7 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
     segmentizedGeom = outputGeom ? outputGeom->segmentize() : geometry->segmentize();
     if ( segmentizedGeom )
     {
-      delete outputGeom;
-      outputGeom = segmentizedGeom;
+      outputGeom.reset( segmentizedGeom );
     }
   }
 
@@ -779,7 +777,7 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
   {
     if ( !outputGeom )
     {
-      outputGeom = geometry->clone();
+      outputGeom.reset( geometry->clone() );
     }
     outputGeom->addZValue();
   }
@@ -787,14 +785,14 @@ QgsGeometry QgsVectorDataProvider::convertToProviderType( const QgsGeometry &geo
   {
     if ( !outputGeom )
     {
-      outputGeom = geometry->clone();
+      outputGeom.reset( geometry->clone() );
     }
     outputGeom->addMValue();
   }
 
   if ( outputGeom )
   {
-    return QgsGeometry( outputGeom );
+    return QgsGeometry( outputGeom.release() );
   }
   return QgsGeometry();
 }

@@ -23,6 +23,7 @@ class QgsVectorLayer;
 
 #include "qgsfeature.h"
 #include <QMap>
+#include <memory>
 
 /** \ingroup core
  * \class QgsGeometryEditUtils
@@ -61,7 +62,7 @@ class QgsGeometryEditUtils
      * \param avoidIntersectionsLayers list of layers to check for intersections
      * \param ignoreFeatures map of layer to feature id of features to ignore
      */
-    static QgsAbstractGeometry *avoidIntersections( const QgsAbstractGeometry &geom,
+    static std::unique_ptr< QgsAbstractGeometry > avoidIntersections( const QgsAbstractGeometry &geom,
         const QList<QgsVectorLayer *> &avoidIntersectionsLayers,
         QHash<QgsVectorLayer *, QSet<QgsFeatureId> > ignoreFeatures = ( QHash<QgsVectorLayer *, QSet<QgsFeatureId> >() ) );
 };
